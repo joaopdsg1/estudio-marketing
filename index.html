@@ -97,6 +97,43 @@ footer.rodape{max-width:1180px;margin:0 auto;padding:0 28px 28px;font-size:12px;
 .miniatura{width:324px;height:405px;overflow:hidden;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.12);position:relative;flex:none}
 .miniatura .escala{transform:scale(.3);transform-origin:0 0;width:1080px;height:1350px}
 .miniatura.excede{outline:3px solid #E0A800;outline-offset:2px}
+/* Fila e revisão */
+.consumo{background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:14px 18px;margin-bottom:22px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.consumo .barra-uso{flex:1;min-width:180px;height:10px;background:var(--gelo);border-radius:10px;overflow:hidden}
+.consumo .barra-uso span{display:block;height:100%;background:var(--petroleo)}
+.consumo .barra-uso span.alerta{background:#D9A400}
+.nova{background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:6px 22px 20px;margin-bottom:28px}
+.nova .linha{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.nova .linha{grid-template-columns:1fr} table.fila{min-width:640px}}
+.nova h3{font-size:26px;color:var(--petroleo);margin-top:14px}
+.progresso{margin-top:14px;font-size:14px}
+.progresso div{padding:3px 0}
+.progresso .feito::before{content:'✓ ';color:#2F6B3A}
+.progresso .rodando::before{content:'… ';color:var(--petroleo)}
+.progresso .falhou{color:var(--erro)}
+table.fila{width:100%;border-collapse:collapse;background:#fff;border:1.5px solid var(--linha);border-radius:10px;overflow:hidden;font-size:14px}
+table.fila th{text-align:left;font-weight:400;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);padding:12px 14px;border-bottom:1.5px solid var(--linha)}
+table.fila td{padding:12px 14px;border-bottom:1px solid var(--linha);vertical-align:top}
+table.fila tr.clicavel{cursor:pointer}
+table.fila tr.clicavel:hover td{background:#F7F9FB}
+.selo{display:inline-block;font-size:12px;padding:2px 10px;border-radius:20px;white-space:nowrap;border:1px solid var(--linha)}
+.selo.aguardando_voce{background:#E7F0F7;border-color:#B7D0E3;color:var(--petroleo);font-weight:400}
+.selo.aprovada,.selo.publicada{background:#EAF4EC;border-color:#B9DBC0;color:#2F6B3A}
+.selo.bloqueada,.selo.rejeitada{background:#FBECEB;border-color:#EBC0BC;color:var(--erro)}
+.selo.em_revisao,.selo.em_producao{background:#FFF6E0;border-color:#F0D58A;color:var(--alerta)}
+.revisao{background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:6px 20px 18px;margin-bottom:16px}
+.revisao h3{font-size:24px;color:var(--petroleo);margin-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.revisao .resumo{margin:6px 0 10px}
+.revisao ul{list-style:none}
+.revisao li{padding:8px 0;border-top:1px solid var(--linha);font-size:14px}
+.revisao li .g{font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:1px 8px;border-radius:10px;margin-right:6px}
+.revisao li .g.alta{background:#FBECEB;color:var(--erro)} .revisao li .g.media{background:#FFF6E0;color:var(--alerta)} .revisao li .g.baixa{background:var(--gelo);color:#5a6372}
+.revisao .trecho{color:#5a6372;font-style:italic}
+.revisao h4{font-weight:400;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:16px 0 4px}
+.decisao{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.btn.verde{background:#2F6B3A} .btn.verde:hover{background:#245430}
+.btn.vermelho{background:#fff;color:var(--erro);border:1.5px solid #EBC0BC}
+.caixa-acao{margin-top:12px;padding:12px;background:var(--gelo);border-radius:8px}
 .legenda-box{margin-top:22px;background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:4px 20px 18px}
 
 /* ================= SLIDES (1080 × 1350) ================= */
@@ -184,6 +221,7 @@ footer.rodape{max-width:1180px;margin:0 auto;padding:0 28px 28px;font-size:12px;
     <img src="assets/logo-branco.svg" alt="Palácio">
     <nav>
       <button data-pg="mesa" class="ativo">Mesa</button>
+      <button data-pg="fila">Fila de peças</button>
       <button data-pg="tarsila">Tarsila · Carrosséis</button>
     </nav>
     <div class="usuario"><span id="nome-usuario"></span><button id="btn-sair" type="button">Sair</button></div>
@@ -193,7 +231,35 @@ footer.rodape{max-width:1180px;margin:0 auto;padding:0 28px 28px;font-size:12px;
   <main class="pagina" id="pg-mesa">
     <h1>Mesa do Péricles</h1>
     <p class="sub">A equipe está sendo montada. Cada agente entra em funcionamento na sua etapa.</p>
+    <div class="consumo" id="consumo-mesa"></div>
     <div class="equipe" id="equipe"></div>
+  </main>
+
+  <!-- Fila -->
+  <main class="pagina oculto" id="pg-fila">
+    <h1>Fila de peças</h1>
+    <p class="sub">Peças criadas pela Clarice e revisadas pela Têmis aguardam a sua decisão aqui.</p>
+    <div class="consumo" id="consumo"></div>
+    <div class="nova">
+      <h3>Nova peça com a Clarice</h3>
+      <label for="np-tema">Tema / pauta</label>
+      <textarea id="np-tema" rows="3" placeholder="Ex.: O que a escola pode e não pode fazer com mensalidade em atraso na rematrícula"></textarea>
+      <div class="linha">
+        <div><label for="np-modelo">Modelo</label>
+          <select id="np-modelo"><option value="lista">Lista</option><option value="pergunta">Pergunta e Resposta</option><option value="mitofato">Mito × Fato</option></select></div>
+        <div><label for="np-pilar">Pilar</label>
+          <select id="np-pilar">
+            <option>Gestão de Inadimplência</option><option>Diálogo com o Gestor Escolar</option>
+            <option>Gestão de Contratos</option><option>Relações Consumeristas</option>
+            <option>Casos Ilustrativos</option><option>Relações Societárias e Sucessão</option></select></div>
+      </div>
+      <label for="np-obs">Observações para a Clarice (opcional)</label>
+      <textarea id="np-obs" rows="2" placeholder="Ex.: enfatizar a importância de formalizar o acordo por escrito"></textarea>
+      <div class="decisao"><button class="btn" id="btn-produzir" type="button">Produzir com Clarice e Têmis</button></div>
+      <div class="progresso" id="progresso"></div>
+    </div>
+    <div style="overflow-x:auto"><table class="fila"><thead><tr><th>Peça</th><th>Modelo · pilar</th><th>Situação</th><th>Custo IA</th><th>Atualizada</th></tr></thead>
+      <tbody id="lista-fila"><tr><td colspan="5">Carregando…</td></tr></tbody></table></div>
   </main>
 
   <!-- Tarsila -->
@@ -225,6 +291,7 @@ footer.rodape{max-width:1180px;margin:0 auto;padding:0 28px 28px;font-size:12px;
     <div class="estudio">
       <div class="editor" id="editor"></div>
       <div class="previa">
+        <div id="painel-revisao"></div>
         <div class="avisos" id="avisos"></div>
         <div class="grade" id="grade"></div>
         <div class="legenda-box">
@@ -248,8 +315,8 @@ footer.rodape{max-width:1180px;margin:0 auto;padding:0 28px 28px;font-size:12px;
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v002';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 1 (Tarsila: modelos de carrossel)',
+const VERSAO = 'v003';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 2 (Clarice + Têmis)',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -263,12 +330,14 @@ const $ = id => document.getElementById(id);
 const EQUIPE = [
   {nome:'Péricles', funcao:'Gestor',                 etapa:3},
   {nome:'Atena',    funcao:'Estrategista',           etapa:3},
-  {nome:'Clarice',  funcao:'Redatora',               etapa:2},
-  {nome:'Têmis',    funcao:'Revisora OAB',           etapa:2},
+  {nome:'Clarice',  funcao:'Redatora',               etapa:2, ativo:true, pg:'fila'},
+  {nome:'Têmis',    funcao:'Revisora OAB',           etapa:2, ativo:true, pg:'fila'},
   {nome:'Tarsila',  funcao:'Arte dos carrosséis',    etapa:1, ativo:true, pg:'tarsila'},
   {nome:'Rondon',   funcao:'Análise de referências', etapa:4},
   {nome:'Glauber',  funcao:'Roteiros de Reels',      etapa:5},
 ];
+
+let usuario = { id:null, papel:null };
 
 /* ---------------- Telas ---------------- */
 function mostrar(tela){
@@ -276,9 +345,11 @@ function mostrar(tela){
   $('tela-app').classList.toggle('oculto', tela !== 'app');
 }
 function irPara(pg){
-  ['mesa','tarsila'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
+  ['mesa','fila','tarsila'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
   document.querySelectorAll('header.topo-app nav button').forEach(b => b.classList.toggle('ativo', b.dataset.pg === pg));
-  if (pg === 'tarsila'){ renderizarEditor(); renderizarPrevia(); carregarListaRascunhos(); }
+  if (pg === 'tarsila'){ renderizarEditor(); renderizarPrevia(); renderizarRevisao(); carregarListaRascunhos(); }
+  if (pg === 'fila'){ carregarFila(); }
+  if (pg === 'mesa'){ carregarConsumo(); }
 }
 document.querySelectorAll('header.topo-app nav button').forEach(b => b.addEventListener('click', () => irPara(b.dataset.pg)));
 
@@ -293,6 +364,7 @@ function traduzirErro(e){
 async function abrirApp(sessao){
   const { data: perfil } = await sb.from('perfis').select('nome,papel').eq('id', sessao.user.id).maybeSingle();
   $('nome-usuario').textContent = (perfil && perfil.nome) || sessao.user.email;
+  usuario = { id: sessao.user.id, papel: perfil && perfil.papel };
   $('equipe').innerHTML = EQUIPE.map(a => `
     <div class="agente${a.ativo ? ' ativo' : ''}" ${a.pg ? `data-pg="${a.pg}"` : ''}>
       <span class="etapa">Etapa ${a.etapa}</span>
@@ -388,7 +460,7 @@ function vazio(modelo){
 }
 function clonar(o){ return JSON.parse(JSON.stringify(o)); }
 
-let estado = { id:null, modelo:'lista', dados: clonar(EXEMPLOS.lista) };
+let estado = { id:null, modelo:'lista', dados: clonar(EXEMPLOS.lista), meta:null };
 
 /* ---------- texto seguro + marcação ---------- */
 function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -574,9 +646,9 @@ $('sel-modelo').addEventListener('change', e => {
   renderizarEditor(); renderizarPrevia();
 });
 $('btn-exemplo').addEventListener('click', () => {
-  estado = { id:null, modelo:estado.modelo, dados: clonar(EXEMPLOS[estado.modelo]) };
+  estado = { id:null, modelo:estado.modelo, dados: clonar(EXEMPLOS[estado.modelo]), meta:null };
   $('sel-rascunho').value = '';
-  renderizarEditor(); renderizarPrevia(); avisar('Exemplo carregado.');
+  renderizarEditor(); renderizarPrevia(); renderizarRevisao(); avisar('Exemplo carregado.');
 });
 
 /* ---------- rascunhos (Supabase) ---------- */
@@ -590,11 +662,8 @@ async function carregarListaRascunhos(){
 }
 $('sel-rascunho').addEventListener('change', async e => {
   const id = e.target.value;
-  if (!id){ estado = { id:null, modelo:estado.modelo, dados: vazio(estado.modelo) }; renderizarEditor(); renderizarPrevia(); return; }
-  const { data, error } = await sb.from('pecas').select('*').eq('id', id).single();
-  if (error) return avisar('Não foi possível abrir o rascunho.', true);
-  estado = { id:data.id, modelo:data.modelo, dados:{...vazio(data.modelo), ...data.conteudo, legenda:data.legenda || ''} };
-  renderizarEditor(); renderizarPrevia(); avisar('Rascunho aberto.');
+  if (!id){ estado = { id:null, modelo:estado.modelo, dados: vazio(estado.modelo), meta:null }; renderizarEditor(); renderizarPrevia(); renderizarRevisao(); return; }
+  await abrirPeca(id);
 });
 $('btn-salvar').addEventListener('click', async () => {
   const titulo = semMarcacao(estado.dados.capa.titulo).trim();
@@ -602,12 +671,15 @@ $('btn-salvar').addEventListener('click', async () => {
   const btn = $('btn-salvar'); btn.disabled = true;
   const { legenda, ...conteudo } = estado.dados;
   const registro = { titulo, modelo:estado.modelo, conteudo, legenda };
+  if (estado.meta && estado.meta.origem === 'clarice') registro.versao = (estado.meta.versao || 1) + 1;
   const q = estado.id ? sb.from('pecas').update(registro).eq('id', estado.id).select('id').single()
                       : sb.from('pecas').insert(registro).select('id').single();
   const { data, error } = await q;
   btn.disabled = false;
   if (error) return avisar('Não foi possível salvar: ' + error.message, true);
-  estado.id = data.id; await carregarListaRascunhos(); avisar('Rascunho salvo.');
+  estado.id = data.id;
+  if (registro.versao) estado.meta.versao = registro.versao;
+  await carregarListaRascunhos(); avisar('Rascunho salvo.');
 });
 
 /* ---------- exportação (PNG 1080×1350 em ZIP) ---------- */
@@ -619,6 +691,8 @@ function nomeArquivo(){
 $('btn-baixar').addEventListener('click', async () => {
   if (typeof htmlToImage === 'undefined' || typeof JSZip === 'undefined')
     return avisar('As ferramentas de exportação não carregaram. Recarregue a página.', true);
+  if (estado.meta && estado.meta.origem === 'clarice' && !['aprovada','publicada'].includes(estado.meta.status))
+    return avisar('Esta peça foi produzida pela Clarice e ainda não foi aprovada. Aprove-a no painel de revisão para liberar o download.', true);
   await document.fonts.ready;
   const avisos = verificarExcesso();
   if (avisos.length && !window.confirm('Há avisos na prévia:\n\n' + avisos.join('\n') + '\n\nBaixar assim mesmo?')) return;
@@ -641,6 +715,225 @@ $('btn-baixar').addEventListener('click', async () => {
     avisar('Falha ao gerar as imagens. Tente novamente.', true);
   } finally { btn.disabled = false; btn.textContent = 'Baixar slides (ZIP)'; }
 });
+
+
+/* =========================================================
+   ETAPA 2 · Clarice + Têmis
+   ========================================================= */
+const NOMES_STATUS = { rascunho:'Rascunho', em_producao:'Em produção', em_revisao:'Em revisão', aguardando_voce:'Aguardando você',
+  bloqueada:'Bloqueada pela Têmis', aprovada:'Aprovada', publicada:'Publicada', rejeitada:'Rejeitada' };
+const NOMES_MODELO = { lista:'Lista', pergunta:'Pergunta e Resposta', mitofato:'Mito × Fato' };
+const CRITERIOS = {0:'Instrução do advogado',1:'Promessa de resultado',2:'Clientes, casos ou valores',3:'Captação / mercantilização',
+  4:'Comparação / autopromoção',5:'Sensacionalismo',6:'Fundamento jurídico',7:'Ressalva informativa',8:'Caso concreto / ilustrativo',
+  9:'Persuasão / incitação',10:'Consulta individual',11:'Exposição de devedores'};
+const usd = v => 'US$ ' + Number(v||0).toFixed(2).replace('.', ',');
+
+async function carregarConsumo(){
+  const [{ data: gasto }, { data: cfg }] = await Promise.all([
+    sb.rpc('custo_mes'), sb.from('config').select('chave,valor')]);
+  const c = Object.fromEntries((Array.isArray(cfg) ? cfg : []).map(r => [r.chave, Number(r.valor)]));
+  const teto = c.teto_mensal_usd || 12, alerta = c.alerta_mensal_usd || 9, g = Number(gasto||0);
+  const pct = Math.min(100, g / teto * 100);
+  const html = `<span><b style="font-weight:400;color:var(--petroleo)">Consumo de IA no mês:</b> ${usd(g)} de ${usd(teto)}</span>
+    <div class="barra-uso"><span class="${g >= alerta ? 'alerta' : ''}" style="width:${pct}%"></span></div>
+    ${g >= teto ? '<span style="color:var(--erro)">Teto atingido · agentes pausados</span>' : g >= alerta ? '<span style="color:var(--alerta)">Atenção: perto do teto</span>' : ''}`;
+  ['consumo','consumo-mesa'].forEach(id => { if ($(id)) $(id).innerHTML = html; });
+}
+
+async function carregarFila(){
+  carregarConsumo();
+  const [{ data: pecas, error }, { data: exec }] = await Promise.all([
+    sb.from('pecas').select('id,titulo,tema,modelo,pilar,status,origem,versao,atualizado_em').order('atualizado_em',{ascending:false}).limit(60),
+    sb.from('agente_execucoes').select('peca_id,custo_usd').limit(2000)]);
+  if (error){ $('lista-fila').innerHTML = '<tr><td colspan="5">Não foi possível carregar a fila.</td></tr>'; return; }
+  const custo = {}; (exec||[]).forEach(e => { if (e.peca_id) custo[e.peca_id] = (custo[e.peca_id]||0) + Number(e.custo_usd); });
+  const ordem = { aguardando_voce:0, bloqueada:1, em_revisao:2, em_producao:2, aprovada:3, rascunho:4, publicada:5, rejeitada:6 };
+  (pecas||[]).sort((a,b) => (ordem[a.status]-ordem[b.status]) || (new Date(b.atualizado_em)-new Date(a.atualizado_em)));
+  $('lista-fila').innerHTML = (pecas||[]).length ? pecas.map(p => `
+    <tr class="clicavel" data-id="${p.id}">
+      <td><div style="font-weight:400">${esc(p.titulo)}</div>${p.tema && p.origem==='clarice' ? `<div style="color:#7a8290;font-size:13px">Pauta: ${esc(p.tema.slice(0,90))}</div>` : ''}</td>
+      <td>${NOMES_MODELO[p.modelo]}${p.pilar ? `<div style="color:#7a8290;font-size:13px">${esc(p.pilar)}</div>` : ''}</td>
+      <td><span class="selo ${p.status}">${NOMES_STATUS[p.status]}</span>${p.origem==='clarice' ? `<div style="color:#7a8290;font-size:12px;margin-top:4px">versão ${p.versao}</div>` : ''}</td>
+      <td>${custo[p.id] ? usd(custo[p.id]) : '—'}</td>
+      <td>${new Date(p.atualizado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td>
+    </tr>`).join('') : '<tr><td colspan="5">Nenhuma peça ainda.</td></tr>';
+  document.querySelectorAll('#lista-fila tr.clicavel').forEach(tr => tr.addEventListener('click', async () => { await abrirPeca(tr.dataset.id); irPara('tarsila'); }));
+}
+
+async function abrirPeca(id){
+  const { data, error } = await sb.from('pecas').select('*').eq('id', id).single();
+  if (error) return avisar('Não foi possível abrir a peça.', true);
+  estado = { id:data.id, modelo:data.modelo, dados:{...vazio(data.modelo), ...data.conteudo, legenda:data.legenda || ''},
+    meta:{ origem:data.origem, status:data.status, versao:data.versao, parecer:data.parecer, pontos:data.pontos_verificacao||[],
+           tema:data.tema, pilar:data.pilar, motivo:data.motivo_rejeicao } };
+  renderizarEditor(); renderizarPrevia(); renderizarRevisao();
+  if ($('sel-rascunho')) $('sel-rascunho').value = id;
+}
+
+/* ---------- chamada às agentes ---------- */
+async function chamarAgente(agente, peca_id){
+  const { data, error } = await sb.functions.invoke('agente', { body: { agente, peca_id } });
+  if (error){
+    let msg = error.message;
+    try { const corpo = await error.context.json(); if (corpo && corpo.erro) msg = corpo.erro; } catch {}
+    throw new Error(msg);
+  }
+  return data;
+}
+function passo(txt, cls='rodando'){
+  const d = document.createElement('div'); d.className = cls; d.textContent = txt; $('progresso').appendChild(d); return d;
+}
+async function cicloClariceTemis(peca_id, primeiraEscrita){
+  let p = passo(primeiraEscrita ? 'Clarice escrevendo o carrossel…' : 'Clarice reescrevendo conforme a instrução…');
+  await chamarAgente('clarice', peca_id); p.className='feito';
+  p = passo('Têmis revisando…');
+  let r = await chamarAgente('temis', peca_id); p.className='feito'; p.textContent = `Têmis: ${r.parecer}`;
+  let voltas = 0;
+  while (r.parecer === 'ajustar' && voltas < 2){
+    voltas++;
+    p = passo(`Clarice ajustando (volta ${voltas} de 2)…`); await chamarAgente('clarice', peca_id); p.className='feito';
+    p = passo('Têmis revisando de novo…'); r = await chamarAgente('temis', peca_id); p.className='feito'; p.textContent = `Têmis: ${r.parecer}`;
+  }
+  if (r.parecer === 'ajustar'){
+    await sb.from('pecas').update({ status:'aguardando_voce' }).eq('id', peca_id);
+    passo('Após 2 voltas ainda há pontos de ajuste. A peça foi para a sua fila com o parecer da Têmis.', 'feito');
+  } else if (r.parecer === 'bloquear'){
+    passo('A Têmis bloqueou a peça. Veja o motivo na fila.', 'falhou');
+  } else {
+    passo('Pronta. A peça está na sua fila para aprovação.', 'feito');
+  }
+  return r;
+}
+
+$('btn-produzir').addEventListener('click', async () => {
+  const tema = $('np-tema').value.trim();
+  if (tema.length < 10) return avisarFila('Descreva o tema com um pouco mais de detalhe.');
+  const btn = $('btn-produzir'); btn.disabled = true; $('progresso').innerHTML = '';
+  let pecaId = null;
+  try {
+    const { data, error } = await sb.from('pecas').insert({
+      titulo: tema.slice(0,200), tema, modelo: $('np-modelo').value, pilar: $('np-pilar').value,
+      observacoes: $('np-obs').value.trim() || null, origem:'clarice', status:'em_producao', conteudo:{} }).select('id').single();
+    if (error) throw new Error(error.message);
+    pecaId = data.id;
+    await cicloClariceTemis(pecaId, true);
+    $('np-tema').value = ''; $('np-obs').value = '';
+  } catch (e) {
+    passo('Falhou: ' + e.message, 'falhou');
+    if (pecaId) await sb.from('pecas').update({ status:'rascunho' }).eq('id', pecaId);
+  } finally { btn.disabled = false; carregarFila(); }
+});
+function avisarFila(t){ $('progresso').innerHTML = ''; passo(t, 'falhou'); }
+
+/* ---------- painel de revisão na Tarsila ---------- */
+function renderizarRevisao(){
+  const box = $('painel-revisao'); if (!box) return;
+  const m = estado.meta;
+  if (!m || m.origem !== 'clarice'){ box.innerHTML = ''; return; }
+  const pr = m.parecer;
+  const corParecer = !pr ? '' : pr.parecer === 'aprovado' ? 'aprovada' : pr.parecer === 'bloquear' ? 'bloqueada' : 'em_revisao';
+  const nomeParecer = !pr ? '' : pr.parecer === 'aprovado' ? 'Sem objeções' : pr.parecer === 'bloquear' ? 'Bloqueada' : 'Pede ajustes';
+  const desatualizado = pr && pr.versao !== m.versao;
+  let h = `<div class="revisao">
+    <h3>Revisão · versão ${m.versao} <span class="selo ${m.status}">${NOMES_STATUS[m.status]}</span></h3>
+    ${m.tema ? `<div class="dica" style="font-size:13px;color:#7a8290">Pauta: ${esc(m.tema)} · ${esc(m.pilar||'')}</div>` : ''}`;
+  if (pr){
+    h += `<h4>Parecer da Têmis ${desatualizado ? '(sobre a versão ' + pr.versao + ' — você editou depois)' : ''}</h4>
+      <div class="resumo"><span class="selo ${corParecer}">${nomeParecer}</span> ${esc(pr.resumo || '')}</div>`;
+    if ((pr.apontamentos||[]).length) h += `<ul>${pr.apontamentos.map(a => `<li><span class="g ${a.gravidade}">${a.gravidade}</span>
+        <b style="font-weight:400">${esc(CRITERIOS[a.criterio] || 'Critério ' + a.criterio)}</b> · ${esc(a.onde)}<br>
+        ${a.trecho ? `<span class="trecho">“${esc(a.trecho)}”</span><br>` : ''}${esc(a.problema)}${a.sugestao ? `<br><span style="color:var(--petroleo)">Sugestão:</span> ${esc(a.sugestao)}` : ''}</li>`).join('')}</ul>`;
+    const cj = (pr.conferencia_juridica||[]);
+    if (cj.length) h += `<h4>Conferência jurídica</h4><ul>${cj.map(c => `<li><span class="g ${c.confianca==='alta'?'baixa':c.confianca==='media'?'media':'alta'}">confiança ${c.confianca}</span>
+        <b style="font-weight:400">${esc(c.dispositivo)}</b> ${c.sustenta ? '' : '<span style="color:var(--erro)">· não sustenta a afirmação</span>'}<br>${esc(c.afirmacao)}${c.observacao ? `<br><span class="trecho">${esc(c.observacao)}</span>` : ''}</li>`).join('')}</ul>`;
+  }
+  if ((m.pontos||[]).length) h += `<h4>Para você conferir (apontado pela Clarice)</h4><ul>${m.pontos.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  if (m.status === 'rejeitada' && m.motivo) h += `<h4>Motivo da rejeição</h4><div>${esc(m.motivo)}</div>`;
+
+  const decidivel = ['aguardando_voce','bloqueada','em_revisao','rascunho'].includes(m.status);
+  h += `<div class="decisao">
+    ${decidivel ? `<button class="btn verde" id="rv-aprovar" type="button">Aprovar</button>` : ''}
+    ${m.status === 'aprovada' ? `<button class="btn" id="rv-publicada" type="button">Marcar como publicada</button>` : ''}
+    <button class="btn sec" id="rv-revisar" type="button">Salvar edições e pedir nova revisão à Têmis</button>
+    <button class="btn sec" id="rv-mostrar-reescrever" type="button">Pedir reescrita à Clarice</button>
+    ${!['rejeitada','publicada'].includes(m.status) ? `<button class="btn vermelho" id="rv-mostrar-rejeitar" type="button">Rejeitar</button>` : ''}
+  </div>
+  <div class="caixa-acao oculto" id="rv-caixa-reescrever">
+    <label for="rv-instrucao" style="margin-top:0">Instrução para a Clarice</label>
+    <textarea id="rv-instrucao" rows="2" placeholder="Ex.: troque o slide 3 por um exemplo sobre rematrícula"></textarea>
+    <div class="decisao"><button class="btn" id="rv-reescrever" type="button">Reescrever e revisar</button></div>
+  </div>
+  <div class="caixa-acao oculto" id="rv-caixa-rejeitar">
+    <label for="rv-motivo" style="margin-top:0">Motivo da rejeição</label>
+    <textarea id="rv-motivo" rows="2" placeholder="Ex.: não usar a palavra 'calote' em nenhum conteúdo"></textarea>
+    <label class="check"><input type="checkbox" id="rv-regra" checked> Transformar em regra permanente para a Clarice</label>
+    <div class="decisao"><button class="btn vermelho" id="rv-rejeitar" type="button">Confirmar rejeição</button></div>
+  </div>
+  <div class="progresso" id="rv-progresso"></div>
+  </div>`;
+  box.innerHTML = h;
+
+  const on = (id, fn) => { const el = $(id); if (el) el.addEventListener('click', fn); };
+  on('rv-mostrar-reescrever', () => $('rv-caixa-reescrever').classList.toggle('oculto'));
+  on('rv-mostrar-rejeitar', () => $('rv-caixa-rejeitar').classList.toggle('oculto'));
+  on('rv-aprovar', async () => {
+    if (pr && pr.parecer !== 'aprovado' && !window.confirm('A Têmis não deu "sem objeções" a esta peça. Aprovar mesmo assim, sob sua responsabilidade?')) return;
+    await salvarEdicoes();
+    const { error } = await sb.from('pecas').update({ status:'aprovada', aprovado_em:new Date().toISOString(), aprovado_por:usuario.id }).eq('id', estado.id);
+    if (error) return avisar('Não foi possível aprovar: ' + error.message, true);
+    await abrirPeca(estado.id); avisar('Peça aprovada. O download está liberado.');
+  });
+  on('rv-publicada', async () => {
+    await sb.from('pecas').update({ status:'publicada' }).eq('id', estado.id); await abrirPeca(estado.id); avisar('Marcada como publicada.');
+  });
+  on('rv-revisar', () => comProgresso(async () => {
+    await salvarEdicoes();
+    const p = passoRv('Têmis revisando a versão editada…');
+    const r = await chamarAgente('temis', estado.id); p.className='feito'; p.textContent = 'Têmis: ' + r.parecer;
+    if (r.parecer === 'ajustar') await sb.from('pecas').update({ status:'aguardando_voce' }).eq('id', estado.id);
+  }));
+  on('rv-reescrever', () => comProgresso(async () => {
+    const instr = $('rv-instrucao').value.trim();
+    if (!instr) throw new Error('Escreva a instrução para a Clarice.');
+    await salvarEdicoes();
+    await sb.from('pecas').update({ status:'em_revisao', parecer:{ parecer:'ajustar', resumo:'Instrução do advogado: ' + instr, versao:estado.meta.versao,
+      apontamentos:[{ criterio:0, onde:'geral', trecho:'', problema:instr, sugestao:instr, gravidade:'alta' }], conferencia_juridica:[] } }).eq('id', estado.id);
+    await cicloRv(estado.id);
+  }));
+  on('rv-rejeitar', async () => {
+    const motivo = $('rv-motivo').value.trim();
+    if (!motivo) return avisar('Informe o motivo da rejeição.', true);
+    const { error } = await sb.from('pecas').update({ status:'rejeitada', motivo_rejeicao:motivo }).eq('id', estado.id);
+    if (error) return avisar('Não foi possível rejeitar: ' + error.message, true);
+    const virouRegra = $('rv-regra').checked;
+    if (virouRegra) await sb.from('aprendizados').insert({ agente:'clarice', regra:motivo, origem_peca:estado.id });
+    await abrirPeca(estado.id); avisar(virouRegra ? 'Peça rejeitada. O motivo virou regra para as próximas peças.' : 'Peça rejeitada.');
+  });
+}
+function passoRv(txt, cls='rodando'){ const d = document.createElement('div'); d.className = cls; d.textContent = txt; $('rv-progresso').appendChild(d); return d; }
+async function cicloRv(id){
+  let p = passoRv('Clarice reescrevendo…'); await chamarAgente('clarice', id); p.className='feito';
+  p = passoRv('Têmis revisando…'); const r = await chamarAgente('temis', id); p.className='feito'; p.textContent = 'Têmis: ' + r.parecer;
+  if (r.parecer === 'ajustar') await sb.from('pecas').update({ status:'aguardando_voce' }).eq('id', id);
+}
+async function comProgresso(fn){
+  document.querySelectorAll('#painel-revisao button').forEach(b => b.disabled = true);
+  try { await fn(); await abrirPeca(estado.id); avisar('Concluído.'); }
+  catch (e) { passoRv('Falhou: ' + e.message, 'falhou'); document.querySelectorAll('#painel-revisao button').forEach(b => b.disabled = false); }
+}
+async function salvarEdicoes(){
+  if (!estado.id) return;
+  const { legenda, ...conteudo } = estado.dados;
+  const atual = JSON.stringify(conteudo) + '|' + legenda;
+  if (salvarEdicoes.ultimo === estado.id + atual) return;
+  const novaVersao = (estado.meta.versao || 1) + 1;
+  const { data: antes } = await sb.from('pecas').select('conteudo,legenda').eq('id', estado.id).single();
+  if (antes && JSON.stringify(antes.conteudo) === JSON.stringify(conteudo) && (antes.legenda||'') === (legenda||'')) { salvarEdicoes.ultimo = estado.id + atual; return; }
+  const { error } = await sb.from('pecas').update({ conteudo, legenda, versao: novaVersao,
+    titulo: semMarcacao(conteudo.capa.titulo).slice(0,200) || 'Sem título' }).eq('id', estado.id);
+  if (error) throw new Error(error.message);
+  estado.meta.versao = novaVersao; salvarEdicoes.ultimo = estado.id + atual;
+}
 
 /* ---------------- Início ---------------- */
 (async () => {
