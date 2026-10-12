@@ -20,6 +20,26 @@ Site interno, separado do SENESCAL, onde agentes de IA produzem conteúdo para o
 | Versão | Etapa | Conteúdo |
 |---|---|---|
 | v001 | 0 | Infraestrutura, login e painel com a equipe de agentes (inativos) |
+| v002 | 1 | Tarsila: 3 modelos de carrossel (Lista, Pergunta e Resposta, Mito × Fato), editor manual, prévia, aviso de texto excedente, rascunhos (tabela `pecas`), exportação PNG 1080×1350 em ZIP |
+
+## Contrato do conteúdo de um carrossel (`pecas.conteudo`)
+
+O mesmo formato será preenchido pela agente Clarice na Etapa 2.
+
+```json
+{
+  "capa": {"kicker": "...", "titulo": "... *ênfase* ..."},
+  "slides": [ ... ],
+  "fechamento": {"rotulo": "...", "titulo": "...", "texto": "..."},
+  "ilustrativo": false
+}
+```
+
+- **Lista:** `{"rotulo", "titulo", "itens": ["**destaque** complemento", ...]}`
+- **Pergunta e Resposta:** `{"rotulo", "pergunta", "resposta"}`
+- **Mito × Fato:** `{"rotulo", "mito", "fato"}`
+
+Marcação: `*texto*` = ênfase em itálico; `**texto**` = destaque na cor da marca.
 
 ## Regras
 

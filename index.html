@@ -7,21 +7,22 @@
 <title>Estúdio · Palácio Gomes</title>
 <link rel="icon" href="assets/caracol-indigo.svg">
 <style>
-@font-face{font-family:Cormorant;font-weight:600;src:url(assets/fonts/cormorant-garamond-latin-600-normal.woff2) format('woff2');font-display:swap}
-@font-face{font-family:Slab;font-weight:300;src:url(assets/fonts/roboto-slab-latin-300-normal.woff2) format('woff2');font-display:swap}
-@font-face{font-family:Slab;font-weight:400;src:url(assets/fonts/roboto-slab-latin-400-normal.woff2) format('woff2');font-display:swap}
+@font-face{font-family:Cormorant;font-weight:600;src:url(assets/fonts/cormorant-garamond-latin-600-normal.woff2) format('woff2');font-display:block}
+@font-face{font-family:Slab;font-weight:300;src:url(assets/fonts/roboto-slab-latin-300-normal.woff2) format('woff2');font-display:block}
+@font-face{font-family:Slab;font-weight:400;src:url(assets/fonts/roboto-slab-latin-400-normal.woff2) format('woff2');font-display:block}
 :root{
   --petroleo:#0D507B; --profundo:#0A3D5E; --nevoa:#5B88A6; --ceu:#A9CBE3;
-  --indigo:#292465; --gelo:#F3F5F8; --linha:#D9DEE5; --grafite:#1A2230; --erro:#A3312B;
+  --indigo:#292465; --gelo:#F3F5F8; --linha:#D9DEE5; --grafite:#1A2230; --erro:#A3312B; --alerta:#9A6A00;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{font:300 16px/1.55 Slab,Georgia,serif;color:var(--grafite);background:var(--gelo)}
-h1,h2{font-family:Cormorant,Georgia,serif;font-weight:600;line-height:1.1}
-button{font:inherit;cursor:pointer}
+h1,h2,h3{font-family:Cormorant,Georgia,serif;font-weight:600;line-height:1.1}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
 .oculto{display:none!important}
 
-/* ---------- LOGIN ---------- */
+/* ================= LOGIN ================= */
 #tela-login{min-height:100%;display:grid;grid-template-columns:1.1fr 1fr}
 .lado-marca{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--petroleo),var(--profundo));color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:space-between}
 .lado-marca img.logo{height:64px;width:auto;align-self:flex-start;position:relative;z-index:1}
@@ -30,47 +31,132 @@ button{font:inherit;cursor:pointer}
 .lado-marca h1 em{font-style:italic;color:var(--ceu)}
 .lado-marca p{font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--ceu);position:relative;z-index:1}
 .lado-form{display:flex;align-items:center;justify-content:center;padding:40px 24px}
-form{width:100%;max-width:360px}
-form h2{font-size:40px;color:var(--petroleo);margin-bottom:8px}
-form .sub{color:#5a6372;margin-bottom:32px;font-size:15px}
-label{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:18px 0 6px}
-input{width:100%;padding:12px 14px;border:1.5px solid var(--linha);border-radius:6px;font:400 16px Slab,serif;background:#fff;color:var(--grafite)}
-input:focus{outline:none;border-color:var(--petroleo)}
-.btn{width:100%;margin-top:28px;padding:13px;border:0;border-radius:6px;background:var(--petroleo);color:#fff;font-weight:400;letter-spacing:.06em}
+#form-login{width:100%;max-width:360px}
+#form-login h2{font-size:40px;color:var(--petroleo);margin-bottom:8px}
+#form-login .sub{color:#5a6372;margin-bottom:32px;font-size:15px}
+label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:16px 0 6px}
+input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--linha);border-radius:6px;font-weight:400;font-size:15px;background:#fff;color:var(--grafite)}
+textarea{resize:vertical;min-height:70px;line-height:1.45}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--petroleo)}
+.btn{padding:11px 18px;border:0;border-radius:6px;background:var(--petroleo);color:#fff;font-weight:400;letter-spacing:.04em}
 .btn:hover{background:var(--profundo)}
-.btn:disabled{opacity:.6;cursor:wait}
-.msg{margin-top:16px;font-size:14px;min-height:1.5em}
+.btn:disabled{opacity:.55;cursor:wait}
+.btn.sec{background:#fff;color:var(--petroleo);border:1.5px solid var(--linha)}
+.btn.sec:hover{border-color:var(--petroleo)}
+.btn.mini{padding:5px 10px;font-size:13px}
+#form-login .btn{width:100%;margin-top:28px;padding:13px}
+.msg{margin-top:14px;font-size:14px;min-height:1.4em}
 .msg.erro{color:var(--erro)}
 
-/* ---------- PAINEL ---------- */
-#tela-painel{min-height:100%}
-header{background:linear-gradient(160deg,var(--petroleo),var(--profundo));color:#fff;padding:18px 32px;display:flex;align-items:center;justify-content:space-between}
-header img{height:40px}
-header .usuario{display:flex;gap:18px;align-items:center;font-size:14px}
-header button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;padding:6px 14px;border-radius:5px;font-size:13px}
-main{max-width:1080px;margin:0 auto;padding:48px 32px}
-main h1{font-size:48px;color:var(--petroleo)}
-main .sub{color:#5a6372;margin:6px 0 40px}
+/* ================= CASCA ================= */
+header.topo-app{background:linear-gradient(160deg,var(--petroleo),var(--profundo));color:#fff;padding:14px 28px;display:flex;align-items:center;gap:28px}
+header.topo-app img{height:38px}
+header.topo-app nav{display:flex;gap:6px;flex:1}
+header.topo-app nav button{background:transparent;border:0;color:var(--ceu);padding:8px 14px;border-radius:5px;font-size:14px;letter-spacing:.04em}
+header.topo-app nav button.ativo{background:rgba(255,255,255,.12);color:#fff}
+header.topo-app .usuario{display:flex;gap:14px;align-items:center;font-size:14px}
+header.topo-app .usuario button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;padding:6px 14px;border-radius:5px;font-size:13px}
+main.pagina{max-width:1180px;margin:0 auto;padding:40px 28px}
+.pagina h1{font-size:46px;color:var(--petroleo)}
+.pagina .sub{color:#5a6372;margin:4px 0 32px}
+footer.rodape{max-width:1180px;margin:0 auto;padding:0 28px 28px;font-size:12px;color:#8a92a0}
+
+/* Mesa */
 .equipe{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
 .agente{background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:20px 22px;position:relative}
+.agente.ativo{border-color:var(--petroleo);cursor:pointer}
+.agente.ativo:hover{box-shadow:0 4px 16px rgba(13,80,123,.12)}
 .agente .nome{font-family:Cormorant,serif;font-weight:600;font-size:28px;color:var(--petroleo);line-height:1}
-.agente .funcao{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:6px 0 12px}
+.agente .funcao{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:6px 0 12px}
 .agente .estado{font-size:13px;color:#7a8290}
+.agente.ativo .estado{color:var(--petroleo);font-weight:400}
 .agente .etapa{position:absolute;top:18px;right:18px;font-size:11px;letter-spacing:.08em;color:var(--nevoa);border:1px solid var(--linha);border-radius:20px;padding:2px 9px}
-footer{max-width:1080px;margin:0 auto;padding:0 32px 32px;font-size:12px;color:#8a92a0}
 
+/* ================= TARSILA ================= */
+#pg-tarsila{max-width:none}
+.barra{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:20px}
+.barra .campo{min-width:200px}
+.barra .campo label{margin-top:0}
+.barra .acoes{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.estudio{display:grid;grid-template-columns:440px 1fr;gap:24px;align-items:start}
+.editor{background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:6px 20px 20px;max-height:calc(100vh - 230px);overflow:auto}
+.editor h3{font-size:24px;color:var(--petroleo);margin:20px 0 2px;display:flex;justify-content:space-between;align-items:center}
+.editor .dica{font-size:12.5px;color:#7a8290;margin-top:4px}
+.editor .bloco{border-top:1.5px solid var(--linha);margin-top:18px;padding-top:4px}
+.editor .bloco-slide{background:var(--gelo);border-radius:8px;padding:4px 14px 14px;margin-top:14px}
+.editor .bloco-slide .cab{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.editor .bloco-slide .cab b{font-weight:400;color:var(--petroleo)}
+.editor .bloco-slide .cab span{display:flex;gap:4px}
+.check{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:14px}
+.check input{width:auto}
+.previa{min-width:0}
+.avisos{margin-bottom:12px}
+.aviso{background:#FFF6E0;border:1px solid #F0D58A;color:var(--alerta);border-radius:6px;padding:8px 12px;font-size:14px;margin-bottom:6px}
+.aviso.ok{background:#EAF4EC;border-color:#B9DBC0;color:#2F6B3A}
+.grade{display:flex;flex-wrap:wrap;gap:14px}
+.miniatura{width:324px;height:405px;overflow:hidden;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.12);position:relative;flex:none}
+.miniatura .escala{transform:scale(.3);transform-origin:0 0;width:1080px;height:1350px}
+.miniatura.excede{outline:3px solid #E0A800;outline-offset:2px}
+.legenda-box{margin-top:22px;background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:4px 20px 18px}
+
+/* ================= SLIDES (1080 × 1350) ================= */
+.slide{width:1080px;height:1350px;position:relative;overflow:hidden;padding:96px 96px 88px;font-family:Slab,serif}
+.slide.escuro{background:linear-gradient(160deg,var(--petroleo) 0%,var(--profundo) 100%);color:#fff}
+.slide.claro{background:var(--gelo);color:var(--grafite)}
+.slide .topo{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
+.slide .topo img{height:96px}
+.slide .pag{font:400 26px Slab;letter-spacing:.12em;opacity:.75}
+.slide.claro .pag{color:var(--petroleo)}
+.slide .kicker{font:400 26px Slab;letter-spacing:.22em;text-transform:uppercase;color:var(--ceu)}
+.slide h1{font:600 104px/1.02 Cormorant;letter-spacing:-.01em;color:inherit}
+.slide.escuro h1{color:#fff}
+.slide h2{font:600 84px/1.04 Cormorant;color:var(--petroleo)}
+.slide p,.slide li{font:300 37px/1.45 Slab}
+.slide em{font-style:italic;color:var(--ceu)}
+.slide.claro em{color:var(--petroleo)}
+.slide b{font-weight:400;color:var(--petroleo)}
+.slide.escuro b{color:var(--ceu)}
+.slide .marca-agua{position:absolute;z-index:0;pointer-events:none}
+.slide .rodape-s{position:absolute;left:96px;right:96px;bottom:80px;display:flex;justify-content:space-between;align-items:center;font:400 25px Slab;letter-spacing:.12em;z-index:2}
+.slide .fio{width:120px;height:3px;background:var(--nevoa);margin:44px 0}
+.slide ul{list-style:none}
+.slide li{display:grid;grid-template-columns:56px 1fr;gap:22px;align-items:start;padding:30px 0;border-top:2px solid var(--linha)}
+.slide li:last-child{border-bottom:2px solid var(--linha)}
+.slide li img{width:48px;margin-top:8px}
+.slide .lei{font:400 24px Slab;letter-spacing:.14em;text-transform:uppercase;color:var(--nevoa);margin-bottom:20px}
+.slide.escuro .lei{color:var(--ceu)}
+.slide .conteudo{position:relative;z-index:2}
+.slide .tag{display:inline-block;font:400 24px Slab;letter-spacing:.2em;text-transform:uppercase;padding:8px 18px;border-radius:40px;margin-bottom:22px}
+.slide .tag.pergunta{background:var(--petroleo);color:#fff}
+.slide .tag.mito{border:2px solid #9AA3AF;color:#6B7480}
+.slide .tag.fato{background:var(--petroleo);color:#fff}
+.slide .q{font:600 78px/1.06 Cormorant;color:var(--petroleo)}
+.slide .mito-txt{font:300 40px/1.4 Slab;color:#6B7480;text-decoration:line-through;text-decoration-color:rgba(107,116,128,.55);text-decoration-thickness:3px}
+.slide .fato-txt{font:400 40px/1.42 Slab;color:var(--grafite)}
+.slide .divisor{height:2px;background:var(--linha);margin:48px 0}
+.slide .ressalva{text-align:right;font-size:21px;line-height:1.6;opacity:.72;letter-spacing:.06em;font-weight:300}
+
+@media (max-width:1000px){
+  .estudio{grid-template-columns:1fr}
+  .editor{max-height:none}
+}
 @media (max-width:760px){
   #tela-login{grid-template-columns:1fr}
-  .lado-marca{padding:32px 24px;min-height:auto;gap:40px}
+  .lado-marca{padding:32px 24px;gap:40px}
   .lado-marca h1{font-size:36px}
-  header{padding:14px 16px} main{padding:32px 16px} footer{padding:0 16px 24px}
-  main h1{font-size:36px}
+  header.topo-app{padding:12px 16px;gap:12px;flex-wrap:wrap}
+  header.topo-app nav{order:3;flex-basis:100%}
+  main.pagina{padding:28px 16px} footer.rodape{padding:0 16px 24px}
+  .pagina h1{font-size:34px}
+  .miniatura{width:270px;height:337.5px}
+  .miniatura .escala{transform:scale(.25)}
+  .barra .acoes{margin-left:0}
 }
 </style>
 </head>
 <body>
 
-<!-- ============ LOGIN ============ -->
+<!-- ================= LOGIN ================= -->
 <section id="tela-login" class="oculto">
   <div class="lado-marca">
     <img class="caracol" src="assets/caracol-branco.svg" alt="">
@@ -92,51 +178,111 @@ footer{max-width:1080px;margin:0 auto;padding:0 32px 32px;font-size:12px;color:#
   </div>
 </section>
 
-<!-- ============ PAINEL ============ -->
-<section id="tela-painel" class="oculto">
-  <header>
+<!-- ================= APLICAÇÃO ================= -->
+<section id="tela-app" class="oculto">
+  <header class="topo-app">
     <img src="assets/logo-branco.svg" alt="Palácio">
+    <nav>
+      <button data-pg="mesa" class="ativo">Mesa</button>
+      <button data-pg="tarsila">Tarsila · Carrosséis</button>
+    </nav>
     <div class="usuario"><span id="nome-usuario"></span><button id="btn-sair" type="button">Sair</button></div>
   </header>
-  <main>
+
+  <!-- Mesa do Péricles -->
+  <main class="pagina" id="pg-mesa">
     <h1>Mesa do Péricles</h1>
     <p class="sub">A equipe está sendo montada. Cada agente entra em funcionamento na sua etapa.</p>
     <div class="equipe" id="equipe"></div>
   </main>
-  <footer id="rodape-versao"></footer>
+
+  <!-- Tarsila -->
+  <main class="pagina oculto" id="pg-tarsila">
+    <h1>Tarsila · Carrosséis</h1>
+    <p class="sub">Digite o conteúdo, confira a prévia e baixe os slides prontos (1080 × 1350 px).</p>
+
+    <div class="barra">
+      <div class="campo">
+        <label for="sel-modelo">Modelo</label>
+        <select id="sel-modelo">
+          <option value="lista">Lista</option>
+          <option value="pergunta">Pergunta e Resposta</option>
+          <option value="mitofato">Mito × Fato</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="sel-rascunho">Abrir rascunho</label>
+        <select id="sel-rascunho"><option value="">— novo carrossel —</option></select>
+      </div>
+      <div class="acoes">
+        <button class="btn sec" id="btn-exemplo" type="button">Carregar exemplo</button>
+        <button class="btn sec" id="btn-salvar" type="button">Salvar rascunho</button>
+        <button class="btn" id="btn-baixar" type="button">Baixar slides (ZIP)</button>
+      </div>
+    </div>
+    <div class="msg" id="msg-tarsila" role="status"></div>
+
+    <div class="estudio">
+      <div class="editor" id="editor"></div>
+      <div class="previa">
+        <div class="avisos" id="avisos"></div>
+        <div class="grade" id="grade"></div>
+        <div class="legenda-box">
+          <label for="legenda">Legenda do post</label>
+          <textarea id="legenda" rows="6" placeholder="Texto que vai na legenda do Instagram"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+            <span class="dica" id="cont-legenda" style="font-size:12.5px;color:#7a8290"></span>
+            <button class="btn sec mini" id="btn-copiar" type="button">Copiar legenda</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer class="rodape" id="rodape-versao"></footer>
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v001';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 0 (infraestrutura + login)',
+const VERSAO = 'v002';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 1 (Tarsila: modelos de carrossel)',
             'color:#0D507B;font-weight:bold');
 
-// Chave publicável: feita para ficar no navegador. A proteção dos dados é feita pelas regras (RLS) do banco.
+// Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
 const SUPABASE_URL = 'https://wffbncqvhnocdalaoqcv.supabase.co';
 const SUPABASE_CHAVE = 'sb_publishable_E6awMlQdzAw9zBS77HVb-w_JM5IcE8g';
 const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_CHAVE) : null;
 
-const EQUIPE = [
-  {nome:'Péricles', funcao:'Gestor',                  etapa:3},
-  {nome:'Atena',    funcao:'Estrategista',            etapa:3},
-  {nome:'Clarice',  funcao:'Redatora',                etapa:2},
-  {nome:'Têmis',    funcao:'Revisora OAB',            etapa:2},
-  {nome:'Tarsila',  funcao:'Arte dos carrosséis',     etapa:1},
-  {nome:'Rondon',   funcao:'Análise de referências',  etapa:4},
-  {nome:'Glauber',  funcao:'Roteiros de Reels',       etapa:5},
-];
-
 const $ = id => document.getElementById(id);
 
+/* ---------------- Equipe ---------------- */
+const EQUIPE = [
+  {nome:'Péricles', funcao:'Gestor',                 etapa:3},
+  {nome:'Atena',    funcao:'Estrategista',           etapa:3},
+  {nome:'Clarice',  funcao:'Redatora',               etapa:2},
+  {nome:'Têmis',    funcao:'Revisora OAB',           etapa:2},
+  {nome:'Tarsila',  funcao:'Arte dos carrosséis',    etapa:1, ativo:true, pg:'tarsila'},
+  {nome:'Rondon',   funcao:'Análise de referências', etapa:4},
+  {nome:'Glauber',  funcao:'Roteiros de Reels',      etapa:5},
+];
+
+/* ---------------- Telas ---------------- */
 function mostrar(tela){
   $('tela-login').classList.toggle('oculto', tela !== 'login');
-  $('tela-painel').classList.toggle('oculto', tela !== 'painel');
+  $('tela-app').classList.toggle('oculto', tela !== 'app');
 }
+function irPara(pg){
+  ['mesa','tarsila'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
+  document.querySelectorAll('header.topo-app nav button').forEach(b => b.classList.toggle('ativo', b.dataset.pg === pg));
+  if (pg === 'tarsila'){ renderizarEditor(); renderizarPrevia(); carregarListaRascunhos(); }
+}
+document.querySelectorAll('header.topo-app nav button').forEach(b => b.addEventListener('click', () => irPara(b.dataset.pg)));
 
+/* ---------------- Login ---------------- */
 function traduzirErro(e){
   const m = (e && e.message || '').toLowerCase();
   if (m.includes('invalid login')) return 'E-mail ou senha incorretos.';
@@ -144,22 +290,20 @@ function traduzirErro(e){
   if (m.includes('network') || m.includes('fetch')) return 'Sem conexão com o servidor. Tente novamente.';
   return 'Não foi possível entrar. Tente novamente.';
 }
-
-async function abrirPainel(sessao){
-  const { data: perfil } = await sb.from('perfis')
-    .select('nome,papel').eq('id', sessao.user.id).maybeSingle();
+async function abrirApp(sessao){
+  const { data: perfil } = await sb.from('perfis').select('nome,papel').eq('id', sessao.user.id).maybeSingle();
   $('nome-usuario').textContent = (perfil && perfil.nome) || sessao.user.email;
   $('equipe').innerHTML = EQUIPE.map(a => `
-    <div class="agente">
+    <div class="agente${a.ativo ? ' ativo' : ''}" ${a.pg ? `data-pg="${a.pg}"` : ''}>
       <span class="etapa">Etapa ${a.etapa}</span>
       <div class="nome">${a.nome}</div>
       <div class="funcao">${a.funcao}</div>
-      <div class="estado">Aguardando implantação</div>
+      <div class="estado">${a.ativo ? 'Em funcionamento · abrir →' : 'Aguardando implantação'}</div>
     </div>`).join('');
+  document.querySelectorAll('.agente[data-pg]').forEach(c => c.addEventListener('click', () => irPara(c.dataset.pg)));
   $('rodape-versao').textContent = 'Estúdio de Marketing ' + VERSAO;
-  mostrar('painel');
+  mostrar('app'); irPara('mesa');
 }
-
 $('form-login').addEventListener('submit', async ev => {
   ev.preventDefault();
   const email = $('email').value.trim(), senha = $('senha').value;
@@ -171,11 +315,334 @@ $('form-login').addEventListener('submit', async ev => {
   btn.disabled = false; btn.textContent = 'Entrar';
   if (error){ msg.textContent = traduzirErro(error); msg.classList.add('erro'); return; }
   $('senha').value = '';
-  abrirPainel(data.session);
+  abrirApp(data.session);
 });
-
 $('btn-sair').addEventListener('click', async () => { await sb.auth.signOut(); mostrar('login'); });
 
+/* =========================================================
+   TARSILA · modelos de carrossel
+   Contrato do conteúdo (o mesmo que a Clarice vai preencher):
+   { capa:{kicker,titulo}, slides:[...], fechamento:{rotulo,titulo,texto}, ilustrativo:bool }
+     lista    → slide {rotulo, titulo, itens:[texto]}
+     pergunta → slide {rotulo, pergunta, resposta}
+     mitofato → slide {rotulo, mito, fato}
+   Marcação: *ênfase* (itálico de destaque)  ·  **destaque** (negrito na cor da marca)
+   ========================================================= */
+const RESSALVA = 'Conteúdo informativo.<br>Cada caso exige análise própria.';
+const RESSALVA_ILUSTRATIVO = 'Situação ilustrativa. Conteúdo informativo.<br>Cada caso exige análise própria.';
+const MAX_SLIDES = 8;
+
+const EXEMPLOS = {
+  lista: {
+    capa:{kicker:'Gestão de inadimplência · Escolas', titulo:'Mensalidade em atraso: o que a escola *pode* e o que *não pode* fazer'},
+    slides:[
+      {rotulo:'Lei 9.870/1999 · art. 6º', titulo:'O que a lei proíbe', itens:[
+        '**Suspender provas** ou impedir o aluno de frequentar as aulas por causa da dívida.',
+        '**Reter documentos** escolares, inclusive os de transferência.',
+        '**Aplicar penalidades pedagógicas** motivadas pelo atraso.']},
+      {rotulo:'Lei 9.870/1999 · art. 5º e art. 6º', titulo:'O que a escola pode fazer', itens:[
+        '**Negar a renovação da matrícula** para o período seguinte ao inadimplente.',
+        '**Cobrar o débito** pelas vias extrajudicial e judicial.',
+        '**Negociar e formalizar** o acordo por escrito, com cronograma claro.']}
+    ],
+    fechamento:{rotulo:'CDC · art. 42', titulo:'Cobrar é direito. Constranger, não.',
+      texto:'O consumidor inadimplente não pode ser exposto ao ridículo nem submetido a ameaça. Firmeza e respeito andam juntos.'},
+    ilustrativo:false,
+    legenda:'Inadimplência na escola exige firmeza, mas dentro da lei.\n\nA Lei 9.870/1999 define com clareza o que a instituição pode e o que não pode fazer diante de mensalidades em atraso. Conhecer esses limites protege a escola e preserva a relação com as famílias.\n\nConteúdo informativo. Cada caso exige análise própria.\n\n#gestãoescolar #inadimplência #direitoeducacional'
+  },
+  pergunta: {
+    capa:{kicker:'Gestão de inadimplência · Escolas', titulo:'3 perguntas que todo diretor faz sobre *mensalidade em atraso*'},
+    slides:[
+      {rotulo:'Lei 9.870/1999 · art. 6º', pergunta:'A escola pode reter o histórico de um aluno inadimplente?',
+       resposta:'Não. A lei proíbe a retenção de documentos escolares, inclusive os de transferência, por motivo de inadimplência. A cobrança segue pelas vias próprias.'},
+      {rotulo:'Lei 9.870/1999 · art. 5º', pergunta:'E pode negar a rematrícula?',
+       resposta:'Sim. A renovação da matrícula é assegurada aos alunos já matriculados, **salvo quando inadimplentes**. A escola pode recusá-la para o período seguinte.'},
+      {rotulo:'CDC · art. 42', pergunta:'Posso cobrar o responsável na saída da escola?',
+       resposta:'Não é recomendável. A cobrança não pode expor o consumidor ao ridículo nem constrangê-lo. Conversas sobre débito devem ser reservadas e documentadas.'}
+    ],
+    fechamento:{rotulo:'Gestão de inadimplência', titulo:'Firmeza com *método*.',
+      texto:'Conhecer os limites legais é o primeiro passo para cobrar sem desgastar a relação com as famílias.'},
+    ilustrativo:false, legenda:''
+  },
+  mitofato: {
+    capa:{kicker:'Mito × Fato · Escolas', titulo:'O que é *verdade* sobre cobrar mensalidades em atraso'},
+    slides:[
+      {rotulo:'Lei 9.870/1999 · art. 6º', mito:'Se o aluno está inadimplente, a escola pode impedir que ele faça as provas.',
+       fato:'A lei **proíbe** suspender provas por inadimplência. A dívida deve ser cobrada pelas vias próprias.'},
+      {rotulo:'Código Civil · art. 206, § 5º, I', mito:'Dívida de mensalidade escolar nunca prescreve.',
+       fato:'Prescreve. Em regra, a cobrança de dívida líquida prevista em contrato escrito prescreve em **5 anos**.'},
+      {rotulo:'CDC · art. 42', mito:'Cobrar extrajudicialmente é sempre constranger a família.',
+       fato:'Cobrar é **direito do credor**. O que a lei veda é a exposição ao ridículo e a ameaça.'}
+    ],
+    fechamento:{rotulo:'Gestão de inadimplência', titulo:'Informação certa evita *prejuízo*.',
+      texto:'Antes de agir, confirme o que a lei permite. Cada situação exige análise própria.'},
+    ilustrativo:false, legenda:''
+  }
+};
+
+function vazio(modelo){
+  const s = modelo === 'lista' ? {rotulo:'', titulo:'', itens:['']}
+          : modelo === 'pergunta' ? {rotulo:'', pergunta:'', resposta:''}
+          : {rotulo:'', mito:'', fato:''};
+  return {capa:{kicker:'',titulo:''}, slides:[s], fechamento:{rotulo:'',titulo:'',texto:''}, ilustrativo:false, legenda:''};
+}
+function clonar(o){ return JSON.parse(JSON.stringify(o)); }
+
+let estado = { id:null, modelo:'lista', dados: clonar(EXEMPLOS.lista) };
+
+/* ---------- texto seguro + marcação ---------- */
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmt(s){
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br>');
+}
+function semMarcacao(s){ return String(s||'').replace(/\*+/g,''); }
+
+/* ---------- geração dos slides ---------- */
+function htmlCapa(d, total){
+  return `<section class="slide escuro" data-tipo="capa">
+    <img class="marca-agua" src="assets/caracol-branco.svg" alt="" style="width:1150px;right:-420px;bottom:-330px;opacity:.10">
+    <div class="topo"><img src="assets/logo-branco.svg" alt=""><span class="pag">01 / ${pad(total)}</span></div>
+    <div class="conteudo" style="margin-top:250px">
+      ${d.capa.kicker ? `<div class="kicker">${fmt(d.capa.kicker)}</div><div class="fio"></div>` : ''}
+      <h1>${fmt(d.capa.titulo) || '<span style="opacity:.35">Título da capa</span>'}</h1>
+    </div>
+    <div class="rodape-s"><span>@PALACIOGOMES.ADV</span><span>ARRASTE →</span></div>
+  </section>`;
+}
+function htmlConteudo(modelo, s, n, total){
+  const cab = `<img class="marca-agua" src="assets/coluna-indigo.svg" alt="" style="height:1180px;right:-170px;top:110px;opacity:.05">
+    <div class="topo"><img src="assets/logo-indigo.svg" alt=""><span class="pag">${pad(n)} / ${pad(total)}</span></div>`;
+  const rot = s.rotulo ? `<div class="lei">${fmt(s.rotulo)}</div>` : '';
+  let corpo = '';
+  if (modelo === 'lista'){
+    const itens = (s.itens||[]).filter(t => String(t).trim());
+    corpo = `${rot}<h2>${fmt(s.titulo)}</h2><div class="fio"></div>
+      <ul>${itens.map(t => `<li><img src="assets/caracol-indigo.svg" alt=""><span>${fmt(t)}</span></li>`).join('')}</ul>`;
+  } else if (modelo === 'pergunta'){
+    corpo = `${rot}<span class="tag pergunta">Pergunta</span><div class="q">${fmt(s.pergunta)}</div>
+      <div class="fio"></div><p>${fmt(s.resposta)}</p>`;
+  } else {
+    corpo = `${rot}<span class="tag mito">Mito</span><div class="mito-txt">${fmt(s.mito)}</div>
+      <div class="divisor"></div><span class="tag fato">Fato</span><div class="fato-txt">${fmt(s.fato)}</div>`;
+  }
+  return `<section class="slide claro" data-tipo="conteudo">${cab}<div class="conteudo" style="margin-top:110px">${corpo}</div></section>`;
+}
+function htmlFechamento(d, total){
+  const f = d.fechamento;
+  return `<section class="slide escuro" data-tipo="fechamento">
+    <img class="marca-agua" src="assets/caracol-branco.svg" alt="" style="width:1150px;left:-430px;top:-360px;opacity:.10">
+    <div class="topo" style="justify-content:flex-end"><span class="pag">${pad(total)} / ${pad(total)}</span></div>
+    <div class="conteudo" style="margin-top:250px">
+      ${f.rotulo ? `<div class="lei">${fmt(f.rotulo)}</div>` : ''}
+      <h1 style="font-size:92px">${fmt(f.titulo)}</h1>
+      ${f.texto ? `<div class="fio"></div><p style="opacity:.9">${fmt(f.texto)}</p>` : ''}
+    </div>
+    <div class="rodape-s" style="align-items:flex-end">
+      <img src="assets/logo-branco.svg" alt="" style="height:120px">
+      <span class="ressalva">${d.ilustrativo ? RESSALVA_ILUSTRATIVO : RESSALVA}</span>
+    </div>
+  </section>`;
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+function gerarSlides(){
+  const d = estado.dados, total = d.slides.length + 2;
+  return [htmlCapa(d,total), ...d.slides.map((s,i) => htmlConteudo(estado.modelo, s, i+2, total)), htmlFechamento(d,total)];
+}
+
+/* ---------- prévia + verificação de texto excedente ---------- */
+let tPrevia = null;
+function agendarPrevia(){ clearTimeout(tPrevia); tPrevia = setTimeout(renderizarPrevia, 200); }
+function renderizarPrevia(){
+  $('grade').innerHTML = gerarSlides().map(h => `<div class="miniatura"><div class="escala">${h}</div></div>`).join('');
+  $('legenda').value = estado.dados.legenda || '';
+  contarLegenda();
+  // espera fontes para medir corretamente
+  document.fonts.ready.then(verificarExcesso);
+}
+function verificarExcesso(){
+  const avisos = [];
+  document.querySelectorAll('#grade .miniatura').forEach((m, i) => {
+    const sl = m.querySelector('.slide'), ct = sl.querySelector('.conteudo'), rd = sl.querySelector('.rodape-s');
+    const limite = rd ? rd.offsetTop - 30 : 1350 - 88;
+    const fim = ct.offsetTop + ct.offsetHeight;
+    const excede = fim > limite;
+    m.classList.toggle('excede', excede);
+    if (excede) avisos.push(`Slide ${i+1}: o texto passa do espaço disponível. Encurte o conteúdo.`);
+  });
+  const d = estado.dados;
+  if (!d.capa.titulo.trim()) avisos.push('Capa: falta o título.');
+  if (!d.fechamento.titulo.trim()) avisos.push('Fechamento: falta o título.');
+  $('avisos').innerHTML = avisos.length
+    ? avisos.map(a => `<div class="aviso">${esc(a)}</div>`).join('')
+    : '<div class="aviso ok">Tudo dentro do espaço. Pronto para baixar.</div>';
+  return avisos;
+}
+
+/* ---------- editor ---------- */
+function campo(rotulo, caminho, valor, tipo='input', dica=''){
+  const id = 'f_' + caminho.replace(/[^a-z0-9]/gi,'_');
+  const ctl = tipo === 'textarea'
+    ? `<textarea id="${id}" data-c="${caminho}" rows="3">${esc(valor)}</textarea>`
+    : `<input id="${id}" data-c="${caminho}" value="${esc(valor)}">`;
+  return `<label for="${id}">${rotulo}</label>${ctl}${dica ? `<div class="dica">${dica}</div>` : ''}`;
+}
+function renderizarEditor(){
+  const d = estado.dados, m = estado.modelo;
+  $('sel-modelo').value = m;
+  let h = `<h3>Capa</h3>
+    ${campo('Rótulo (acima do título)', 'capa.kicker', d.capa.kicker, 'input', 'Ex.: Gestão de inadimplência · Escolas')}
+    ${campo('Título', 'capa.titulo', d.capa.titulo, 'textarea', 'Use *asteriscos* para destacar palavras em itálico.')}
+    <div class="bloco"><h3>Slides de conteúdo <button class="btn sec mini" type="button" id="btn-add-slide">+ slide</button></h3></div>`;
+  d.slides.forEach((s, i) => {
+    h += `<div class="bloco-slide"><div class="cab"><b>Slide ${i+2}</b><span>
+      <button class="btn sec mini" type="button" data-acao="sobe" data-i="${i}" ${i===0?'disabled':''} title="Mover para cima">↑</button>
+      <button class="btn sec mini" type="button" data-acao="desce" data-i="${i}" ${i===d.slides.length-1?'disabled':''} title="Mover para baixo">↓</button>
+      <button class="btn sec mini" type="button" data-acao="remove" data-i="${i}" ${d.slides.length===1?'disabled':''} title="Remover">✕</button>
+      </span></div>
+      ${campo('Fundamento (rótulo)', `slides.${i}.rotulo`, s.rotulo, 'input', 'Ex.: Lei 9.870/1999 · art. 6º')}`;
+    if (m === 'lista'){
+      h += campo('Título', `slides.${i}.titulo`, s.titulo)
+         + `<label for="f_itens_${i}">Itens (um por linha)</label><textarea id="f_itens_${i}" data-c="slides.${i}.itens" rows="5">${esc((s.itens||[]).join('\n'))}</textarea>
+            <div class="dica">Use **dois asteriscos** para o trecho em destaque. Ideal: 3 itens.</div>`;
+    } else if (m === 'pergunta'){
+      h += campo('Pergunta', `slides.${i}.pergunta`, s.pergunta, 'textarea') + campo('Resposta', `slides.${i}.resposta`, s.resposta, 'textarea');
+    } else {
+      h += campo('Mito', `slides.${i}.mito`, s.mito, 'textarea') + campo('Fato', `slides.${i}.fato`, s.fato, 'textarea');
+    }
+    h += `</div>`;
+  });
+  h += `<div class="bloco"><h3>Fechamento</h3>
+    ${campo('Fundamento (rótulo)', 'fechamento.rotulo', d.fechamento.rotulo)}
+    ${campo('Título', 'fechamento.titulo', d.fechamento.titulo, 'textarea')}
+    ${campo('Texto', 'fechamento.texto', d.fechamento.texto, 'textarea')}
+    <label class="check"><input type="checkbox" id="chk-ilustrativo" ${d.ilustrativo?'checked':''}> Caso ilustrativo (acrescenta "Situação ilustrativa" à ressalva)</label>
+    <div class="dica">A ressalva "Conteúdo informativo. Cada caso exige análise própria." é sempre incluída.</div></div>`;
+  $('editor').innerHTML = h;
+
+  $('editor').querySelectorAll('[data-c]').forEach(el => el.addEventListener('input', () => {
+    definir(el.dataset.c, el.dataset.c.endsWith('.itens') ? el.value.split('\n') : el.value);
+    agendarPrevia();
+  }));
+  $('chk-ilustrativo').addEventListener('change', e => { estado.dados.ilustrativo = e.target.checked; agendarPrevia(); });
+  $('btn-add-slide').addEventListener('click', () => {
+    if (d.slides.length >= MAX_SLIDES) return avisar(`Máximo de ${MAX_SLIDES} slides de conteúdo.`, true);
+    d.slides.push(vazio(m).slides[0]); renderizarEditor(); renderizarPrevia();
+  });
+  $('editor').querySelectorAll('[data-acao]').forEach(b => b.addEventListener('click', () => {
+    const i = +b.dataset.i, a = b.dataset.acao;
+    if (a === 'remove') d.slides.splice(i,1);
+    if (a === 'sobe') [d.slides[i-1], d.slides[i]] = [d.slides[i], d.slides[i-1]];
+    if (a === 'desce') [d.slides[i+1], d.slides[i]] = [d.slides[i], d.slides[i+1]];
+    renderizarEditor(); renderizarPrevia();
+  }));
+}
+function definir(caminho, valor){
+  const p = caminho.split('.'); let o = estado.dados;
+  for (let i = 0; i < p.length-1; i++) o = o[p[i]];
+  o[p[p.length-1]] = valor;
+}
+
+/* ---------- legenda ---------- */
+function contarLegenda(){
+  const n = $('legenda').value.length;
+  $('cont-legenda').textContent = `${n} / 2.200 caracteres` + (n > 2200 ? ' (acima do limite do Instagram)' : '');
+}
+$('legenda').addEventListener('input', () => { estado.dados.legenda = $('legenda').value; contarLegenda(); });
+$('btn-copiar').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('legenda').value); avisar('Legenda copiada.'); }
+  catch { $('legenda').select(); avisar('Selecione e copie com Ctrl+C.', true); }
+});
+
+/* ---------- barra de ações ---------- */
+function avisar(t, erro=false){
+  const m = $('msg-tarsila'); m.textContent = t; m.className = 'msg' + (erro ? ' erro' : '');
+  clearTimeout(avisar.t); avisar.t = setTimeout(() => { m.textContent=''; }, 6000);
+}
+$('sel-modelo').addEventListener('change', e => {
+  const novo = e.target.value;
+  if (novo === estado.modelo) return;
+  const temConteudo = estado.dados.slides.some(s => Object.values(s).some(v => String(v).trim()));
+  if (temConteudo && !window.confirm('Trocar o modelo apaga os slides de conteúdo (capa e fechamento são mantidos). Continuar?')){
+    e.target.value = estado.modelo; return;
+  }
+  const base = vazio(novo);
+  estado.modelo = novo;
+  estado.dados.slides = base.slides;
+  renderizarEditor(); renderizarPrevia();
+});
+$('btn-exemplo').addEventListener('click', () => {
+  estado = { id:null, modelo:estado.modelo, dados: clonar(EXEMPLOS[estado.modelo]) };
+  $('sel-rascunho').value = '';
+  renderizarEditor(); renderizarPrevia(); avisar('Exemplo carregado.');
+});
+
+/* ---------- rascunhos (Supabase) ---------- */
+async function carregarListaRascunhos(){
+  const { data, error } = await sb.from('pecas').select('id,titulo,modelo,atualizado_em').order('atualizado_em', {ascending:false}).limit(30);
+  if (error) return;
+  const nomes = {lista:'Lista', pergunta:'Pergunta e Resposta', mitofato:'Mito × Fato'};
+  $('sel-rascunho').innerHTML = '<option value="">— novo carrossel —</option>' + (data||[]).map(r =>
+    `<option value="${r.id}">${esc(r.titulo.slice(0,60))} · ${nomes[r.modelo]} · ${new Date(r.atualizado_em).toLocaleDateString('pt-BR')}</option>`).join('');
+  if (estado.id) $('sel-rascunho').value = estado.id;
+}
+$('sel-rascunho').addEventListener('change', async e => {
+  const id = e.target.value;
+  if (!id){ estado = { id:null, modelo:estado.modelo, dados: vazio(estado.modelo) }; renderizarEditor(); renderizarPrevia(); return; }
+  const { data, error } = await sb.from('pecas').select('*').eq('id', id).single();
+  if (error) return avisar('Não foi possível abrir o rascunho.', true);
+  estado = { id:data.id, modelo:data.modelo, dados:{...vazio(data.modelo), ...data.conteudo, legenda:data.legenda || ''} };
+  renderizarEditor(); renderizarPrevia(); avisar('Rascunho aberto.');
+});
+$('btn-salvar').addEventListener('click', async () => {
+  const titulo = semMarcacao(estado.dados.capa.titulo).trim();
+  if (!titulo) return avisar('Preencha o título da capa antes de salvar.', true);
+  const btn = $('btn-salvar'); btn.disabled = true;
+  const { legenda, ...conteudo } = estado.dados;
+  const registro = { titulo, modelo:estado.modelo, conteudo, legenda };
+  const q = estado.id ? sb.from('pecas').update(registro).eq('id', estado.id).select('id').single()
+                      : sb.from('pecas').insert(registro).select('id').single();
+  const { data, error } = await q;
+  btn.disabled = false;
+  if (error) return avisar('Não foi possível salvar: ' + error.message, true);
+  estado.id = data.id; await carregarListaRascunhos(); avisar('Rascunho salvo.');
+});
+
+/* ---------- exportação (PNG 1080×1350 em ZIP) ---------- */
+function nomeArquivo(){
+  const base = semMarcacao(estado.dados.capa.titulo).normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,50) || 'carrossel';
+  return new Date().toISOString().slice(0,10) + '_' + base;
+}
+$('btn-baixar').addEventListener('click', async () => {
+  if (typeof htmlToImage === 'undefined' || typeof JSZip === 'undefined')
+    return avisar('As ferramentas de exportação não carregaram. Recarregue a página.', true);
+  await document.fonts.ready;
+  const avisos = verificarExcesso();
+  if (avisos.length && !window.confirm('Há avisos na prévia:\n\n' + avisos.join('\n') + '\n\nBaixar assim mesmo?')) return;
+  const btn = $('btn-baixar'); btn.disabled = true;
+  try {
+    const zip = new JSZip(), base = nomeArquivo();
+    const slides = [...document.querySelectorAll('#grade .slide')];
+    for (let i = 0; i < slides.length; i++){
+      btn.textContent = `Gerando ${i+1} de ${slides.length}…`;
+      const blob = await htmlToImage.toBlob(slides[i], {width:1080, height:1350, pixelRatio:1, cacheBust:false});
+      zip.file(`${base}_${pad(i+1)}.png`, blob);
+    }
+    if (estado.dados.legenda) zip.file(`${base}_legenda.txt`, estado.dados.legenda);
+    const arquivo = await zip.generateAsync({type:'blob'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(arquivo); a.download = base + '.zip';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    avisar(`${slides.length} slides baixados.`);
+  } catch (err) {
+    console.error('[Tarsila] falha na exportação', err);
+    avisar('Falha ao gerar as imagens. Tente novamente.', true);
+  } finally { btn.disabled = false; btn.textContent = 'Baixar slides (ZIP)'; }
+});
+
+/* ---------------- Início ---------------- */
 (async () => {
   if (!sb){
     mostrar('login');
@@ -186,7 +653,7 @@ $('btn-sair').addEventListener('click', async () => { await sb.auth.signOut(); m
     return;
   }
   const { data } = await sb.auth.getSession();
-  if (data.session) abrirPainel(data.session); else mostrar('login');
+  if (data.session) abrirApp(data.session); else mostrar('login');
 })();
 </script>
 </body>
