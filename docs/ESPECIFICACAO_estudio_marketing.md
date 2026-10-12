@@ -3,7 +3,7 @@
 **Projeto:** Estúdio de Marketing — Palácio Gomes Advocacia
 **Endereço:** `marketing.palaciogomes.com.br`
 **Versão do documento:** 1.3 — 12/10/2026 (foco no gestor escolar, casos ilustrativos, checklist OAB conferido, prompt do Rondon)
-**Status:** Etapas 0 e 1 aprovadas; Etapa 2 publicada (v003), aguardando a chave da API e o aceite com 5 peças reais
+**Status:** Etapas 0, 1 e 2 aprovadas pelo João (12/10/2026). Próxima etapa em definição (proposta: Glauber/Reels antes de Atena+Péricles)
 
 ---
 

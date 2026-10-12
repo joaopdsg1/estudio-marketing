@@ -134,6 +134,30 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 .btn.verde{background:#2F6B3A} .btn.verde:hover{background:#245430}
 .btn.vermelho{background:#fff;color:var(--erro);border:1.5px solid #EBC0BC}
 .caixa-acao{margin-top:12px;padding:12px;background:var(--gelo);border-radius:8px}
+/* Mesa: briefing e pauta */
+.briefing{background:linear-gradient(160deg,var(--petroleo),var(--profundo));color:#fff;border-radius:12px;padding:22px 26px;margin-bottom:22px;position:relative;overflow:hidden}
+.briefing .marca{position:absolute;right:-90px;bottom:-110px;width:320px;opacity:.08;pointer-events:none}
+.briefing h2{position:relative;z-index:1}
+.briefing h2 .btn,.pauta h3 .btn{font:400 13px Slab,serif;letter-spacing:.03em}
+.briefing h2{font-size:30px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.briefing h2 small{font:300 13px Slab;color:var(--ceu);letter-spacing:.06em}
+.briefing .resumo{font-size:16.5px;line-height:1.6;max-width:820px;position:relative}
+.briefing .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;position:relative}
+.briefing .chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:8px 14px;font-size:14px;color:#fff;cursor:pointer}
+.briefing .chip b{font-weight:400;font-size:20px;display:block;line-height:1.1;color:#fff}
+.briefing .chip.alerta b{color:#FFD879}
+.briefing .btn.sec{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.pauta{background:#fff;border:1.5px solid var(--linha);border-radius:12px;padding:6px 22px 18px;margin-bottom:26px}
+.pauta h3{font-size:28px;color:var(--petroleo);margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.pauta .resumo-semana{color:#5a6372;font-size:14px;margin:2px 0 8px}
+.item-pauta{border-top:1px solid var(--linha);padding:14px 0;display:grid;grid-template-columns:34px 1fr auto;gap:14px;align-items:start}
+.item-pauta .n{font-family:Cormorant,serif;font-weight:600;font-size:30px;color:var(--nevoa);line-height:1}
+.item-pauta .tema{font-weight:400;color:var(--grafite)}
+.item-pauta .meta{font-size:13px;color:#7a8290;margin-top:2px}
+.item-pauta .angulo{font-size:14px;margin-top:6px}
+.item-pauta .acoes-p{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.item-pauta.descartada{opacity:.45}
+@media (max-width:760px){.item-pauta{grid-template-columns:28px 1fr}.item-pauta .acoes-p{grid-column:2;justify-content:flex-start}}
 .legenda-box{margin-top:22px;background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:4px 20px 18px}
 
 /* ================= SLIDES (1080 × 1350) ================= */
@@ -230,8 +254,11 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
   <!-- Mesa do Péricles -->
   <main class="pagina" id="pg-mesa">
     <h1>Mesa do Péricles</h1>
-    <p class="sub">A equipe está sendo montada. Cada agente entra em funcionamento na sua etapa.</p>
+    <p class="sub">O resumo do dia, a pauta da semana e a equipe.</p>
+    <div class="briefing" id="briefing"></div>
+    <div class="pauta" id="pauta-semana"></div>
     <div class="consumo" id="consumo-mesa"></div>
+    <h3 style="font-size:26px;color:var(--petroleo);margin:6px 0 14px">Equipe</h3>
     <div class="equipe" id="equipe"></div>
   </main>
 
@@ -315,8 +342,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v003';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 2 (Clarice + Têmis)',
+const VERSAO = 'v004';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 3 (Atena + Péricles)',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -328,8 +355,8 @@ const $ = id => document.getElementById(id);
 
 /* ---------------- Equipe ---------------- */
 const EQUIPE = [
-  {nome:'Péricles', funcao:'Gestor',                 etapa:3},
-  {nome:'Atena',    funcao:'Estrategista',           etapa:3},
+  {nome:'Péricles', funcao:'Gestor',                 etapa:3, ativo:true, pg:'mesa'},
+  {nome:'Atena',    funcao:'Estrategista',           etapa:3, ativo:true, pg:'mesa'},
   {nome:'Clarice',  funcao:'Redatora',               etapa:2, ativo:true, pg:'fila'},
   {nome:'Têmis',    funcao:'Revisora OAB',           etapa:2, ativo:true, pg:'fila'},
   {nome:'Tarsila',  funcao:'Arte dos carrosséis',    etapa:1, ativo:true, pg:'tarsila'},
@@ -349,7 +376,7 @@ function irPara(pg){
   document.querySelectorAll('header.topo-app nav button').forEach(b => b.classList.toggle('ativo', b.dataset.pg === pg));
   if (pg === 'tarsila'){ renderizarEditor(); renderizarPrevia(); renderizarRevisao(); carregarListaRascunhos(); }
   if (pg === 'fila'){ carregarFila(); }
-  if (pg === 'mesa'){ carregarConsumo(); }
+  if (pg === 'mesa'){ carregarMesa(); }
 }
 document.querySelectorAll('header.topo-app nav button').forEach(b => b.addEventListener('click', () => irPara(b.dataset.pg)));
 
@@ -780,8 +807,9 @@ async function chamarAgente(agente, peca_id){
   }
   return data;
 }
+let alvoProgresso = 'progresso';
 function passo(txt, cls='rodando'){
-  const d = document.createElement('div'); d.className = cls; d.textContent = txt; $('progresso').appendChild(d); return d;
+  const d = document.createElement('div'); d.className = cls; d.textContent = txt; $(alvoProgresso).appendChild(d); return d;
 }
 async function cicloClariceTemis(peca_id, primeiraEscrita){
   let p = passo(primeiraEscrita ? 'Clarice escrevendo o carrossel…' : 'Clarice reescrevendo conforme a instrução…');
@@ -933,6 +961,114 @@ async function salvarEdicoes(){
     titulo: semMarcacao(conteudo.capa.titulo).slice(0,200) || 'Sem título' }).eq('id', estado.id);
   if (error) throw new Error(error.message);
   estado.meta.versao = novaVersao; salvarEdicoes.ultimo = estado.id + atual;
+}
+
+
+/* =========================================================
+   ETAPA 3 · Atena (pauta semanal) + Péricles (briefing)
+   ========================================================= */
+function segundaISO(){
+  const d = new Date(); const dia = (d.getDay() + 6) % 7; d.setDate(d.getDate() - dia);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+async function chamarRotina(tarefa, extra={}){
+  const { data, error } = await sb.functions.invoke('rotina', { body: { tarefa, ...extra } });
+  if (error){
+    let msg = error.message;
+    try { const c = await error.context.json(); if (c && c.erro) msg = c.erro; } catch {}
+    throw new Error(msg);
+  }
+  return data;
+}
+async function carregarMesa(){ carregarConsumo(); await Promise.all([carregarBriefing(), carregarPautas()]); }
+
+async function carregarBriefing(){
+  const box = $('briefing'); if (!box) return;
+  const { data } = await sb.from('briefings').select('*').order('data',{ascending:false}).limit(1);
+  const b = Array.isArray(data) ? data[0] : null;
+  const dataTxt = b ? new Date(b.data + 'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long', day:'2-digit', month:'long'}) : '';
+  const d = (b && b.dados) || {};
+  const chip = (n, rot, alvo, alerta) => `<div class="chip${alerta && n ? ' alerta' : ''}" data-ir="${alvo}"><b>${n ?? 0}</b>${rot}</div>`;
+  box.innerHTML = `<img class="marca" src="assets/caracol-branco.svg" alt="">
+    <h2><span>Resumo do dia · Péricles <small>${esc(dataTxt)}</small></span>
+      <button class="btn sec mini" id="btn-briefing" type="button">Atualizar agora</button></h2>
+    <div class="resumo">${b ? esc(b.resumo) : 'Ainda não há resumo. O Péricles escreve um toda manhã útil às 7h; clique em "Atualizar agora" para gerar o primeiro.'}</div>
+    ${b ? `<div class="chips">
+      ${chip((d.aguardando||[]).length, 'aguardando você', 'fila', true)}
+      ${chip((d.bloqueadas||[]).length, 'bloqueadas', 'fila', true)}
+      ${chip((d.aprovadas_nao_publicadas||[]).length, 'aprovadas a publicar', 'fila', false)}
+      ${chip(`${d.publicadas_semana ?? 0}/${d.meta_semana ?? 2}`, 'publicadas na semana', 'fila', false)}
+      ${chip(d.pautas_propostas, 'pautas a decidir', 'pauta', true)}
+    </div>` : ''}
+    <div class="progresso" id="prog-briefing" style="color:var(--ceu)"></div>`;
+  box.querySelectorAll('[data-ir]').forEach(c => c.addEventListener('click', () => {
+    if (c.dataset.ir === 'pauta') $('pauta-semana').scrollIntoView({behavior:'smooth'}); else irPara(c.dataset.ir);
+  }));
+  $('btn-briefing').addEventListener('click', async e => {
+    e.target.disabled = true; $('prog-briefing').textContent = 'Péricles revisando o dia…';
+    try { await chamarRotina('briefing'); await carregarBriefing(); carregarConsumo(); }
+    catch (err) { $('prog-briefing').textContent = 'Falhou: ' + err.message; e.target.disabled = false; }
+  });
+}
+
+async function carregarPautas(){
+  const box = $('pauta-semana'); if (!box) return;
+  const semana = segundaISO();
+  const { data } = await sb.from('pautas').select('*').eq('semana', semana).order('ordem');
+  const lista = (Array.isArray(data) ? data : []).filter(p => p.status !== 'descartada');
+  const semanaTxt = new Date(semana + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit', month:'2-digit'});
+  let h = `<h3><span>Pauta da semana · Atena <small style="font:300 13px Slab;color:#7a8290">semana de ${semanaTxt}</small></span>
+    <button class="btn sec mini" id="btn-gerar-pauta" type="button">${lista.length ? 'Pedir nova pauta' : 'Gerar pauta agora'}</button></h3>`;
+  if (!lista.length) h += `<p class="resumo-semana">A Atena monta a pauta toda segunda às 6h30. Ainda não há pauta para esta semana.</p>`;
+  h += lista.map(p => `
+    <div class="item-pauta" data-id="${p.id}">
+      <div class="n">${p.ordem}</div>
+      <div>
+        <div class="tema">${esc(p.tema)}</div>
+        <div class="meta">${NOMES_MODELO[p.modelo]} · ${esc(p.pilar)}${p.dia_sugerido ? ' · ' + esc(p.dia_sugerido) : ''}
+          · <span class="selo ${p.status==='produzida'?'aprovada':p.status==='aprovada'?'em_revisao':'aguardando_voce'}">${{proposta:'Para decidir',aprovada:'Em produção',produzida:'Produzida'}[p.status]||p.status}</span></div>
+        ${p.angulo ? `<div class="angulo"><span style="color:var(--petroleo)">Ângulo:</span> ${esc(p.angulo)}</div>` : ''}
+        ${p.justificativa ? `<div class="angulo" style="color:#7a8290">${esc(p.justificativa)}</div>` : ''}
+        <div class="progresso" id="pp-${p.id}"></div>
+      </div>
+      <div class="acoes-p">
+        ${p.status==='proposta' ? `<button class="btn mini" data-acao="produzir" type="button">Aprovar e produzir</button>
+          <button class="btn sec mini" data-acao="descartar" type="button">Descartar</button>` : ''}
+        ${p.peca_id ? `<button class="btn sec mini" data-acao="abrir" type="button">Abrir peça</button>` : ''}
+      </div>
+    </div>`).join('');
+  h += `<div class="progresso" id="prog-pauta"></div>`;
+  box.innerHTML = h;
+
+  $('btn-gerar-pauta').addEventListener('click', async e => {
+    const abertas = lista.filter(p => p.status === 'proposta').length;
+    if (lista.length && !window.confirm(abertas ? `A Atena vai descartar as ${abertas} pauta(s) ainda não decididas e propor outras. Continuar?` : 'Pedir uma nova pauta para esta semana?')) return;
+    e.target.disabled = true; $('prog-pauta').textContent = 'Atena montando a pauta…';
+    try { const r = await chamarRotina('pauta_semanal', { forcar: lista.length > 0 }); await carregarPautas(); carregarConsumo();
+          if (r && r.aviso) $('prog-pauta').textContent = r.aviso; }
+    catch (err) { $('prog-pauta').textContent = 'Falhou: ' + err.message; e.target.disabled = false; }
+  });
+  box.querySelectorAll('.item-pauta [data-acao]').forEach(b => b.addEventListener('click', async () => {
+    const id = b.closest('.item-pauta').dataset.id, p = lista.find(x => x.id === id);
+    if (b.dataset.acao === 'abrir'){ await abrirPeca(p.peca_id); irPara('tarsila'); return; }
+    if (b.dataset.acao === 'descartar'){ await sb.from('pautas').update({ status:'descartada' }).eq('id', id); carregarPautas(); return; }
+    // aprovar e produzir
+    b.closest('.acoes-p').querySelectorAll('button').forEach(x => x.disabled = true);
+    alvoProgresso = 'pp-' + id;
+    try {
+      await sb.from('pautas').update({ status:'aprovada' }).eq('id', id);
+      const { data: nova, error } = await sb.from('pecas').insert({ titulo: p.tema.slice(0,200), tema: p.tema, modelo: p.modelo, pilar: p.pilar,
+        observacoes: p.angulo ? 'Ângulo sugerido pela Atena: ' + p.angulo : null, origem:'clarice', status:'em_producao', conteudo:{} }).select('id').single();
+      if (error) throw new Error(error.message);
+      await sb.from('pautas').update({ peca_id: nova.id }).eq('id', id);
+      await cicloClariceTemis(nova.id, true);
+      await sb.from('pautas').update({ status:'produzida' }).eq('id', id);
+      setTimeout(carregarPautas, 1500);
+    } catch (err) {
+      passo('Falhou: ' + err.message, 'falhou');
+      await sb.from('pautas').update({ status:'proposta' }).eq('id', id);
+    } finally { alvoProgresso = 'progresso'; }
+  }));
 }
 
 /* ---------------- Início ---------------- */

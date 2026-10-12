@@ -14,6 +14,7 @@ Site interno, separado do SENESCAL, onde agentes de IA produzem conteúdo para o
 | `index.html` | Aplicação inteira: HTML, CSS e JS, sem framework |
 | `assets/` | Logos e caracol em SVG |
 | `assets/fonts/` | Cormorant Garamond e Roboto Slab (licença SIL OFL) |
+| `supabase/functions/rotina/` | Edge Function agendada: pauta semanal (Atena) e resumo do dia (Péricles). Autenticada por segredo no Vault (agendador) ou por usuário logado |
 | `supabase/functions/agente/` | Edge Function das agentes (Clarice e Têmis): instruções, saída estruturada, teto de custo, registro de execuções |
 
 ## Versões
@@ -23,6 +24,7 @@ Site interno, separado do SENESCAL, onde agentes de IA produzem conteúdo para o
 | v001 | 0 | Infraestrutura, login e painel com a equipe de agentes (inativos) |
 | v002 | 1 | Tarsila: 3 modelos de carrossel (Lista, Pergunta e Resposta, Mito × Fato), editor manual, prévia, aviso de texto excedente, rascunhos (tabela `pecas`), exportação PNG 1080×1350 em ZIP |
 | v003 | 2 | Clarice (redação) e Têmis (revisão OAB) via Edge Function `agente`; Fila de peças; painel de revisão com aprovar / reescrever / nova revisão / rejeitar; aprendizados; consumo do mês e teto de US$ 12 |
+| v004 | 3 | Atena (pauta semanal, segunda 6h30) e Péricles (resumo do dia, seg–sex 7h) via Edge Function `rotina` + pg_cron; Mesa com resumo, pauta da semana (aprovar e produzir / descartar) |
 
 ## Contrato do conteúdo de um carrossel (`pecas.conteudo`)
 
