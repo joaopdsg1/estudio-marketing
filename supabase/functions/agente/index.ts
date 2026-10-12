@@ -42,7 +42,7 @@ FORMATO (limites para caber no slide — respeite rigorosamente):
 - capa.kicker: até 45 caracteres (ex.: "Gestão de inadimplência · Escolas")
 - capa.titulo: até 75 caracteres; destaque 1 ou 2 palavras com *asteriscos*
 - 2 a 4 slides de conteúdo (padrão: 3)
-- Modelo LISTA: rotulo até 40 · titulo até 35 · 3 itens de até 110 caracteres cada, começando com **trecho em destaque**
+- Modelo LISTA: rotulo até 40 · titulo até 24 (uma linha) · exatamente 3 itens de até 88 caracteres cada, começando com **trecho em destaque**
 - Modelo PERGUNTA: rotulo até 40 · pergunta até 80 · resposta até 260
 - Modelo MITOFATO: rotulo até 40 · mito até 110 · fato até 170 (use **destaque** no fato)
 - fechamento: rotulo até 40 · titulo até 45 (pode ter *ênfase*) · texto até 160
@@ -50,7 +50,7 @@ FORMATO (limites para caber no slide — respeite rigorosamente):
 
 QUANDO RECEBER PARECER DA TÊMIS: corrija exatamente os pontos apontados, mantendo o resto. Não discuta o parecer; ajuste.
 
-Responda chamando a ferramenta entregar_carrossel.`;
+Responda somente com o JSON no formato solicitado.`;
 
 const SISTEMA_TEMIS = `Você é Têmis, revisora de conformidade ética e jurídica do Estúdio de Marketing da Palácio Gomes Advocacia. Você revisa carrosséis para Instagram ANTES de chegarem ao advogado responsável, que é quem decide. Você nunca aprova sozinha: seu "aprovado" significa apenas "sem objeções da revisão".
 
@@ -81,7 +81,7 @@ PARECER:
 
 CONFERÊNCIA JURÍDICA: para cada afirmação jurídica da peça, informe o dispositivo citado, se ele sustenta a afirmação e sua confiança (alta/media/baixa). Confiança "media" ou "baixa" deve ser explicada — o advogado vai conferir.
 
-Responda chamando a ferramenta emitir_parecer.`;
+Responda somente com o JSON no formato solicitado.`;
 
 /* ======================= FERRAMENTAS (saída estruturada) ======================= */
 const SLIDE: Record<string, unknown> = {
@@ -135,6 +135,46 @@ const FERRAMENTA_TEMIS = {
     },
   },
 };
+
+// Saída estruturada exige additionalProperties:false e não aceita limites numéricos/de tamanho
+function estrito(s: any): any {
+  if (Array.isArray(s)) return s.map(estrito);
+  if (!s || typeof s !== "object") return s;
+  const o: any = {};
+  for (const [k, v] of Object.entries(s)) {
+    if (["minItems", "maxItems", "minimum", "maximum", "minLength", "maxLength"].includes(k)) continue;
+    o[k] = estrito(v);
+  }
+  if (o.type === "object") o.additionalProperties = false;
+  return o;
+}
+
+// Limites de caracteres (sem contar asteriscos) para o texto caber no slide
+const LIMITES: Record<string, Record<string, number>> = {
+  lista: { rotulo: 40, titulo: 24, item: 88 },
+  pergunta: { rotulo: 40, pergunta: 80, resposta: 260 },
+  mitofato: { rotulo: 40, mito: 110, fato: 170 },
+};
+function excessos(r: any, modelo: string): string[] {
+  const n = (s: unknown) => String(s ?? "").replace(/\*+/g, "").length;
+  const v: string[] = [];
+  const chk = (onde: string, s: unknown, max: number) => { if (n(s) > max) v.push(`${onde}: ${n(s)} caracteres (máximo ${max})`); };
+  chk("capa.kicker", r.capa?.kicker, 45); chk("capa.titulo", r.capa?.titulo, 75);
+  const L = LIMITES[modelo];
+  (r.slides || []).forEach((s: any, i: number) => {
+    const o = `slide ${i + 2}`;
+    chk(`${o}.rotulo`, s.rotulo, L.rotulo);
+    if (modelo === "lista") {
+      chk(`${o}.titulo`, s.titulo, L.titulo);
+      if ((s.itens || []).length > 3) v.push(`${o}: ${s.itens.length} itens (máximo 3)`);
+      (s.itens || []).forEach((it: string, j: number) => chk(`${o}.item ${j + 1}`, it, L.item));
+    } else if (modelo === "pergunta") { chk(`${o}.pergunta`, s.pergunta, L.pergunta); chk(`${o}.resposta`, s.resposta, L.resposta); }
+    else { chk(`${o}.mito`, s.mito, L.mito); chk(`${o}.fato`, s.fato, L.fato); }
+  });
+  chk("fechamento.rotulo", r.fechamento?.rotulo, 40); chk("fechamento.titulo", r.fechamento?.titulo, 45);
+  chk("fechamento.texto", r.fechamento?.texto, 160); chk("legenda", r.legenda, 1400);
+  return v;
+}
 
 const NOMES_MODELO: Record<string, string> = { lista: "LISTA", pergunta: "PERGUNTA", mitofato: "MITOFATO" };
 
@@ -202,39 +242,58 @@ ${peca.observacoes ? `OBSERVAÇÕES DO ADVOGADO: ${peca.observacoes}\n` : ""}` +
     mensagem = `PILAR: ${peca.pilar || "-"}\nMODELO: ${NOMES_MODELO[peca.modelo]}\nTEMA: ${peca.tema || "-"}\n\nPEÇA A REVISAR:\n${JSON.stringify(peca.conteudo)}\n\nLEGENDA:\n${peca.legenda || "(sem legenda)"}`;
   }
 
-  const inicio = Date.now();
-  let resp: Response;
-  try {
-    resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "x-api-key": CHAVE, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({
-        model: M.id, max_tokens: 4096, system: sistema,
-        tools: [ferramenta], tool_choice: { type: "tool", name: (ferramenta as { name: string }).name },
-        messages: [{ role: "user", content: mensagem }],
-      }),
-    });
-  } catch (e) {
-    await admin.from("agente_execucoes").insert({ agente, peca_id: peca.id, modelo: M.id, status: "erro",
-      erro: "Falha de rede: " + String(e), duracao_ms: Date.now() - inicio });
-    return json({ erro: "Não foi possível falar com a API da Anthropic." }, 502);
+  const schema = estrito((ferramenta as { input_schema: unknown }).input_schema);
+  async function chamar(msg: string): Promise<{ r: any; falha: string; status: number }> {
+    const inicio = Date.now();
+    let resp: Response;
+    try {
+      resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "x-api-key": CHAVE!, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+        body: JSON.stringify({ model: M.id, max_tokens: 8000, system: sistema,
+          output_config: { format: { type: "json_schema", schema } },
+          messages: [{ role: "user", content: msg }] }),
+      });
+    } catch (e) {
+      await admin.from("agente_execucoes").insert({ agente, peca_id: peca.id, modelo: M.id, status: "erro",
+        erro: "Falha de rede: " + String(e), duracao_ms: Date.now() - inicio });
+      return { r: null, falha: "Não foi possível falar com a API da Anthropic.", status: 502 };
+    }
+    const dados = await resp.json();
+    const duracao = Date.now() - inicio;
+    const uso = dados.usage || {};
+    const custo = ((uso.input_tokens || 0) * M.entrada + (uso.output_tokens || 0) * M.saida) / 1e6;
+    if (!resp.ok) {
+      await admin.from("agente_execucoes").insert({ agente, peca_id: peca.id, modelo: M.id, status: "erro",
+        erro: JSON.stringify(dados).slice(0, 500), duracao_ms: duracao });
+      return { r: null, falha: "A API da Anthropic recusou a chamada: " + (dados?.error?.message || resp.status), status: 502 };
+    }
+    const texto = (dados.content || []).filter((c: { type: string }) => c.type === "text").map((c: { text: string }) => c.text).join("");
+    let r: any = null, falha = "";
+    if (dados.stop_reason === "refusal") falha = "A agente recusou a tarefa.";
+    else if (dados.stop_reason === "max_tokens") falha = "Resposta cortada por tamanho.";
+    else { try { r = JSON.parse(texto); } catch { falha = "Resposta fora do formato JSON."; } }
+    await admin.from("agente_execucoes").insert({ agente, peca_id: peca.id, modelo: M.id, status: r ? "ok" : "erro",
+      tokens_entrada: uso.input_tokens || 0, tokens_saida: uso.output_tokens || 0, custo_usd: custo,
+      duracao_ms: duracao, erro: r ? null : falha });
+    return { r, falha: r ? "" : falha + " Tente novamente.", status: 502 };
   }
-  const dados = await resp.json();
-  const duracao = Date.now() - inicio;
-  const uso = dados.usage || {};
-  const custo = ((uso.input_tokens || 0) * M.entrada + (uso.output_tokens || 0) * M.saida) / 1e6;
 
-  if (!resp.ok) {
-    await admin.from("agente_execucoes").insert({ agente, peca_id: peca.id, modelo: M.id, status: "erro",
-      erro: JSON.stringify(dados).slice(0, 500), duracao_ms: duracao });
-    return json({ erro: "A API da Anthropic recusou a chamada: " + (dados?.error?.message || resp.status) }, 502);
+  let { r, falha, status: st } = await chamar(mensagem);
+  if (!r) return json({ erro: falha }, st);
+  // Clarice: se passou dos limites de tamanho, uma correção automática
+  if (agente === "clarice") {
+    const v = excessos(r, peca.modelo);
+    if (v.length) {
+      const segunda = await chamar(mensagem + `\n\nSUA VERSÃO ANTERIOR:\n${JSON.stringify(r)}\n\nELA EXCEDEU OS LIMITES DE TAMANHO E NÃO CABE NOS SLIDES:\n- ${v.join("\n- ")}\n\nReescreva encurtando APENAS esses campos, mantendo o restante e o sentido.`);
+      if (segunda.r) r = segunda.r;
+    }
   }
-  const bloco = (dados.content || []).find((c: { type: string }) => c.type === "tool_use");
-  await admin.from("agente_execucoes").insert({ agente, peca_id: peca.id, modelo: M.id, status: bloco ? "ok" : "erro",
-    tokens_entrada: uso.input_tokens || 0, tokens_saida: uso.output_tokens || 0, custo_usd: custo,
-    duracao_ms: duracao, erro: bloco ? null : "Resposta sem ferramenta" });
-  if (!bloco) return json({ erro: "A agente não devolveu o formato esperado. Tente novamente." }, 502);
-  const r = bloco.input;
+  if (agente === "temis") {
+    r.parecer = String(r.parecer || "").toLowerCase();
+    (r.apontamentos || []).forEach((a: any) => { a.gravidade = String(a.gravidade || "").toLowerCase(); });
+    (r.conferencia_juridica || []).forEach((c: any) => { c.confianca = String(c.confianca || "").toLowerCase(); });
+  }
 
   // 5) Grava o resultado
   if (agente === "clarice") {
@@ -245,7 +304,7 @@ ${peca.observacoes ? `OBSERVAÇÕES DO ADVOGADO: ${peca.observacoes}\n` : ""}` +
       titulo: String(conteudo.capa?.titulo || peca.tema || "Sem título").replace(/\*+/g, "").slice(0, 200),
       status: "em_revisao", versao,
     }).eq("id", peca.id);
-    return json({ ok: true, agente, versao, custo_usd: custo });
+    return json({ ok: true, agente, versao });
   } else {
     // Regra dura: apontamento de gravidade alta nunca deixa passar como "aprovado"
     if (r.parecer === "aprovado" && (r.apontamentos || []).some((a: { gravidade: string }) => a.gravidade === "alta")) {
@@ -256,6 +315,6 @@ ${peca.observacoes ? `OBSERVAÇÕES DO ADVOGADO: ${peca.observacoes}\n` : ""}` +
     await admin.from("pecas").update({
       parecer: registro, historico: [...(peca.historico || []), registro], status,
     }).eq("id", peca.id);
-    return json({ ok: true, agente, parecer: r.parecer, custo_usd: custo });
+    return json({ ok: true, agente, parecer: r.parecer });
   }
 });
