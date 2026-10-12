@@ -3,7 +3,7 @@
 **Projeto:** Estúdio de Marketing — Palácio Gomes Advocacia
 **Endereço:** `marketing.palaciogomes.com.br`
 **Versão do documento:** 1.3 — 12/10/2026 (foco no gestor escolar, casos ilustrativos, checklist OAB conferido, prompt do Rondon)
-**Status:** Etapas 0, 1 e 2 aprovadas pelo João (12/10/2026). Próxima etapa em definição (proposta: Glauber/Reels antes de Atena+Péricles)
+**Status:** Etapas 0, 1 e 2 aprovadas; Etapa 3 (Atena + Péricles) publicada como v004 em 12/10/2026, aguardando aceite do João. Vídeos: João e Giovanna aparecerão (definido para o Glauber).
 
 ---
 
@@ -295,7 +295,9 @@ Entregue: 3 modelos (Lista, Pergunta e Resposta, Mito × Fato), editor com prév
 - Tela "Nova peça": tema → Redator → Revisor → Fila.
 - **Aceite:** 5 peças geradas. Nenhuma passa com promessa de resultado (testado com uma pauta propositalmente problemática). O custo por peça fica registrado.
 
-### Etapa 3 — Estrategista + Gestor
+### Etapa 3 — Estrategista + Gestor ✅ publicada (v004)
+
+Entregue: função `rotina` (Atena com Sonnet 5.5; Péricles com Haiku 5.5) e agendamentos pg_cron (pauta toda segunda às 6h30; resumo seg–sex às 7h, horário de Brasília). O agendador se autentica por um segredo gerado aleatoriamente e guardado no Vault, que ninguém precisa conhecer. A Mesa mostra o resumo com indicadores e a pauta da semana, com "Aprovar e produzir" (dispara Clarice→Têmis) e "Descartar". Custo real: Atena ≈ US$ 0,01 por pauta; Péricles ≈ US$ 0,001 por resumo.
 - Pauta semanal automática e Mesa de Deliberações com briefing diário.
 - **Aceite:** na segunda de manhã há uma pauta da semana aguardando aprovação. Todo dia às 7h, o briefing lista as pendências.
 
