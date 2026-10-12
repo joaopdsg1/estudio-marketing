@@ -316,8 +316,18 @@ Reformulada a pedido do João (12/10/2026): o Rondon passou a ser o pesquisador 
 - Cadastro manual de referências e relatório. Integração com a Meta só se a verificação do §8 for positiva.
 - **Aceite:** relatório comparativo de pelo menos 3 perfis, sem nenhum trecho copiado.
 
-### Etapa 5 — Roteirista (Reels)
-- **Aceite:** roteiro com tempo estimado, texto de tela e falas, aprovado pelo Revisor.
+### Etapa 5 — Glauber, roteiros de Reels ✅ publicada (v006)
+
+Desenhada com o João em 12/10/2026.
+- **Frequência:** 2 carrosséis + 1 Reels por semana. João e Giovanna gravam os 4 ou 5 vídeos do mês num único dia (data marcada no site).
+- **Formato:** sempre estudo de caso a partir de notícia do Radar (não dicas). Blocos: gancho (veículo e mês, nunca "esta semana") → problema do credor e ponte com a escola → estratégia em tese, com dispositivo → fechamento que eleva a consciência do gestor sobre os riscos da cobrança sem técnica, terminando com "Cada caso exige análise de um advogado especializado em recuperação de crédito."
+- **Conscientização × captação:** mostrar riscos e complexidade é permitido; "contrate", "terceirize com a gente", comparação escola × escritório, promessa ou medo para empurrar a contratação são vedados (Prov. 205/2021, art. 3º, §1º). A Têmis ganhou o item 13 para isso.
+- **Pauta mensal (Atena):** dia 1º às 6h40, 5 casos do Radar das últimas 6 semanas ainda não usados em Reels, com formato (João, Giovanna ou dupla), duração (30/45/60 s) e urgência ("atemporal" ou "postar logo"). Botão "Aprovar e roteirizar todas".
+- **Glauber (Sonnet 5.5):** fala exata, tópicos, segundos, texto na tela, sugestão de imagem, capa e legenda com fonte. Validação automática de tempo (2,5 palavras/s), soma de segundos, apresentadores, fecho e capa; o que sobrar vira ponto de verificação.
+- **Site:** página "Glauber · Reels" (data de gravação, pauta do mês, lista, roteiro avulso, "Virar Reels" no Radar); editor com contador de tempo; capa 1080 × 1920 da Tarsila (liberada após aprovação); roteiro em .txt; teleprompter com lote de gravação, rolagem ajustável, texto exato ou tópicos, espelhar, "marcar como gravado"; datas de postagem semanais às quartas, "postar logo" primeiro.
+- **Péricles:** o resumo mostra Reels a decidir, roteiros prontos para gravar e avisa quando a gravação estiver a 3 dias ou menos, e quando há Reels para postar no dia.
+- **Custo real:** Atena (pauta de Reels) ≈ US$ 0,04. Roteiro revisado estimado em US$ 0,15–0,25 (≈ US$ 1 por mês).
+- **Aceite:** um lote real roteirizado, revisado pela Têmis e lido no teleprompter pelo João.
 
 ### Etapa 6 (opcional) — Painel visual
 - O "escritório" animado, no estilo dos prints de referência, lendo `agente_execucoes`.
@@ -336,6 +346,7 @@ Reformulada a pedido do João (12/10/2026): o Rondon passou a ser o pesquisador 
 - Visual do carrossel-protótipo: **aprovado**.
 - Hospedagem: **Vercel** (decisão do João, ciente do risco descrito no §7.2).
 - Foco editorial: diretor ou dono de escola + casos ilustrativos (§3).
+- Reels: 1 por semana, estudo de caso com gancho de notícia, gravação mensal em lote por João e Giovanna; vídeos também elevam a consciência do gestor sobre a cobrança especializada, sem incitar a contratação.
 
 **Em aberto:**
 1. Texto final do checklist OAB (§5.1). Pode ser validado durante a Etapa 2.
