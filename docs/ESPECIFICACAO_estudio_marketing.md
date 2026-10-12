@@ -3,7 +3,7 @@
 **Projeto:** Estúdio de Marketing — Palácio Gomes Advocacia
 **Endereço:** `marketing.palaciogomes.com.br`
 **Versão do documento:** 1.3 — 12/10/2026 (foco no gestor escolar, casos ilustrativos, checklist OAB conferido, prompt do Rondon)
-**Status:** Etapas 0, 1 e 2 aprovadas; Etapa 3 (Atena + Péricles) publicada como v004 em 12/10/2026, aguardando aceite do João. Vídeos: João e Giovanna aparecerão (definido para o Glauber).
+**Status:** Etapas 0–3 aprovadas; Etapa 4 (Radar do Rondon) publicada como v005 em 12/10/2026, aguardando aceite. Próxima prevista: Glauber (Reels, com João e Giovanna).
 
 ---
 
@@ -301,7 +301,18 @@ Entregue: função `rotina` (Atena com Sonnet 5.5; Péricles com Haiku 5.5) e ag
 - Pauta semanal automática e Mesa de Deliberações com briefing diário.
 - **Aceite:** na segunda de manhã há uma pauta da semana aguardando aprovação. Todo dia às 7h, o briefing lista as pendências.
 
-### Etapa 4 — Analista de Referências
+### Etapa 4 — Radar do Rondon ✅ publicada (v005)
+
+Reformulada a pedido do João (12/10/2026): o Rondon passou a ser o pesquisador semanal.
+- **Radar toda segunda (5h–5h20):** casos públicos (famosos, empresários, pessoas públicas), números e pesquisas sobre inadimplência e endividamento, setores (educação e pós-pagos). Busca na web só em fontes confiáveis editáveis. Só entra item cujo link apareceu de fato na pesquisa.
+- **Atena (6h30)** usa o Radar e liga a pauta à notícia de origem. "Virar pauta" também pode ser feito à mão.
+- **Casos públicos:** a notícia é o gancho, com fonte; estratégia possível em tese, com dispositivo; nada de opinião sobre mérito, devedor ou advogados das partes; sem convite ao escritório. O fechamento genérico "Cada caso exige análise de um advogado especializado em recuperação de crédito" é permitido. A Têmis tem o item 12 para isso.
+- **Estilo:** a Clarice recebe o trecho explicativo do texto do blog do João como amostra de tom.
+- **Perfis de referência:** cadastro manual + sugestões mensais do Rondon (aceitar/recusar).
+- **Custo real:** ≈ US$ 0,20–0,33 por categoria pesquisada (≈ US$ 0,85 por semana, ≈ US$ 3,70 por mês).
+- **Limitação conhecida:** Estadão e UOL bloqueiam o robô de pesquisa e ficam desativados.
+
+### Etapa 4 (original) — Analista de Referências
 - Cadastro manual de referências e relatório. Integração com a Meta só se a verificação do §8 for positiva.
 - **Aceite:** relatório comparativo de pelo menos 3 perfis, sem nenhum trecho copiado.
 
