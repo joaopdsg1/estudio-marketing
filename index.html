@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Estúdio · Palácio Gomes</title>
+<link rel="icon" href="assets/caracol-indigo.svg">
+<style>
+@font-face{font-family:Cormorant;font-weight:600;src:url(assets/fonts/cormorant-garamond-latin-600-normal.woff2) format('woff2');font-display:swap}
+@font-face{font-family:Slab;font-weight:300;src:url(assets/fonts/roboto-slab-latin-300-normal.woff2) format('woff2');font-display:swap}
+@font-face{font-family:Slab;font-weight:400;src:url(assets/fonts/roboto-slab-latin-400-normal.woff2) format('woff2');font-display:swap}
+:root{
+  --petroleo:#0D507B; --profundo:#0A3D5E; --nevoa:#5B88A6; --ceu:#A9CBE3;
+  --indigo:#292465; --gelo:#F3F5F8; --linha:#D9DEE5; --grafite:#1A2230; --erro:#A3312B;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font:300 16px/1.55 Slab,Georgia,serif;color:var(--grafite);background:var(--gelo)}
+h1,h2{font-family:Cormorant,Georgia,serif;font-weight:600;line-height:1.1}
+button{font:inherit;cursor:pointer}
+.oculto{display:none!important}
+
+/* ---------- LOGIN ---------- */
+#tela-login{min-height:100%;display:grid;grid-template-columns:1.1fr 1fr}
+.lado-marca{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--petroleo),var(--profundo));color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:space-between}
+.lado-marca img.logo{height:64px;width:auto;align-self:flex-start;position:relative;z-index:1}
+.lado-marca .caracol{position:absolute;width:760px;right:-280px;bottom:-240px;opacity:.09}
+.lado-marca h1{font-size:clamp(40px,4.4vw,64px);max-width:12ch;position:relative;z-index:1}
+.lado-marca h1 em{font-style:italic;color:var(--ceu)}
+.lado-marca p{font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--ceu);position:relative;z-index:1}
+.lado-form{display:flex;align-items:center;justify-content:center;padding:40px 24px}
+form{width:100%;max-width:360px}
+form h2{font-size:40px;color:var(--petroleo);margin-bottom:8px}
+form .sub{color:#5a6372;margin-bottom:32px;font-size:15px}
+label{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:18px 0 6px}
+input{width:100%;padding:12px 14px;border:1.5px solid var(--linha);border-radius:6px;font:400 16px Slab,serif;background:#fff;color:var(--grafite)}
+input:focus{outline:none;border-color:var(--petroleo)}
+.btn{width:100%;margin-top:28px;padding:13px;border:0;border-radius:6px;background:var(--petroleo);color:#fff;font-weight:400;letter-spacing:.06em}
+.btn:hover{background:var(--profundo)}
+.btn:disabled{opacity:.6;cursor:wait}
+.msg{margin-top:16px;font-size:14px;min-height:1.5em}
+.msg.erro{color:var(--erro)}
+
+/* ---------- PAINEL ---------- */
+#tela-painel{min-height:100%}
+header{background:linear-gradient(160deg,var(--petroleo),var(--profundo));color:#fff;padding:18px 32px;display:flex;align-items:center;justify-content:space-between}
+header img{height:40px}
+header .usuario{display:flex;gap:18px;align-items:center;font-size:14px}
+header button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;padding:6px 14px;border-radius:5px;font-size:13px}
+main{max-width:1080px;margin:0 auto;padding:48px 32px}
+main h1{font-size:48px;color:var(--petroleo)}
+main .sub{color:#5a6372;margin:6px 0 40px}
+.equipe{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.agente{background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:20px 22px;position:relative}
+.agente .nome{font-family:Cormorant,serif;font-weight:600;font-size:28px;color:var(--petroleo);line-height:1}
+.agente .funcao{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:6px 0 12px}
+.agente .estado{font-size:13px;color:#7a8290}
+.agente .etapa{position:absolute;top:18px;right:18px;font-size:11px;letter-spacing:.08em;color:var(--nevoa);border:1px solid var(--linha);border-radius:20px;padding:2px 9px}
+footer{max-width:1080px;margin:0 auto;padding:0 32px 32px;font-size:12px;color:#8a92a0}
+
+@media (max-width:760px){
+  #tela-login{grid-template-columns:1fr}
+  .lado-marca{padding:32px 24px;min-height:auto;gap:40px}
+  .lado-marca h1{font-size:36px}
+  header{padding:14px 16px} main{padding:32px 16px} footer{padding:0 16px 24px}
+  main h1{font-size:36px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section id="tela-login" class="oculto">
+  <div class="lado-marca">
+    <img class="caracol" src="assets/caracol-branco.svg" alt="">
+    <img class="logo" src="assets/logo-branco.svg" alt="Palácio">
+    <h1>Estúdio de <em>Marketing</em></h1>
+    <p>Uso interno · Palácio Gomes Advocacia</p>
+  </div>
+  <div class="lado-form">
+    <form id="form-login" novalidate>
+      <h2>Entrar</h2>
+      <p class="sub">Acesso restrito à equipe do escritório.</p>
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" autocomplete="current-password" required>
+      <button class="btn" type="submit" id="btn-entrar">Entrar</button>
+      <div class="msg" id="msg-login" role="alert"></div>
+    </form>
+  </div>
+</section>
+
+<!-- ============ PAINEL ============ -->
+<section id="tela-painel" class="oculto">
+  <header>
+    <img src="assets/logo-branco.svg" alt="Palácio">
+    <div class="usuario"><span id="nome-usuario"></span><button id="btn-sair" type="button">Sair</button></div>
+  </header>
+  <main>
+    <h1>Mesa do Péricles</h1>
+    <p class="sub">A equipe está sendo montada. Cada agente entra em funcionamento na sua etapa.</p>
+    <div class="equipe" id="equipe"></div>
+  </main>
+  <footer id="rodape-versao"></footer>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* =========================================================
+   ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
+   ========================================================= */
+const VERSAO = 'v001';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 0 (infraestrutura + login)',
+            'color:#0D507B;font-weight:bold');
+
+// Chave publicável: feita para ficar no navegador. A proteção dos dados é feita pelas regras (RLS) do banco.
+const SUPABASE_URL = 'https://wffbncqvhnocdalaoqcv.supabase.co';
+const SUPABASE_CHAVE = 'sb_publishable_E6awMlQdzAw9zBS77HVb-w_JM5IcE8g';
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_CHAVE) : null;
+
+const EQUIPE = [
+  {nome:'Péricles', funcao:'Gestor',                  etapa:3},
+  {nome:'Atena',    funcao:'Estrategista',            etapa:3},
+  {nome:'Clarice',  funcao:'Redatora',                etapa:2},
+  {nome:'Têmis',    funcao:'Revisora OAB',            etapa:2},
+  {nome:'Tarsila',  funcao:'Arte dos carrosséis',     etapa:1},
+  {nome:'Rondon',   funcao:'Análise de referências',  etapa:4},
+  {nome:'Glauber',  funcao:'Roteiros de Reels',       etapa:5},
+];
+
+const $ = id => document.getElementById(id);
+
+function mostrar(tela){
+  $('tela-login').classList.toggle('oculto', tela !== 'login');
+  $('tela-painel').classList.toggle('oculto', tela !== 'painel');
+}
+
+function traduzirErro(e){
+  const m = (e && e.message || '').toLowerCase();
+  if (m.includes('invalid login')) return 'E-mail ou senha incorretos.';
+  if (m.includes('email not confirmed')) return 'E-mail ainda não confirmado.';
+  if (m.includes('network') || m.includes('fetch')) return 'Sem conexão com o servidor. Tente novamente.';
+  return 'Não foi possível entrar. Tente novamente.';
+}
+
+async function abrirPainel(sessao){
+  const { data: perfil } = await sb.from('perfis')
+    .select('nome,papel').eq('id', sessao.user.id).maybeSingle();
+  $('nome-usuario').textContent = (perfil && perfil.nome) || sessao.user.email;
+  $('equipe').innerHTML = EQUIPE.map(a => `
+    <div class="agente">
+      <span class="etapa">Etapa ${a.etapa}</span>
+      <div class="nome">${a.nome}</div>
+      <div class="funcao">${a.funcao}</div>
+      <div class="estado">Aguardando implantação</div>
+    </div>`).join('');
+  $('rodape-versao').textContent = 'Estúdio de Marketing ' + VERSAO;
+  mostrar('painel');
+}
+
+$('form-login').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const email = $('email').value.trim(), senha = $('senha').value;
+  const msg = $('msg-login'), btn = $('btn-entrar');
+  msg.textContent = ''; msg.className = 'msg';
+  if (!email || !senha){ msg.textContent = 'Informe e-mail e senha.'; msg.classList.add('erro'); return; }
+  btn.disabled = true; btn.textContent = 'Entrando…';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+  btn.disabled = false; btn.textContent = 'Entrar';
+  if (error){ msg.textContent = traduzirErro(error); msg.classList.add('erro'); return; }
+  $('senha').value = '';
+  abrirPainel(data.session);
+});
+
+$('btn-sair').addEventListener('click', async () => { await sb.auth.signOut(); mostrar('login'); });
+
+(async () => {
+  if (!sb){
+    mostrar('login');
+    $('btn-entrar').disabled = true;
+    $('msg-login').textContent = 'Não foi possível carregar o sistema. Verifique a internet e recarregue a página.';
+    $('msg-login').classList.add('erro');
+    console.error('[Estúdio] biblioteca do Supabase não carregou (CDN indisponível).');
+    return;
+  }
+  const { data } = await sb.auth.getSession();
+  if (data.session) abrirPainel(data.session); else mostrar('login');
+})();
+</script>
+</body>
+</html>
