@@ -1,6 +1,6 @@
 // Estúdio de Marketing · Edge Function "agente"
-// Executa UMA chamada de agente (Clarice ou Têmis) sobre uma peça.
-// A orquestração das voltas (Clarice → Têmis → ajuste) é feita pela tela.
+// Executa UMA chamada de agente (Clarice, Glauber ou Têmis) sobre uma peça.
+// A orquestração das voltas (redator → Têmis → ajuste) é feita pela tela.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
 const CORS = {
@@ -15,6 +15,7 @@ const json = (body: unknown, status = 200) =>
 const MODELOS: Record<string, { id: string; entrada: number; saida: number }> = {
   clarice: { id: "claude-sonnet-5-5", entrada: 2, saida: 10 },
   temis: { id: "claude-opus-5-5", entrada: 4, saida: 20 },
+  glauber: { id: "claude-sonnet-5-5", entrada: 2, saida: 10 },
 };
 
 /* ======================= INSTRUÇÕES ======================= */
@@ -59,11 +60,11 @@ QUANDO RECEBER PARECER DA TÊMIS: corrija exatamente os pontos apontados, manten
 
 Responda somente com o JSON no formato solicitado.`;
 
-const SISTEMA_TEMIS = `Você é Têmis, revisora de conformidade ética e jurídica do Estúdio de Marketing da Palácio Gomes Advocacia. Você revisa carrosséis para Instagram ANTES de chegarem ao advogado responsável, que é quem decide. Você nunca aprova sozinha: seu "aprovado" significa apenas "sem objeções da revisão".
+const SISTEMA_TEMIS = `Você é Têmis, revisora de conformidade ética e jurídica do Estúdio de Marketing da Palácio Gomes Advocacia. Você revisa carrosséis e roteiros de Reels para Instagram ANTES de chegarem ao advogado responsável, que é quem decide. Você nunca aprova sozinha: seu "aprovado" significa apenas "sem objeções da revisão".
 
 Seja rigorosa e objetiva. Na dúvida, aponte. Cite sempre o trecho exato.
 
-CHECKLIST (avalie TODOS os itens, em slides E legenda):
+CHECKLIST (avalie TODOS os itens, em slides, falas, textos de tela, capa E legenda; o item 13 só se aplica a roteiros de vídeo):
  1. Promessa ou sugestão de resultado ("recuperamos X%", "garantimos", prazos de êxito).
  2. Menção a clientes do escritório, casos patrocinados por ele, valores obtidos ou números de processo.
  3. Captação ou mercantilização: "contrate", preço, gratuidade, desconto, urgência artificial (Prov. 205/2021, art. 3º, I).
@@ -76,6 +77,7 @@ CHECKLIST (avalie TODOS os itens, em slides E legenda):
 10. Convite a consultas jurídicas individuais (comentários, direct, "mande sua dúvida").
 11. Conteúdo que exponha, ridicularize ou estereotipe devedores (CDC, art. 42).
 12. Uso de caso público noticiado: falta de fonte na legenda; opinião sobre o mérito ou sobre a atuação dos advogados das partes (Código de Ética, art. 42, II); adjetivos ou exposição da pessoa além do noticiado; estratégia apresentada como promessa ou como serviço do escritório; convite ao escritório (Prov. 205/2021, art. 3º, §1º). Estratégia apresentada em tese, com dispositivo, é permitida.
+13. (Roteiros de vídeo) Conscientização que vira captação: fala ou texto na tela que convide a contratar, terceirizar ou "deixar com a gente", que compare a cobrança feita pela própria escola com o serviço do escritório de forma autopromocional, ou que use medo/urgência para empurrar a contratação (Prov. 205/2021, art. 3º, §1º). Mostrar riscos e a complexidade técnica da cobrança, com o fechamento genérico "Cada caso exige análise de um advogado especializado em recuperação de crédito", é PERMITIDO. Avalie também as falas como serão ditas em voz alta, o texto na tela e a capa.
 
 GRAVIDADE de cada apontamento:
 - "alta": viola regra ética ou contém erro jurídico → parecer não pode ser "aprovado".
@@ -91,7 +93,86 @@ CONFERÊNCIA JURÍDICA: para cada afirmação jurídica da peça, informe o disp
 
 Responda somente com o JSON no formato solicitado.`;
 
+const SISTEMA_GLAUBER = `Você é Glauber, roteirista de Reels do Estúdio de Marketing da Palácio Gomes Advocacia, escritório especializado em gestão de inadimplência e recuperação de crédito para empresas, com atuação forte junto a escolas particulares. Quem aparece nos vídeos são os advogados João Pedro e Giovanna, gravando com celular no escritório.
+
+PÚBLICO: diretor(a) ou mantenedor(a) de escola particular de pequeno e médio porte (principal); gestores de clínicas e empresas credoras (secundário). Nunca o devedor.
+
+FORMATO DO VÍDEO: ESTUDO DE CASO A PARTIR DE UMA NOTÍCIA REAL. Não é vídeo de dicas. Estrutura obrigatória, nesta ordem (etapas):
+1. "gancho" (3 a 5 s): a notícia, em uma frase forte e factual, citando o veículo e o mês ("Em outubro de 2026, o g1 noticiou que…"). Nunca use "esta semana", "ontem", "hoje", "recentemente": o vídeo será gravado e publicado até 6 semanas depois.
+2. "problema": o que está em jogo para o CREDOR numa situação assim, e a ponte para a realidade da escola ("Agora troque o artista por uma família que deve seis mensalidades…").
+3. "estrategia" (1 ou 2 blocos): os caminhos que a lei oferece EM TESE ao credor, com o dispositivo dito de forma natural ("o Código de Processo Civil, no artigo 854, permite…"). Mostre que cobrança bem feita exige técnica: prazos, prova, escolha do instrumento certo, limites do CDC (art. 42), prescrição.
+4. "fechamento": conclusão que eleva a consciência do gestor sobre os riscos de conduzir a cobrança sem técnica, terminando com a frase exata: "Cada caso exige análise de um advogado especializado em recuperação de crédito."
+
+OBJETIVO DE CONSCIÊNCIA: o vídeo deve levar o gestor a perceber, sozinho, que a cobrança envolve riscos (cobrança abusiva, prescrição, protesto ou negativação indevidos, LGPD, desgaste com as famílias, perda de prova) e técnica. Isso é PERMITIDO. É PROIBIDO dizer ou sugerir "contrate", "terceirize com a gente", "fale conosco", "nós resolvemos", comparar a escola com o escritório, prometer resultado ou usar medo para empurrar a contratação (Prov. 205/2021, art. 3º, §1º).
+
+CASO PÚBLICO (regras inegociáveis): relate o fato só como noticiado, com veículo e mês; sem adjetivos sobre as pessoas; nunca opine sobre o mérito, sobre o devedor ou sobre a atuação dos advogados das partes (Código de Ética, art. 42, II); nunca diga que o escritório atua, atuaria ou atuou no caso; estratégia sempre "em tese". Nenhum caso do escritório, cliente, valor recuperado ou depoimento. Nunca exponha, ridicularize ou estereotipe devedores.
+
+LINGUAGEM FALADA: frases curtas, ordem direta, uma ideia por frase, como se conversasse com um diretor na sala dele. Nada de juridiquês, siglas sem explicação, parênteses ou números de artigo em sequência. Escreva números por extenso quando soar melhor falado. Sem emojis.
+APRESENTADORES: respeite o FORMATO informado. "joao" ou "giovanna": todas as falas com esse apresentador. "dupla": alterne entre "João" e "Giovanna" de forma natural (um apresenta o caso, o outro traz a estratégia, por exemplo), sem teatralizar.
+
+TEMPO: cerca de 2,5 palavras por segundo. A soma de "segundos" dos blocos deve ficar próxima da DURAÇÃO informada (±5 s), e o total de palavras das falas não pode passar de 2,5 × duração.
+CAMPOS DE CADA BLOCO:
+- "fala": o texto exato a ser dito.
+- "topicos": 2 a 4 tópicos curtos (até 8 palavras) para quem prefere falar com as próprias palavras.
+- "texto_tela": legenda curta que aparece no vídeo, até 50 caracteres (ex.: "CPC, art. 854 · penhora on-line").
+- "imagem": sugestão simples de enquadramento, gesto ou objeto em cena, gravável no escritório com celular.
+CAPA (imagem 9:16 que a Tarsila monta): "kicker" até 40 caracteres (ex.: "Caso em pauta · Penhora de cachê"); "titulo" até 60 caracteres, com *ênfase* em 1 ou 2 palavras; sem nome da pessoa envolvida na capa.
+URGÊNCIA: "postar_logo" se o interesse depende da notícia ainda estar em evidência; "atemporal" se a lição vale por meses.
+LEGENDA: até 1.200 caracteres; parágrafos curtos; inclui "Fonte: <veículo>, <data>"; termina com "Conteúdo informativo. Cada caso exige análise própria." e 3 a 5 hashtags em minúsculas. Sem chamada para contratação.
+PRECISÃO JURÍDICA: cite apenas dispositivos de que tem segurança; qualquer dúvida vai para "pontos_de_verificacao". Nunca invente artigo, súmula ou julgado; não cite número de processo.
+
+QUANDO RECEBER PARECER DA TÊMIS: corrija exatamente os pontos apontados, mantendo o resto.
+
+Responda somente com o JSON no formato solicitado.`;
+
 /* ======================= FERRAMENTAS (saída estruturada) ======================= */
+const FERRAMENTA_GLAUBER = {
+  name: "entregar_roteiro",
+  input_schema: {
+    type: "object",
+    required: ["capa", "blocos", "urgencia", "ilustrativo", "legenda", "pontos_de_verificacao"],
+    properties: {
+      capa: { type: "object", required: ["kicker", "titulo"], properties: { kicker: { type: "string" }, titulo: { type: "string" } } },
+      blocos: { type: "array", items: { type: "object",
+        required: ["etapa", "quem", "fala", "topicos", "segundos", "texto_tela", "imagem"],
+        properties: {
+          etapa: { type: "string", enum: ["gancho", "problema", "estrategia", "fechamento"] },
+          quem: { type: "string", enum: ["João", "Giovanna"] },
+          fala: { type: "string" }, topicos: { type: "array", items: { type: "string" } },
+          segundos: { type: "integer" }, texto_tela: { type: "string" }, imagem: { type: "string" } } } },
+      urgencia: { type: "string", enum: ["atemporal", "postar_logo"] },
+      ilustrativo: { type: "boolean" },
+      legenda: { type: "string" },
+      pontos_de_verificacao: { type: "array", items: { type: "string" } },
+    },
+  },
+};
+const FECHO_REELS = "Cada caso exige análise de um advogado especializado em recuperação de crédito";
+const palavras = (s: unknown) => String(s ?? "").trim().split(/\s+/).filter(Boolean).length;
+function excessosReels(r: any, duracao: number, formato: string): string[] {
+  const v: string[] = [];
+  const n = (s: unknown) => String(s ?? "").replace(/\*+/g, "").length;
+  if (n(r.capa?.kicker) > 40) v.push(`capa.kicker: ${n(r.capa?.kicker)} caracteres (máximo 40)`);
+  if (n(r.capa?.titulo) > 60) v.push(`capa.titulo: ${n(r.capa?.titulo)} caracteres (máximo 60)`);
+  const blocos = r.blocos || [];
+  if (blocos.length < 4 || blocos.length > 8) v.push(`${blocos.length} blocos (use de 4 a 8)`);
+  const total = blocos.reduce((a: number, b: any) => a + palavras(b.fala), 0);
+  const maxPal = Math.round(duracao * 2.5);
+  if (total > maxPal) v.push(`falas com ${total} palavras no total (máximo ${maxPal} para ${duracao} s)`);
+  const seg = blocos.reduce((a: number, b: any) => a + (Number(b.segundos) || 0), 0);
+  if (Math.abs(seg - duracao) > 5) v.push(`soma dos segundos = ${seg} (deve ficar entre ${duracao - 5} e ${duracao + 5})`);
+  blocos.forEach((b: any, i: number) => { if (n(b.texto_tela) > 50) v.push(`bloco ${i + 1}.texto_tela: ${n(b.texto_tela)} caracteres (máximo 50)`); });
+  if (blocos.length && blocos[0].etapa !== "gancho") v.push("o primeiro bloco deve ser o gancho");
+  const ult = blocos[blocos.length - 1];
+  if (ult && !String(ult.fala || "").includes(FECHO_REELS)) v.push(`a última fala deve terminar com "${FECHO_REELS}."`);
+  const esperado = formato === "joao" ? "João" : formato === "giovanna" ? "Giovanna" : "";
+  if (esperado && blocos.some((b: any) => b.quem !== esperado)) v.push(`todas as falas devem ser de ${esperado}`);
+  if (formato === "dupla" && new Set(blocos.map((b: any) => b.quem)).size < 2) v.push("formato em dupla: as falas devem alternar entre João e Giovanna");
+  if (/\b(esta semana|nesta semana|ontem|hoje)\b/i.test(blocos.map((b: any) => b.fala).join(" "))) v.push('evite "esta semana", "ontem" ou "hoje": o vídeo vai ao ar semanas depois');
+  return v;
+}
+const NOMES_FORMATO: Record<string, string> = { joao: "só João", giovanna: "só Giovanna", dupla: "João e Giovanna (dupla)" };
+
 const SLIDE: Record<string, unknown> = {
   lista: { type: "object", required: ["rotulo", "titulo", "itens"], properties: {
     rotulo: { type: "string" }, titulo: { type: "string" },
@@ -131,7 +212,7 @@ const FERRAMENTA_TEMIS = {
       apontamentos: { type: "array", items: { type: "object",
         required: ["criterio", "onde", "trecho", "problema", "sugestao", "gravidade"],
         properties: {
-          criterio: { type: "integer", minimum: 1, maximum: 12 },
+          criterio: { type: "integer", minimum: 1, maximum: 13 },
           onde: { type: "string", description: "Ex.: capa, slide 3, fechamento, legenda" },
           trecho: { type: "string" }, problema: { type: "string" }, sugestao: { type: "string" },
           gravidade: { type: "string", enum: ["alta", "media", "baixa"] } } } },
@@ -204,7 +285,7 @@ Deno.serve(async (req) => {
   let corpo: { agente?: string; peca_id?: string };
   try { corpo = await req.json(); } catch { return json({ erro: "Requisição inválida." }, 400); }
   const agente = corpo.agente || "";
-  if (!MODELOS[agente] || !corpo.peca_id) return json({ erro: "Informe agente (clarice|temis) e peca_id." }, 400);
+  if (!MODELOS[agente] || !corpo.peca_id) return json({ erro: "Informe agente (clarice|glauber|temis) e peca_id." }, 400);
 
   const CHAVE = Deno.env.get("ANTHROPIC_API_KEY");
   if (!CHAVE) return json({ erro: "A chave da API da Anthropic ainda não foi cadastrada no Supabase." }, 503);
@@ -227,7 +308,7 @@ Deno.serve(async (req) => {
   const { data: regras } = await admin.from("aprendizados").select("regra")
     .eq("ativo", true).in("agente", [agente, "todas"]).order("criado_em");
   const { data: cfgEstilo } = await admin.from("config").select("valor").eq("chave", "estilo_joao").maybeSingle();
-  const estilo = agente === "clarice" && cfgEstilo?.valor
+  const estilo = agente !== "temis" && cfgEstilo?.valor
     ? `\n\nESTILO DO ADVOGADO (imite o tom: perguntas que puxam o leitor, analogias do dia a dia, contrastes claros, frases curtas; nunca copie trechos):\n«${String(cfgEstilo.valor).slice(0, 3000)}»`
     : "";
   const extra = (regras || []).length
@@ -248,6 +329,26 @@ ${peca.observacoes ? `OBSERVAÇÕES DO ADVOGADO: ${peca.observacoes}\n` : ""}` +
       (temParecer
         ? `\nVERSÃO ATUAL (corrija conforme o parecer):\n${JSON.stringify({ ...peca.conteudo, legenda: peca.legenda })}\n\nPARECER DA TÊMIS:\n${JSON.stringify(peca.parecer)}`
         : "\nEscreva o carrossel.");
+  } else if (agente === "glauber") {
+    sistema = SISTEMA_GLAUBER + estilo + extra;
+    ferramenta = FERRAMENTA_GLAUBER;
+    const temParecer = peca.parecer && peca.parecer.parecer === "ajustar" && peca.conteudo?.blocos;
+    const hoje = new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+    mensagem = `HOJE: ${hoje}
+FORMATO: ${NOMES_FORMATO[peca.formato || "joao"]}
+DURAÇÃO: ${peca.duracao || 45} segundos
+TEMA: ${peca.tema}
+${peca.observacoes ? `NOTÍCIA E ORIENTAÇÕES:\n${peca.observacoes}\n` : ""}` +
+      (temParecer
+        ? `\nVERSÃO ATUAL (corrija conforme o parecer):\n${JSON.stringify({ ...peca.conteudo, legenda: peca.legenda })}\n\nPARECER DA TÊMIS:\n${JSON.stringify(peca.parecer)}`
+        : "\nEscreva o roteiro.");
+  } else if (peca.modelo === "reels") {
+    sistema = SISTEMA_TEMIS + extra;
+    ferramenta = FERRAMENTA_TEMIS;
+    const c = peca.conteudo || {};
+    const roteiro = (c.blocos || []).map((b: any, i: number) =>
+      `[${i + 1} · ${b.etapa} · ${b.quem} · ${b.segundos}s]\nFALA: ${b.fala}\nTEXTO NA TELA: ${b.texto_tela}\nIMAGEM: ${b.imagem}`).join("\n\n");
+    mensagem = `TIPO: ROTEIRO DE REELS (vídeo falado; aplique também o item 13)\nFORMATO: ${NOMES_FORMATO[peca.formato || "joao"]} · ${peca.duracao || 45} s\nTEMA: ${peca.tema || "-"}\n${peca.observacoes ? `NOTÍCIA DE BASE E ORIENTAÇÕES:\n${peca.observacoes}\n` : ""}\nCAPA: ${c.capa?.kicker || ""} — ${c.capa?.titulo || ""}\n\nROTEIRO A REVISAR:\n${roteiro}\n\nLEGENDA:\n${peca.legenda || "(sem legenda)"}\n\nNo campo "onde", use "capa", "bloco N" ou "legenda".`;
   } else {
     sistema = SISTEMA_TEMIS + extra;
     ferramenta = FERRAMENTA_TEMIS;
@@ -294,10 +395,10 @@ ${peca.observacoes ? `OBSERVAÇÕES DO ADVOGADO: ${peca.observacoes}\n` : ""}` +
   let { r, falha, status: st } = await chamar(mensagem);
   if (!r) return json({ erro: falha }, st);
   // Clarice: se passou dos limites de tamanho, uma correção automática
-  if (agente === "clarice") {
-    const v = excessos(r, peca.modelo);
+  if (agente === "clarice" || agente === "glauber") {
+    const v = agente === "clarice" ? excessos(r, peca.modelo) : excessosReels(r, peca.duracao || 45, peca.formato || "joao");
     if (v.length) {
-      const segunda = await chamar(mensagem + `\n\nSUA VERSÃO ANTERIOR:\n${JSON.stringify(r)}\n\nELA EXCEDEU OS LIMITES DE TAMANHO E NÃO CABE NOS SLIDES:\n- ${v.join("\n- ")}\n\nReescreva encurtando APENAS esses campos, mantendo o restante e o sentido.`);
+      const segunda = await chamar(mensagem + `\n\nSUA VERSÃO ANTERIOR:\n${JSON.stringify(r)}\n\nELA NÃO RESPEITOU AS REGRAS DE FORMATO:\n- ${v.join("\n- ")}\n\nReescreva encurtando APENAS esses campos, mantendo o restante e o sentido.`);
       if (segunda.r) r = segunda.r;
     }
   }
@@ -308,11 +409,14 @@ ${peca.observacoes ? `OBSERVAÇÕES DO ADVOGADO: ${peca.observacoes}\n` : ""}` +
   }
 
   // 5) Grava o resultado
-  if (agente === "clarice") {
+  if (agente === "clarice" || agente === "glauber") {
     const { legenda, pontos_de_verificacao, ...conteudo } = r;
     const versao = peca.conteudo?.capa ? (peca.versao || 1) + 1 : 1;
+    const pontos: string[] = [...(pontos_de_verificacao || [])];
+    // Glauber: o que ainda ficou fora do formato vai para a conferência do advogado
+    if (agente === "glauber") pontos.push(...excessosReels(r, peca.duracao || 45, peca.formato || "joao").map((x) => "Formato: " + x));
     await admin.from("pecas").update({
-      conteudo, legenda, pontos_verificacao: pontos_de_verificacao || [],
+      conteudo, legenda, pontos_verificacao: pontos,
       titulo: String(conteudo.capa?.titulo || peca.tema || "Sem título").replace(/\*+/g, "").slice(0, 200),
       status: "em_revisao", versao,
     }).eq("id", peca.id);

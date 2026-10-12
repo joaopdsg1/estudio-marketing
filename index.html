@@ -174,10 +174,44 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 .caixa{background:#fff;border:1.5px solid var(--linha);border-radius:12px;padding:6px 20px 18px;margin-bottom:24px}
 .caixa h3{font-size:26px;color:var(--petroleo);margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .form-linha{display:grid;grid-template-columns:2fr 1fr 2fr 2fr auto;gap:8px;align-items:end;margin-top:8px}
-@media (max-width:760px){.form-linha{grid-template-columns:1fr}}
+.form-linha.grav{grid-template-columns:220px auto 1fr}
+@media (max-width:760px){.form-linha,.form-linha.grav{grid-template-columns:1fr}}
 .fontes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .fonte-chip{font-size:13px;border:1px solid var(--linha);border-radius:20px;padding:3px 10px;cursor:pointer;background:var(--gelo)}
 .fonte-chip.off{opacity:.45;text-decoration:line-through}
+/* Reels */
+.reels-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:24px;align-items:start}
+@media (max-width:1000px){.reels-grid{grid-template-columns:1fr}}
+.bloco-rot{background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:4px 18px 16px;margin-bottom:12px}
+.bloco-rot .cab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.bloco-rot .cab b{font-weight:400;color:var(--petroleo);text-transform:uppercase;letter-spacing:.08em;font-size:13px}
+.bloco-rot .cab select,.bloco-rot .cab input{width:auto;padding:4px 8px;font-size:14px}
+.bloco-rot .duas{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.bloco-rot .duas{grid-template-columns:1fr}}
+.contador{font-size:13px;color:#7a8290}
+.contador.estoura{color:var(--erro)}
+.tempo-total{background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:10px 16px;margin-bottom:12px;font-size:14px}
+.capa-mini{width:270px;height:480px;overflow:hidden;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);margin:8px 0 10px}
+.capa-mini .escala{transform:scale(.25);transform-origin:0 0;width:1080px;height:1920px}
+.slide.vertical{height:1920px;padding:120px 96px}
+.selo.urg{background:#FBF1E6;border-color:#E8C9A6;color:#8A4B12}
+/* Teleprompter */
+#teleprompter{position:fixed;inset:0;z-index:50;background:#05070a;color:#fff;display:flex;flex-direction:column}
+#tp-barra{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px;background:#111722;font:300 14px Slab,serif}
+#tp-barra .btn{padding:6px 12px;font-size:13px}
+#tp-barra label{margin:0;color:var(--ceu);display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px}
+#tp-barra input[type=range]{width:110px;padding:0}
+#tp-barra select{width:auto;padding:4px 6px;font-size:13px}
+#tp-titulo{flex-basis:100%;color:var(--ceu);font-size:13px}
+#tp-rolo{flex:1;overflow-y:auto;padding:45vh 7vw 70vh;scroll-behavior:auto}
+#tp-rolo.espelho{transform:scaleX(-1)}
+#tp-rolo .tp-bloco{margin-bottom:1.4em}
+#tp-rolo .tp-quem{font:400 .42em Slab,serif;letter-spacing:.14em;text-transform:uppercase;color:#7FB2D6;display:block;margin-bottom:.2em}
+#tp-rolo .tp-quem.giovanna{color:#E8B86B}
+#tp-rolo .tp-fala{line-height:1.35}
+#tp-rolo .tp-tela{font-size:.38em;color:#6c7685;display:block;margin-top:.3em}
+#tp-rolo ul{list-style:disc;padding-left:1.1em}
+#tp-guia{position:absolute;left:0;right:0;top:45vh;height:2px;background:rgba(255,255,255,.12);pointer-events:none}
 .legenda-box{margin-top:22px;background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:4px 20px 18px}
 
 /* ================= SLIDES (1080 × 1350) ================= */
@@ -226,7 +260,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
   .lado-marca{padding:32px 24px;gap:40px}
   .lado-marca h1{font-size:36px}
   header.topo-app{padding:12px 16px;gap:12px;flex-wrap:wrap}
-  header.topo-app nav{order:3;flex-basis:100%}
+  header.topo-app nav{order:3;flex-basis:100%;flex-wrap:wrap;gap:2px}
+  header.topo-app nav button{padding:6px 9px;font-size:13px}
   main.pagina{padding:28px 16px} footer.rodape{padding:0 16px 24px}
   .pagina h1{font-size:34px}
   .miniatura{width:270px;height:337.5px}
@@ -267,6 +302,7 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
       <button data-pg="mesa" class="ativo">Mesa</button>
       <button data-pg="fila">Fila de peças</button>
       <button data-pg="tarsila">Tarsila · Carrosséis</button>
+      <button data-pg="reels">Glauber · Reels</button>
       <button data-pg="radar">Radar</button>
     </nav>
     <div class="usuario"><span id="nome-usuario"></span><button id="btn-sair" type="button">Sair</button></div>
@@ -308,6 +344,84 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
     </div>
     <div style="overflow-x:auto"><table class="fila"><thead><tr><th>Peça</th><th>Modelo · pilar</th><th>Situação</th><th>Custo IA</th><th>Atualizada</th></tr></thead>
       <tbody id="lista-fila"><tr><td colspan="5">Carregando…</td></tr></tbody></table></div>
+  </main>
+
+  <!-- Reels (Glauber) -->
+  <main class="pagina oculto" id="pg-reels">
+    <div id="reels-lista-view">
+      <h1>Glauber · Reels</h1>
+      <p class="sub">Estudos de caso a partir de notícias do Radar. Um vídeo por semana, gravados em lote uma vez por mês.</p>
+      <div class="caixa">
+        <h3><span>Dia de gravação</span><button class="btn mini" id="btn-modo-gravacao" type="button">Modo gravação (teleprompter)</button></h3>
+        <div class="form-linha grav">
+          <div><label for="rg-data">Próxima gravação</label><input id="rg-data" type="date"></div>
+          <div><button class="btn sec" id="btn-salvar-gravacao" type="button">Salvar data</button></div>
+          <div class="dica" id="rg-info" style="font-size:13px;color:#7a8290;align-self:center"></div>
+        </div>
+      </div>
+      <div class="pauta" id="pauta-reels"></div>
+      <div class="caixa">
+        <h3><span>Roteiros</span><button class="btn sec mini" id="btn-datas-reels" type="button">Sugerir datas de postagem</button></h3>
+        <div class="progresso" id="prog-lista-reels"></div>
+        <div style="overflow-x:auto;margin-top:10px"><table class="fila"><thead><tr><th>Roteiro</th><th>Situação</th><th>Postagem</th><th>Gravado</th><th></th></tr></thead>
+          <tbody id="lista-reels"><tr><td colspan="5">Carregando…</td></tr></tbody></table></div>
+      </div>
+      <div class="nova">
+        <h3>Roteiro avulso com o Glauber</h3>
+        <p class="dica" style="font-size:13px;color:#7a8290">Para um caso que surgiu fora da pauta do mês. Lembre que ele precisará ser gravado fora do dia fixo.</p>
+        <label for="ra-noticia">Notícia do Radar (últimas 6 semanas)</label>
+        <select id="ra-noticia"><option value="">— escolha a notícia —</option></select>
+        <label for="ra-tema">Tema / ângulo</label>
+        <textarea id="ra-tema" rows="2" placeholder="Ex.: Penhora de cachê: o que a escola aprende sobre bloqueio de valores a receber"></textarea>
+        <div class="linha">
+          <div><label for="ra-formato">Quem aparece</label>
+            <select id="ra-formato"><option value="joao">Só João</option><option value="giovanna">Só Giovanna</option><option value="dupla">João e Giovanna</option></select></div>
+          <div><label for="ra-duracao">Duração</label>
+            <select id="ra-duracao"><option value="30">30 segundos</option><option value="45" selected>45 segundos</option><option value="60">60 segundos</option></select></div>
+        </div>
+        <label for="ra-obs">Observações para o Glauber (opcional)</label>
+        <textarea id="ra-obs" rows="2"></textarea>
+        <div class="decisao"><button class="btn" id="btn-roteirizar" type="button">Roteirizar com Glauber e Têmis</button></div>
+        <div class="progresso" id="prog-reels"></div>
+      </div>
+    </div>
+    <div id="reels-detalhe-view" class="oculto">
+      <div class="decisao" style="margin:0 0 14px"><button class="btn sec mini" id="btn-voltar-reels" type="button">← Voltar aos roteiros</button></div>
+      <h1 id="rd-titulo" style="font-size:38px">Roteiro</h1>
+      <p class="sub" id="rd-sub"></p>
+      <div class="msg" id="msg-reels" role="status"></div>
+      <div class="reels-grid">
+        <div>
+          <div id="painel-revisao-reels"></div>
+          <div class="tempo-total" id="rd-tempo"></div>
+          <div id="rd-blocos"></div>
+          <div class="legenda-box">
+            <label for="legenda-reels">Legenda do post</label>
+            <textarea id="legenda-reels" rows="7"></textarea>
+            <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn sec mini" id="btn-copiar-reels" type="button">Copiar legenda</button></div>
+          </div>
+        </div>
+        <div>
+          <div class="caixa" style="padding-bottom:14px">
+            <h3>Gravação</h3>
+            <div class="decisao" style="margin-top:6px"><button class="btn" id="btn-tp-um" type="button">Abrir no teleprompter</button>
+              <button class="btn sec" id="btn-baixar-roteiro" type="button">Baixar roteiro (.txt)</button></div>
+            <label for="rd-urgencia">Urgência</label>
+            <select id="rd-urgencia"><option value="atemporal">Atemporal</option><option value="postar_logo">Postar logo</option></select>
+            <label for="rd-postagem">Data de postagem</label><input id="rd-postagem" type="date">
+            <label class="check"><input type="checkbox" id="rd-gravado"> Vídeo já gravado</label>
+            <div id="rd-fonte" style="font-size:13px;margin-top:10px"></div>
+          </div>
+          <div class="caixa" style="padding-bottom:14px">
+            <h3>Capa · Tarsila</h3>
+            <label for="rd-kicker">Rótulo (até 40)</label><input id="rd-kicker">
+            <label for="rd-capa">Título (até 60; *ênfase*)</label><textarea id="rd-capa" rows="2"></textarea>
+            <div class="capa-mini"><div class="escala" id="rd-capa-previa"></div></div>
+            <button class="btn sec" id="btn-baixar-capa" type="button">Baixar capa (1080 × 1920)</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Radar -->
@@ -391,6 +505,25 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
   <footer class="rodape" id="rodape-versao"></footer>
 </section>
 
+<!-- Teleprompter -->
+<div id="teleprompter" class="oculto" role="dialog" aria-label="Teleprompter">
+  <div id="tp-barra">
+    <span id="tp-titulo"></span>
+    <button class="btn sec" id="tp-ant" type="button">← Anterior</button>
+    <button class="btn" id="tp-play" type="button">▶ Rolar</button>
+    <button class="btn sec" id="tp-inicio" type="button">⟲ Início</button>
+    <button class="btn sec" id="tp-prox" type="button">Próximo →</button>
+    <label>Velocidade <input type="range" id="tp-vel" min="10" max="160" value="55"></label>
+    <label>Letra <input type="range" id="tp-tam" min="28" max="96" value="54"></label>
+    <label>Mostrar <select id="tp-modo"><option value="texto">Texto exato</option><option value="topicos">Só tópicos</option></select></label>
+    <label><input type="checkbox" id="tp-espelho" style="width:auto"> Espelhar</label>
+    <button class="btn verde" id="tp-gravado" type="button">Marcar como gravado</button>
+    <button class="btn sec" id="tp-fechar" type="button">Fechar (Esc)</button>
+  </div>
+  <div id="tp-rolo"></div>
+  <div id="tp-guia"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -398,8 +531,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v005';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 4 (Radar do Rondon)',
+const VERSAO = 'v006';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 5 (Glauber · Reels)',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -415,9 +548,9 @@ const EQUIPE = [
   {nome:'Atena',    funcao:'Estrategista',           etapa:3, ativo:true, pg:'mesa'},
   {nome:'Clarice',  funcao:'Redatora',               etapa:2, ativo:true, pg:'fila'},
   {nome:'Têmis',    funcao:'Revisora OAB',           etapa:2, ativo:true, pg:'fila'},
-  {nome:'Tarsila',  funcao:'Arte dos carrosséis',    etapa:1, ativo:true, pg:'tarsila'},
+  {nome:'Tarsila',  funcao:'Arte: carrosséis e capas', etapa:1, ativo:true, pg:'tarsila'},
   {nome:'Rondon',   funcao:'Radar e referências',    etapa:4, ativo:true, pg:'radar'},
-  {nome:'Glauber',  funcao:'Roteiros de Reels',      etapa:5},
+  {nome:'Glauber',  funcao:'Roteiros de Reels',      etapa:5, ativo:true, pg:'reels'},
 ];
 
 let usuario = { id:null, papel:null };
@@ -427,13 +560,20 @@ function mostrar(tela){
   $('tela-login').classList.toggle('oculto', tela !== 'login');
   $('tela-app').classList.toggle('oculto', tela !== 'app');
 }
-function irPara(pg){
-  ['mesa','fila','tarsila','radar'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
+function irPara(pg, opcoes={}){
+  if (pg === 'tarsila' && estado.modelo === 'reels') estado = { id:null, modelo:'lista', dados: vazio('lista'), meta:null };
+  ['mesa','fila','tarsila','reels','radar'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
   document.querySelectorAll('header.topo-app nav button').forEach(b => b.classList.toggle('ativo', b.dataset.pg === pg));
   if (pg === 'tarsila'){ renderizarEditor(); renderizarPrevia(); renderizarRevisao(); carregarListaRascunhos(); }
   if (pg === 'fila'){ carregarFila(); }
   if (pg === 'mesa'){ carregarMesa(); }
   if (pg === 'radar'){ carregarRadar(); }
+  if (pg === 'reels'){
+    $('reels-lista-view').classList.toggle('oculto', !!opcoes.detalhe);
+    $('reels-detalhe-view').classList.toggle('oculto', !opcoes.detalhe);
+    if (!opcoes.detalhe) carregarReels();
+    window.scrollTo(0, 0);
+  }
 }
 document.querySelectorAll('header.topo-app nav button').forEach(b => b.addEventListener('click', () => irPara(b.dataset.pg)));
 
@@ -714,7 +854,7 @@ $('btn-copiar').addEventListener('click', async () => {
 
 /* ---------- barra de ações ---------- */
 function avisar(t, erro=false){
-  const m = $('msg-tarsila'); m.textContent = t; m.className = 'msg' + (erro ? ' erro' : '');
+  const m = $(estado.modelo === 'reels' ? 'msg-reels' : 'msg-tarsila'); m.textContent = t; m.className = 'msg' + (erro ? ' erro' : '');
   clearTimeout(avisar.t); avisar.t = setTimeout(() => { m.textContent=''; }, 6000);
 }
 $('sel-modelo').addEventListener('change', e => {
@@ -737,7 +877,7 @@ $('btn-exemplo').addEventListener('click', () => {
 
 /* ---------- rascunhos (Supabase) ---------- */
 async function carregarListaRascunhos(){
-  const { data, error } = await sb.from('pecas').select('id,titulo,modelo,atualizado_em').order('atualizado_em', {ascending:false}).limit(30);
+  const { data, error } = await sb.from('pecas').select('id,titulo,modelo,atualizado_em').neq('modelo','reels').order('atualizado_em', {ascending:false}).limit(30);
   if (error) return;
   const nomes = {lista:'Lista', pergunta:'Pergunta e Resposta', mitofato:'Mito × Fato'};
   $('sel-rascunho').innerHTML = '<option value="">— novo carrossel —</option>' + (data||[]).map(r =>
@@ -806,10 +946,12 @@ $('btn-baixar').addEventListener('click', async () => {
    ========================================================= */
 const NOMES_STATUS = { rascunho:'Rascunho', em_producao:'Em produção', em_revisao:'Em revisão', aguardando_voce:'Aguardando você',
   bloqueada:'Bloqueada pela Têmis', aprovada:'Aprovada', publicada:'Publicada', rejeitada:'Rejeitada' };
-const NOMES_MODELO = { lista:'Lista', pergunta:'Pergunta e Resposta', mitofato:'Mito × Fato' };
+const NOMES_MODELO = { lista:'Lista', pergunta:'Pergunta e Resposta', mitofato:'Mito × Fato', reels:'Reels' };
+const REDATOR = { clarice:'Clarice', glauber:'Glauber' };
+const ehAgente = o => o === 'clarice' || o === 'glauber';
 const CRITERIOS = {0:'Instrução do advogado',1:'Promessa de resultado',2:'Clientes, casos ou valores',3:'Captação / mercantilização',
   4:'Comparação / autopromoção',5:'Sensacionalismo',6:'Fundamento jurídico',7:'Ressalva informativa',8:'Caso concreto / ilustrativo',
-  9:'Persuasão / incitação',10:'Consulta individual',11:'Exposição de devedores',12:'Uso de caso público'};
+  9:'Persuasão / incitação',10:'Consulta individual',11:'Exposição de devedores',12:'Uso de caso público',13:'Conscientização × captação'};
 const usd = v => 'US$ ' + Number(v||0).toFixed(2).replace('.', ',');
 
 async function carregarConsumo(){
@@ -835,18 +977,19 @@ async function carregarFila(){
   (pecas||[]).sort((a,b) => (ordem[a.status]-ordem[b.status]) || (new Date(b.atualizado_em)-new Date(a.atualizado_em)));
   $('lista-fila').innerHTML = (pecas||[]).length ? pecas.map(p => `
     <tr class="clicavel" data-id="${p.id}">
-      <td><div style="font-weight:400">${esc(p.titulo)}</div>${p.tema && p.origem==='clarice' ? `<div style="color:#7a8290;font-size:13px">Pauta: ${esc(p.tema.slice(0,90))}</div>` : ''}</td>
+      <td><div style="font-weight:400">${esc(p.titulo)}</div>${p.tema && ehAgente(p.origem) ? `<div style="color:#7a8290;font-size:13px">Pauta: ${esc(p.tema.slice(0,90))}</div>` : ''}</td>
       <td>${NOMES_MODELO[p.modelo]}${p.pilar ? `<div style="color:#7a8290;font-size:13px">${esc(p.pilar)}</div>` : ''}</td>
-      <td><span class="selo ${p.status}">${NOMES_STATUS[p.status]}</span>${p.origem==='clarice' ? `<div style="color:#7a8290;font-size:12px;margin-top:4px">versão ${p.versao}</div>` : ''}</td>
+      <td><span class="selo ${p.status}">${NOMES_STATUS[p.status]}</span>${ehAgente(p.origem) ? `<div style="color:#7a8290;font-size:12px;margin-top:4px">versão ${p.versao}</div>` : ''}</td>
       <td>${custo[p.id] ? usd(custo[p.id]) : '—'}</td>
       <td>${new Date(p.atualizado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td>
     </tr>`).join('') : '<tr><td colspan="5">Nenhuma peça ainda.</td></tr>';
-  document.querySelectorAll('#lista-fila tr.clicavel').forEach(tr => tr.addEventListener('click', async () => { await abrirPeca(tr.dataset.id); irPara('tarsila'); }));
+  document.querySelectorAll('#lista-fila tr.clicavel').forEach(tr => tr.addEventListener('click', async () => { await abrirPeca(tr.dataset.id); if (estado.modelo !== 'reels') irPara('tarsila'); }));
 }
 
 async function abrirPeca(id){
   const { data, error } = await sb.from('pecas').select('*').eq('id', id).single();
   if (error) return avisar('Não foi possível abrir a peça.', true);
+  if (data.modelo === 'reels') return abrirRoteiro(data);
   estado = { id:data.id, modelo:data.modelo, dados:{...vazio(data.modelo), ...data.conteudo, legenda:data.legenda || ''},
     meta:{ origem:data.origem, status:data.status, versao:data.versao, parecer:data.parecer, pontos:data.pontos_verificacao||[],
            tema:data.tema, pilar:data.pilar, motivo:data.motivo_rejeicao } };
@@ -868,15 +1011,16 @@ let alvoProgresso = 'progresso';
 function passo(txt, cls='rodando'){
   const d = document.createElement('div'); d.className = cls; d.textContent = txt; $(alvoProgresso).appendChild(d); return d;
 }
-async function cicloClariceTemis(peca_id, primeiraEscrita){
-  let p = passo(primeiraEscrita ? 'Clarice escrevendo o carrossel…' : 'Clarice reescrevendo conforme a instrução…');
-  await chamarAgente('clarice', peca_id); p.className='feito';
+async function cicloClariceTemis(peca_id, primeiraEscrita, redator='clarice'){
+  const nome = REDATOR[redator], oque = redator === 'glauber' ? 'o roteiro' : 'o carrossel';
+  let p = passo(primeiraEscrita ? `${nome} escrevendo ${oque}…` : `${nome} reescrevendo conforme a instrução…`);
+  await chamarAgente(redator, peca_id); p.className='feito';
   p = passo('Têmis revisando…');
   let r = await chamarAgente('temis', peca_id); p.className='feito'; p.textContent = `Têmis: ${r.parecer}`;
   let voltas = 0;
   while (r.parecer === 'ajustar' && voltas < 2){
     voltas++;
-    p = passo(`Clarice ajustando (volta ${voltas} de 2)…`); await chamarAgente('clarice', peca_id); p.className='feito';
+    p = passo(`${nome} ajustando (volta ${voltas} de 2)…`); await chamarAgente(redator, peca_id); p.className='feito';
     p = passo('Têmis revisando de novo…'); r = await chamarAgente('temis', peca_id); p.className='feito'; p.textContent = `Têmis: ${r.parecer}`;
   }
   if (r.parecer === 'ajustar'){
@@ -912,9 +1056,12 @@ function avisarFila(t){ $('progresso').innerHTML = ''; passo(t, 'falhou'); }
 
 /* ---------- painel de revisão na Tarsila ---------- */
 function renderizarRevisao(){
-  const box = $('painel-revisao'); if (!box) return;
+  const reels = estado.modelo === 'reels';
+  const box = $(reels ? 'painel-revisao-reels' : 'painel-revisao'); if (!box) return;
+  $(reels ? 'painel-revisao' : 'painel-revisao-reels').innerHTML = '';
   const m = estado.meta;
-  if (!m || m.origem !== 'clarice'){ box.innerHTML = ''; return; }
+  if (!m || !ehAgente(m.origem)){ box.innerHTML = ''; return; }
+  const redator = m.origem, nomeRed = REDATOR[redator];
   const pr = m.parecer;
   const corParecer = !pr ? '' : pr.parecer === 'aprovado' ? 'aprovada' : pr.parecer === 'bloquear' ? 'bloqueada' : 'em_revisao';
   const nomeParecer = !pr ? '' : pr.parecer === 'aprovado' ? 'Sem objeções' : pr.parecer === 'bloquear' ? 'Bloqueada' : 'Pede ajustes';
@@ -932,7 +1079,7 @@ function renderizarRevisao(){
     if (cj.length) h += `<h4>Conferência jurídica</h4><ul>${cj.map(c => `<li><span class="g ${c.confianca==='alta'?'baixa':c.confianca==='media'?'media':'alta'}">confiança ${c.confianca}</span>
         <b style="font-weight:400">${esc(c.dispositivo)}</b> ${c.sustenta ? '' : '<span style="color:var(--erro)">· não sustenta a afirmação</span>'}<br>${esc(c.afirmacao)}${c.observacao ? `<br><span class="trecho">${esc(c.observacao)}</span>` : ''}</li>`).join('')}</ul>`;
   }
-  if ((m.pontos||[]).length) h += `<h4>Para você conferir (apontado pela Clarice)</h4><ul>${m.pontos.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  if ((m.pontos||[]).length) h += `<h4>Para você conferir (apontado por ${nomeRed === 'Glauber' ? 'Glauber' : 'Clarice'})</h4><ul>${m.pontos.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
   if (m.status === 'rejeitada' && m.motivo) h += `<h4>Motivo da rejeição</h4><div>${esc(m.motivo)}</div>`;
 
   const decidivel = ['aguardando_voce','bloqueada','em_revisao','rascunho'].includes(m.status);
@@ -940,18 +1087,18 @@ function renderizarRevisao(){
     ${decidivel ? `<button class="btn verde" id="rv-aprovar" type="button">Aprovar</button>` : ''}
     ${m.status === 'aprovada' ? `<button class="btn" id="rv-publicada" type="button">Marcar como publicada</button>` : ''}
     <button class="btn sec" id="rv-revisar" type="button">Salvar edições e pedir nova revisão à Têmis</button>
-    <button class="btn sec" id="rv-mostrar-reescrever" type="button">Pedir reescrita à Clarice</button>
+    <button class="btn sec" id="rv-mostrar-reescrever" type="button">Pedir reescrita ${redator === 'glauber' ? 'ao Glauber' : 'à Clarice'}</button>
     ${!['rejeitada','publicada'].includes(m.status) ? `<button class="btn vermelho" id="rv-mostrar-rejeitar" type="button">Rejeitar</button>` : ''}
   </div>
   <div class="caixa-acao oculto" id="rv-caixa-reescrever">
-    <label for="rv-instrucao" style="margin-top:0">Instrução para a Clarice</label>
-    <textarea id="rv-instrucao" rows="2" placeholder="Ex.: troque o slide 3 por um exemplo sobre rematrícula"></textarea>
+    <label for="rv-instrucao" style="margin-top:0">Instrução para ${redator === 'glauber' ? 'o Glauber' : 'a Clarice'}</label>
+    <textarea id="rv-instrucao" rows="2" placeholder="${reels ? 'Ex.: deixe a fala da estratégia mais curta e troque o exemplo por rematrícula' : 'Ex.: troque o slide 3 por um exemplo sobre rematrícula'}"></textarea>
     <div class="decisao"><button class="btn" id="rv-reescrever" type="button">Reescrever e revisar</button></div>
   </div>
   <div class="caixa-acao oculto" id="rv-caixa-rejeitar">
     <label for="rv-motivo" style="margin-top:0">Motivo da rejeição</label>
     <textarea id="rv-motivo" rows="2" placeholder="Ex.: não usar a palavra 'calote' em nenhum conteúdo"></textarea>
-    <label class="check"><input type="checkbox" id="rv-regra" checked> Transformar em regra permanente para a Clarice</label>
+    <label class="check"><input type="checkbox" id="rv-regra" checked> Transformar em regra permanente ${redator === 'glauber' ? 'para o Glauber' : 'para a Clarice'}</label>
     <div class="decisao"><button class="btn vermelho" id="rv-rejeitar" type="button">Confirmar rejeição</button></div>
   </div>
   <div class="progresso" id="rv-progresso"></div>
@@ -966,7 +1113,7 @@ function renderizarRevisao(){
     await salvarEdicoes();
     const { error } = await sb.from('pecas').update({ status:'aprovada', aprovado_em:new Date().toISOString(), aprovado_por:usuario.id }).eq('id', estado.id);
     if (error) return avisar('Não foi possível aprovar: ' + error.message, true);
-    await abrirPeca(estado.id); avisar('Peça aprovada. O download está liberado.');
+    await abrirPeca(estado.id); avisar(reels ? 'Roteiro aprovado. Já pode ir para o teleprompter, e a capa está liberada.' : 'Peça aprovada. O download está liberado.');
   });
   on('rv-publicada', async () => {
     await sb.from('pecas').update({ status:'publicada' }).eq('id', estado.id); await abrirPeca(estado.id); avisar('Marcada como publicada.');
@@ -979,11 +1126,11 @@ function renderizarRevisao(){
   }));
   on('rv-reescrever', () => comProgresso(async () => {
     const instr = $('rv-instrucao').value.trim();
-    if (!instr) throw new Error('Escreva a instrução para a Clarice.');
+    if (!instr) throw new Error('Escreva a instrução para ' + (redator === 'glauber' ? 'o Glauber.' : 'a Clarice.'));
     await salvarEdicoes();
     await sb.from('pecas').update({ status:'em_revisao', parecer:{ parecer:'ajustar', resumo:'Instrução do advogado: ' + instr, versao:estado.meta.versao,
       apontamentos:[{ criterio:0, onde:'geral', trecho:'', problema:instr, sugestao:instr, gravidade:'alta' }], conferencia_juridica:[] } }).eq('id', estado.id);
-    await cicloRv(estado.id);
+    await cicloRv(estado.id, redator);
   }));
   on('rv-rejeitar', async () => {
     const motivo = $('rv-motivo').value.trim();
@@ -991,20 +1138,20 @@ function renderizarRevisao(){
     const { error } = await sb.from('pecas').update({ status:'rejeitada', motivo_rejeicao:motivo }).eq('id', estado.id);
     if (error) return avisar('Não foi possível rejeitar: ' + error.message, true);
     const virouRegra = $('rv-regra').checked;
-    if (virouRegra) await sb.from('aprendizados').insert({ agente:'clarice', regra:motivo, origem_peca:estado.id });
+    if (virouRegra) await sb.from('aprendizados').insert({ agente:redator, regra:motivo, origem_peca:estado.id });
     await abrirPeca(estado.id); avisar(virouRegra ? 'Peça rejeitada. O motivo virou regra para as próximas peças.' : 'Peça rejeitada.');
   });
 }
 function passoRv(txt, cls='rodando'){ const d = document.createElement('div'); d.className = cls; d.textContent = txt; $('rv-progresso').appendChild(d); return d; }
-async function cicloRv(id){
-  let p = passoRv('Clarice reescrevendo…'); await chamarAgente('clarice', id); p.className='feito';
+async function cicloRv(id, redator='clarice'){
+  let p = passoRv(REDATOR[redator] + ' reescrevendo…'); await chamarAgente(redator, id); p.className='feito';
   p = passoRv('Têmis revisando…'); const r = await chamarAgente('temis', id); p.className='feito'; p.textContent = 'Têmis: ' + r.parecer;
   if (r.parecer === 'ajustar') await sb.from('pecas').update({ status:'aguardando_voce' }).eq('id', id);
 }
 async function comProgresso(fn){
-  document.querySelectorAll('#painel-revisao button').forEach(b => b.disabled = true);
+  document.querySelectorAll('#painel-revisao button, #painel-revisao-reels button').forEach(b => b.disabled = true);
   try { await fn(); await abrirPeca(estado.id); avisar('Concluído.'); }
-  catch (e) { passoRv('Falhou: ' + e.message, 'falhou'); document.querySelectorAll('#painel-revisao button').forEach(b => b.disabled = false); }
+  catch (e) { passoRv('Falhou: ' + e.message, 'falhou'); document.querySelectorAll('#painel-revisao button, #painel-revisao-reels button').forEach(b => b.disabled = false); }
 }
 async function salvarEdicoes(){
   if (!estado.id) return;
@@ -1056,6 +1203,8 @@ async function carregarBriefing(){
       ${chip((d.aprovadas_nao_publicadas||[]).length, 'aprovadas a publicar', 'fila', false)}
       ${chip(`${d.publicadas_semana ?? 0}/${d.meta_semana ?? 2}`, 'publicadas na semana', 'fila', false)}
       ${chip(d.pautas_propostas, 'pautas a decidir', 'pauta', true)}
+      ${d.reels ? chip((d.reels.pautas_reels_propostas||0) + (d.reels.roteiros_aguardando||0), 'Reels a decidir', 'reels', true) : ''}
+      ${d.reels ? chip(d.reels.roteiros_prontos_para_gravar, d.reels.proxima_gravacao ? 'prontos p/ gravar em ' + new Date(d.reels.proxima_gravacao + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : 'prontos p/ gravar', 'reels', false) : ''}
     </div>` : ''}
     <div class="progresso" id="prog-briefing" style="color:var(--ceu)"></div>`;
   box.querySelectorAll('[data-ir]').forEach(c => c.addEventListener('click', () => {
@@ -1071,7 +1220,7 @@ async function carregarBriefing(){
 async function carregarPautas(){
   const box = $('pauta-semana'); if (!box) return;
   const semana = segundaISO();
-  const { data } = await sb.from('pautas').select('*').eq('semana', semana).order('ordem');
+  const { data } = await sb.from('pautas').select('*').eq('semana', semana).eq('tipo','carrossel').order('ordem');
   const lista = (Array.isArray(data) ? data : []).filter(p => p.status !== 'descartada');
   const semanaTxt = new Date(semana + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit', month:'2-digit'});
   let h = `<h3><span>Pauta da semana · Atena <small style="font:300 13px Slab;color:#7a8290">semana de ${semanaTxt}</small></span>
@@ -1108,7 +1257,7 @@ async function carregarPautas(){
   });
   box.querySelectorAll('.item-pauta [data-acao]').forEach(b => b.addEventListener('click', async () => {
     const id = b.closest('.item-pauta').dataset.id, p = lista.find(x => x.id === id);
-    if (b.dataset.acao === 'abrir'){ await abrirPeca(p.peca_id); irPara('tarsila'); return; }
+    if (b.dataset.acao === 'abrir'){ await abrirPeca(p.peca_id); if (estado.modelo !== 'reels') irPara('tarsila'); return; }
     if (b.dataset.acao === 'descartar'){ await sb.from('pautas').update({ status:'descartada' }).eq('id', id); carregarPautas(); return; }
     // aprovar e produzir
     b.closest('.acoes-p').querySelectorAll('button').forEach(x => x.disabled = true);
@@ -1158,6 +1307,7 @@ async function carregarRadar(){
         ${i.risco_etico ? `<div class="risco">${esc(i.risco_etico)}</div>` : ''}
         <div class="acoes-r">
           ${/^https?:\/\//.test(i.url||'') ? `<a href="${esc(i.url)}" target="_blank" rel="noopener">Abrir notícia ↗</a>` : ''}
+          <button class="btn sec mini" data-acao="reels" type="button">Virar Reels</button>
           ${i.status==='novo' ? `<button class="btn mini" data-acao="pauta" type="button">Virar pauta</button>
           <button class="btn sec mini" data-acao="descartar" type="button">Descartar</button>` : ''}
         </div>
@@ -1166,7 +1316,8 @@ async function carregarRadar(){
   document.querySelectorAll('#radar-lista [data-acao]').forEach(b => b.addEventListener('click', async () => {
     const id = b.closest('.radar-item').dataset.id, i = itens.find(x => x.id === id);
     if (b.dataset.acao === 'descartar'){ await sb.from('radar_itens').update({ status:'descartado' }).eq('id', id); return carregarRadar(); }
-    const { data: ps } = await sb.from('pautas').select('ordem').eq('semana', semana);
+    if (b.dataset.acao === 'reels'){ irPara('reels'); await carregarNoticiasReels(); $('ra-noticia').value = id; $('ra-tema').value = i.titulo; $('ra-tema').scrollIntoView({behavior:'smooth', block:'center'}); return; }
+    const { data: ps } = await sb.from('pautas').select('ordem').eq('semana', semana).eq('tipo','carrossel');
     const ordem = Math.max(0, ...(Array.isArray(ps) ? ps.map(x => x.ordem) : [0])) + 1;
     const { error } = await sb.from('pautas').insert({ semana, ordem, tema: i.titulo, modelo: 'lista',
       pilar: i.categoria === 'numeros' ? 'Gestão de Inadimplência' : 'Casos em Pauta',
@@ -1240,6 +1391,394 @@ $('btn-add-fonte').addEventListener('click', async () => {
   const { error } = await sb.from('fontes_confiaveis').insert({ dominio: dom, nome: $('fn-nome').value.trim() || dom });
   if (error) return alert('Não foi possível adicionar: ' + error.message);
   $('fn-dom').value = ''; $('fn-nome').value = ''; carregarFontes();
+});
+
+/* =========================================================
+   ETAPA 5 · Glauber (roteiros de Reels) + teleprompter
+   Contrato do roteiro (pecas.conteudo quando modelo = 'reels'):
+   { capa:{kicker,titulo}, blocos:[{etapa,quem,fala,topicos[],segundos,texto_tela,imagem}], urgencia, ilustrativo }
+   Colunas próprias: formato (joao|giovanna|dupla), duracao (30|45|60), lote (AAAA-MM),
+   radar_id, fonte_url, data_postagem, gravado_em
+   ========================================================= */
+const NOMES_FORMATO = { joao:'Só João', giovanna:'Só Giovanna', dupla:'João e Giovanna' };
+const NOMES_ETAPA = { gancho:'Gancho', problema:'Problema do credor', estrategia:'Estratégia em tese', fechamento:'Fechamento' };
+const PALAVRAS_POR_SEG = 2.5;
+const contaPalavras = s => String(s||'').trim().split(/\s+/).filter(Boolean).length;
+const loteAtual = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
+const dataBR = iso => iso ? new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR') : '';
+const isoDia = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+let reelsCache = [];
+
+/* ---------- lista: gravação, pauta mensal, roteiros ---------- */
+async function carregarReels(){
+  carregarConsumo();
+  const { data: cfg } = await sb.from('config').select('valor').eq('chave','proxima_gravacao').maybeSingle();
+  const dg = cfg && typeof cfg.valor === 'string' ? cfg.valor : '';
+  $('rg-data').value = dg;
+  $('rg-info').textContent = dg ? `O Péricles avisa no resumo da manhã quando faltarem 3 dias.` : 'Marque o dia em que você e a Giovanna vão gravar o lote do mês.';
+  await Promise.all([carregarPautaReels(), carregarListaReels(), carregarNoticiasReels()]);
+}
+$('btn-salvar-gravacao').addEventListener('click', async () => {
+  const v = $('rg-data').value || null;
+  const { error } = await sb.from('config').update({ valor: v, atualizado_em: new Date().toISOString() }).eq('chave','proxima_gravacao');
+  $('rg-info').textContent = error ? 'Não foi possível salvar: ' + error.message : (v ? `Gravação marcada para ${dataBR(v)}.` : 'Data removida.');
+});
+
+async function carregarPautaReels(){
+  const box = $('pauta-reels'), lote = loteAtual();
+  const { data } = await sb.from('pautas').select('*').eq('tipo','reels').eq('lote', lote).order('ordem');
+  const lista = (Array.isArray(data) ? data : []).filter(p => p.status !== 'descartada');
+  const mesTxt = new Date(lote + '-15T12:00:00').toLocaleDateString('pt-BR',{month:'long', year:'numeric'});
+  const abertas = lista.filter(p => p.status === 'proposta');
+  let h = `<h3><span>Pauta de Reels · Atena <small style="font:300 13px Slab;color:#7a8290">${esc(mesTxt)}</small></span>
+    <span style="display:flex;gap:6px;flex-wrap:wrap">
+      ${abertas.length > 1 ? `<button class="btn mini" id="btn-roteirizar-todas" type="button">Aprovar e roteirizar todas (${abertas.length})</button>` : ''}
+      <button class="btn sec mini" id="btn-pauta-reels" type="button">${lista.length ? 'Pedir nova pauta' : 'Gerar pauta do mês'}</button></span></h3>`;
+  if (!lista.length) h += `<p class="resumo-semana">A Atena escolhe 5 casos do Radar no dia 1º de cada mês (6h40). Aprove 4 ou 5. Ainda não há pauta para este mês.</p>`;
+  h += lista.map(p => `
+    <div class="item-pauta" data-id="${p.id}">
+      <div class="n">${p.ordem}</div>
+      <div>
+        <div class="tema">${esc(p.tema)}</div>
+        <div class="meta">${NOMES_FORMATO[p.formato] || '-'} · ${p.duracao || 45} s
+          ${p.urgencia === 'postar_logo' ? ' · <span class="selo urg">Postar logo</span>' : ' · Atemporal'}
+          · <span class="selo ${p.status==='produzida'?'aprovada':p.status==='aprovada'?'em_revisao':'aguardando_voce'}">${{proposta:'Para decidir',aprovada:'Em produção',produzida:'Roteirizada'}[p.status]||p.status}</span></div>
+        ${p.angulo ? `<div class="angulo"><span style="color:var(--petroleo)">Ângulo:</span> ${esc(p.angulo)}</div>` : ''}
+        ${p.justificativa ? `<div class="angulo" style="color:#7a8290">${esc(p.justificativa)}</div>` : ''}
+        ${p.fonte_url ? `<div class="angulo"><a href="${esc(p.fonte_url)}" target="_blank" rel="noopener" style="color:var(--petroleo)">Notícia de origem ↗</a></div>` : ''}
+        <div class="progresso" id="pr-${p.id}"></div>
+      </div>
+      <div class="acoes-p">
+        ${p.status==='proposta' ? `<button class="btn mini" data-acao="produzir" type="button">Aprovar e roteirizar</button>
+          <button class="btn sec mini" data-acao="descartar" type="button">Descartar</button>` : ''}
+        ${p.peca_id ? `<button class="btn sec mini" data-acao="abrir" type="button">Abrir roteiro</button>` : ''}
+      </div>
+    </div>`).join('');
+  h += `<div class="progresso" id="prog-pauta-reels"></div>`;
+  box.innerHTML = h;
+
+  $('btn-pauta-reels').addEventListener('click', async e => {
+    if (lista.length && !window.confirm(abertas.length ? `A Atena vai descartar as ${abertas.length} pauta(s) de Reels ainda não decididas e propor outras. Continuar?` : 'Pedir uma nova pauta de Reels para este mês?')) return;
+    e.target.disabled = true; $('prog-pauta-reels').textContent = 'Atena escolhendo os casos do Radar…';
+    try { const r = await chamarRotina('pauta_reels', { forcar: lista.length > 0 }); await carregarPautaReels(); carregarConsumo();
+          if (r && r.aviso) $('prog-pauta-reels').textContent = r.aviso; }
+    catch (err) { $('prog-pauta-reels').textContent = 'Falhou: ' + err.message; e.target.disabled = false; }
+  });
+  const todas = $('btn-roteirizar-todas');
+  if (todas) todas.addEventListener('click', async () => {
+    if (!window.confirm(`O Glauber vai escrever ${abertas.length} roteiros, um de cada vez, e a Têmis revisa cada um. Leva alguns minutos; deixe esta tela aberta. Continuar?`)) return;
+    box.querySelectorAll('button').forEach(x => x.disabled = true);
+    for (const p of abertas) await roteirizarPauta(p);
+    carregarPautaReels(); carregarListaReels(); carregarConsumo();
+  });
+  box.querySelectorAll('.item-pauta [data-acao]').forEach(b => b.addEventListener('click', async () => {
+    const id = b.closest('.item-pauta').dataset.id, p = lista.find(x => x.id === id);
+    if (b.dataset.acao === 'abrir') return abrirPeca(p.peca_id);
+    if (b.dataset.acao === 'descartar'){ await sb.from('pautas').update({ status:'descartada' }).eq('id', id); return carregarPautaReels(); }
+    b.closest('.acoes-p').querySelectorAll('button').forEach(x => x.disabled = true);
+    await roteirizarPauta(p);
+    setTimeout(() => { carregarPautaReels(); carregarListaReels(); }, 1200);
+  }));
+}
+
+function textoNoticia(n){
+  return `NOTÍCIA: ${n.titulo} — ${n.fonte}, ${n.data_publicacao}. ${n.url}\nResumo: ${n.resumo}\nGancho jurídico: ${n.gancho_juridico || '-'}\nEstratégia em tese: ${n.estrategia_em_tese || '-'}${n.risco_etico ? '\nCuidado ético: ' + n.risco_etico : ''}`;
+}
+async function criarRoteiro({ tema, formato, duracao, radar, extra, lote }){
+  const obs = textoNoticia(radar) + (extra ? '\n' + extra : '');
+  const { data, error } = await sb.from('pecas').insert({ titulo: tema.slice(0,200), tema, modelo:'reels', pilar:'Casos em Pauta',
+    observacoes: obs, origem:'glauber', status:'em_producao', conteudo:{}, formato, duracao, lote: lote || loteAtual(),
+    radar_id: radar.id, fonte_url: radar.url }).select('id').single();
+  if (error) throw new Error(error.message);
+  await sb.from('radar_itens').update({ status:'usado' }).eq('id', radar.id);
+  return data.id;
+}
+async function roteirizarPauta(p){
+  alvoProgresso = 'pr-' + p.id;
+  try {
+    await sb.from('pautas').update({ status:'aprovada' }).eq('id', p.id);
+    const { data: n } = await sb.from('radar_itens').select('*').eq('id', p.radar_id).maybeSingle();
+    if (!n) throw new Error('A notícia de origem não está mais no Radar.');
+    const extra = [p.angulo && 'Ângulo sugerido pela Atena: ' + p.angulo, p.justificativa && 'Por quê: ' + p.justificativa,
+      'Urgência sugerida: ' + (p.urgencia === 'postar_logo' ? 'postar logo' : 'atemporal')].filter(Boolean).join('\n');
+    const pecaId = await criarRoteiro({ tema: p.tema, formato: p.formato || 'joao', duracao: p.duracao || 45, radar: n, extra, lote: p.lote });
+    await sb.from('pautas').update({ peca_id: pecaId }).eq('id', p.id);
+    await cicloClariceTemis(pecaId, true, 'glauber');
+    await sb.from('pautas').update({ status:'produzida' }).eq('id', p.id);
+  } catch (err) {
+    passo('Falhou: ' + err.message, 'falhou');
+    await sb.from('pautas').update({ status:'proposta' }).eq('id', p.id);
+  } finally { alvoProgresso = 'progresso'; }
+}
+
+async function carregarNoticiasReels(){
+  const desde = new Date(); desde.setDate(desde.getDate() - 42);
+  const { data } = await sb.from('radar_itens').select('id,titulo,fonte,data_publicacao,categoria').gte('criado_em', desde.toISOString())
+    .neq('status','descartado').order('criado_em',{ascending:false}).limit(40);
+  const atual = $('ra-noticia').value;
+  $('ra-noticia').innerHTML = '<option value="">— escolha a notícia —</option>' + (Array.isArray(data) ? data : []).map(n =>
+    `<option value="${n.id}">${esc(n.titulo.slice(0,90))} · ${esc(n.fonte||'')} · ${esc(n.data_publicacao||'')}</option>`).join('');
+  $('ra-noticia').value = atual;
+}
+$('btn-roteirizar').addEventListener('click', async () => {
+  const tema = $('ra-tema').value.trim(), rid = $('ra-noticia').value;
+  alvoProgresso = 'prog-reels'; $('prog-reels').innerHTML = '';
+  if (!rid){ passo('Escolha a notícia do Radar que serve de gancho.', 'falhou'); alvoProgresso = 'progresso'; return; }
+  if (tema.length < 10){ passo('Descreva o tema com um pouco mais de detalhe.', 'falhou'); alvoProgresso = 'progresso'; return; }
+  const btn = $('btn-roteirizar'); btn.disabled = true; let pecaId = null;
+  try {
+    const { data: n } = await sb.from('radar_itens').select('*').eq('id', rid).single();
+    pecaId = await criarRoteiro({ tema, formato: $('ra-formato').value, duracao: +$('ra-duracao').value, radar: n,
+      extra: $('ra-obs').value.trim() ? 'Orientações do advogado: ' + $('ra-obs').value.trim() : '' });
+    await cicloClariceTemis(pecaId, true, 'glauber');
+    $('ra-tema').value = ''; $('ra-obs').value = '';
+  } catch (e) {
+    passo('Falhou: ' + e.message, 'falhou');
+    if (pecaId) await sb.from('pecas').update({ status:'rascunho' }).eq('id', pecaId);
+  } finally { btn.disabled = false; alvoProgresso = 'progresso'; carregarListaReels(); carregarConsumo(); }
+});
+
+async function carregarListaReels(){
+  const lote = loteAtual();
+  const { data, error } = await sb.from('pecas').select('id,titulo,status,formato,duracao,lote,conteudo,data_postagem,gravado_em,atualizado_em')
+    .eq('modelo','reels').order('criado_em',{ascending:false}).limit(60);
+  if (error){ $('lista-reels').innerHTML = '<tr><td colspan="5">Não foi possível carregar.</td></tr>'; return; }
+  // Mostra os do mês e todos os que ainda não foram publicados
+  reelsCache = (data||[]).filter(p => p.lote === lote || !['publicada','rejeitada'].includes(p.status));
+  const ordem = { aguardando_voce:0, bloqueada:1, em_revisao:2, em_producao:2, aprovada:3, rascunho:4, publicada:5, rejeitada:6 };
+  reelsCache.sort((a,b) => (ordem[a.status]-ordem[b.status]) || String(a.data_postagem||'9').localeCompare(String(b.data_postagem||'9')));
+  $('lista-reels').innerHTML = reelsCache.length ? reelsCache.map(p => {
+    const urg = p.conteudo && p.conteudo.urgencia === 'postar_logo';
+    return `<tr class="clicavel" data-id="${p.id}">
+      <td><div style="font-weight:400">${esc(p.titulo)}</div><div style="color:#7a8290;font-size:13px">${NOMES_FORMATO[p.formato]||'-'} · ${p.duracao||45} s${urg ? ' · <span class="selo urg">Postar logo</span>' : ''}</div></td>
+      <td><span class="selo ${p.status}">${NOMES_STATUS[p.status]}</span></td>
+      <td>${p.data_postagem ? dataBR(p.data_postagem) : '—'}</td>
+      <td>${p.gravado_em ? '✓ ' + new Date(p.gravado_em).toLocaleDateString('pt-BR') : '—'}</td>
+      <td>${p.status === 'aprovada' ? `<button class="btn sec mini" data-tp="${p.id}" type="button">Teleprompter</button>` : ''}</td>
+    </tr>`; }).join('') : '<tr><td colspan="5">Nenhum roteiro ainda.</td></tr>';
+  document.querySelectorAll('#lista-reels tr.clicavel').forEach(tr => tr.addEventListener('click', ev => {
+    if (ev.target.dataset.tp) return abrirTeleprompter([ev.target.dataset.tp]);
+    abrirPeca(tr.dataset.id);
+  }));
+}
+
+// Distribui as postagens: uma por semana, às quartas, a partir do dia seguinte à gravação (ou de hoje)
+$('btn-datas-reels').addEventListener('click', async () => {
+  const alvo = reelsCache.filter(p => p.status === 'aprovada' && !p.data_postagem);
+  const prog = $('prog-lista-reels');
+  if (!alvo.length){ prog.textContent = 'Nenhum roteiro aprovado sem data. As datas só são sugeridas para roteiros aprovados.'; return; }
+  alvo.sort((a,b) => ((b.conteudo||{}).urgencia === 'postar_logo') - ((a.conteudo||{}).urgencia === 'postar_logo'));
+  const ocupadas = new Set(reelsCache.filter(p => p.data_postagem).map(p => p.data_postagem));
+  const base = new Date(); const g = $('rg-data').value;
+  if (g && new Date(g + 'T12:00:00') > base) base.setTime(new Date(g + 'T12:00:00').getTime());
+  base.setDate(base.getDate() + 1);
+  while (base.getDay() !== 3) base.setDate(base.getDate() + 1); // quarta-feira
+  for (const p of alvo){
+    while (ocupadas.has(isoDia(base))) base.setDate(base.getDate() + 7);
+    const d = isoDia(base); ocupadas.add(d);
+    await sb.from('pecas').update({ data_postagem: d }).eq('id', p.id);
+  }
+  prog.textContent = `${alvo.length} data(s) sugerida(s), uma por semana às quartas. Você pode mudar cada uma no roteiro.`;
+  carregarListaReels();
+});
+
+/* ---------- detalhe do roteiro ---------- */
+function abrirRoteiro(data){
+  const c = data.conteudo || {};
+  estado = { id:data.id, modelo:'reels',
+    dados:{ capa:{kicker:'', titulo:'', ...(c.capa||{})}, blocos: Array.isArray(c.blocos) ? c.blocos : [], urgencia: c.urgencia || 'atemporal',
+            ilustrativo: !!c.ilustrativo, legenda: data.legenda || '' },
+    meta:{ origem:data.origem, status:data.status, versao:data.versao, parecer:data.parecer, pontos:data.pontos_verificacao||[],
+           tema:data.tema, pilar:data.pilar, motivo:data.motivo_rejeicao, formato:data.formato, duracao:data.duracao||45,
+           fonte_url:data.fonte_url, data_postagem:data.data_postagem, gravado_em:data.gravado_em } };
+  irPara('reels', { detalhe:true });
+  renderizarRoteiro(); renderizarRevisao();
+}
+$('btn-voltar-reels').addEventListener('click', async () => {
+  try { await salvarEdicoes(); } catch (e) { return avisar('Não foi possível salvar: ' + e.message, true); }
+  irPara('reels');
+});
+
+function renderizarRoteiro(){
+  const d = estado.dados, m = estado.meta;
+  $('rd-titulo').textContent = semMarcacao(d.capa.titulo) || m.tema || 'Roteiro';
+  $('rd-sub').textContent = `${NOMES_FORMATO[m.formato] || '-'} · ${m.duracao} segundos · ${m.tema || ''}`;
+  $('rd-urgencia').value = d.urgencia;
+  $('rd-postagem').value = m.data_postagem || '';
+  $('rd-gravado').checked = !!m.gravado_em;
+  $('rd-fonte').innerHTML = m.fonte_url ? `<a href="${esc(m.fonte_url)}" target="_blank" rel="noopener" style="color:var(--petroleo)">Notícia de origem ↗</a>` : '';
+  $('rd-kicker').value = d.capa.kicker || ''; $('rd-capa').value = d.capa.titulo || '';
+  $('legenda-reels').value = d.legenda || '';
+  const opQuem = q => ['João','Giovanna'].map(n => `<option${n===q?' selected':''}>${n}</option>`).join('');
+  $('rd-blocos').innerHTML = d.blocos.map((b, i) => `
+    <div class="bloco-rot" data-i="${i}">
+      <div class="cab"><b>${i+1} · ${NOMES_ETAPA[b.etapa] || esc(b.etapa)}</b>
+        <select data-k="quem" aria-label="Quem fala">${opQuem(b.quem)}</select>
+        <label style="margin:0;display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0">segundos <input data-k="segundos" type="number" min="1" max="60" value="${Number(b.segundos)||0}" style="width:70px"></label>
+        <span class="contador" data-cont></span></div>
+      <label>Fala</label><textarea data-k="fala" rows="4">${esc(b.fala)}</textarea>
+      <div class="duas">
+        <div><label>Tópicos (um por linha)</label><textarea data-k="topicos" rows="3">${esc((b.topicos||[]).join('\n'))}</textarea></div>
+        <div><label>Texto na tela (até 50)</label><input data-k="texto_tela" value="${esc(b.texto_tela)}">
+          <label>Sugestão de imagem</label><input data-k="imagem" value="${esc(b.imagem)}"></div>
+      </div>
+    </div>`).join('') || '<p class="dica">Roteiro ainda sem blocos.</p>';
+  $('rd-blocos').querySelectorAll('[data-k]').forEach(el => el.addEventListener('input', () => {
+    const b = d.blocos[+el.closest('.bloco-rot').dataset.i], k = el.dataset.k;
+    b[k] = k === 'topicos' ? el.value.split('\n').filter(x => x.trim()) : k === 'segundos' ? (+el.value || 0) : el.value;
+    atualizarTempo();
+  }));
+  atualizarTempo(); renderizarCapaReels();
+}
+function atualizarTempo(){
+  const d = estado.dados, dur = estado.meta.duracao;
+  let total = 0, seg = 0;
+  document.querySelectorAll('#rd-blocos .bloco-rot').forEach(el => {
+    const b = d.blocos[+el.dataset.i], n = contaPalavras(b.fala), est = Math.round(n / PALAVRAS_POR_SEG);
+    total += n; seg += Number(b.segundos) || 0;
+    const c = el.querySelector('[data-cont]'); c.textContent = `${n} palavras ≈ ${est} s falados`;
+    c.classList.toggle('estoura', est > (Number(b.segundos)||0) + 3);
+    const tela = el.querySelector('[data-k="texto_tela"]'); tela.style.borderColor = String(b.texto_tela||'').length > 50 ? '#E0A800' : '';
+  });
+  const est = Math.round(total / PALAVRAS_POR_SEG), estoura = est > dur + 5;
+  $('rd-tempo').innerHTML = `<b style="font-weight:400;color:var(--petroleo)">Tempo:</b> ${total} palavras ≈ <span class="${estoura?'contador estoura':''}">${est} s falados</span> · soma dos blocos ${seg} s · meta ${dur} s
+    ${estoura ? '<div class="contador estoura">O texto ficou longo para a duração. Corte frases ou peça ajuste ao Glauber.</div>' : ''}`;
+}
+function htmlCapaReels(d){
+  return `<section class="slide escuro vertical">
+    <img class="marca-agua" src="assets/caracol-branco.svg" alt="" style="width:1400px;right:-560px;bottom:-380px;opacity:.10">
+    <div class="topo"><img src="assets/logo-branco.svg" alt=""></div>
+    <div class="conteudo" style="margin-top:520px">
+      ${d.capa.kicker ? `<div class="kicker">${fmt(d.capa.kicker)}</div><div class="fio"></div>` : ''}
+      <h1 style="font-size:112px">${fmt(d.capa.titulo) || '<span style="opacity:.35">Título da capa</span>'}</h1>
+    </div>
+    <div class="rodape-s" style="bottom:110px"><span>@PALACIOGOMES.ADV</span><span>CASO EM PAUTA</span></div>
+  </section>`;
+}
+function renderizarCapaReels(){ $('rd-capa-previa').innerHTML = htmlCapaReels(estado.dados); }
+$('rd-kicker').addEventListener('input', e => { estado.dados.capa.kicker = e.target.value; renderizarCapaReels(); });
+$('rd-capa').addEventListener('input', e => { estado.dados.capa.titulo = e.target.value; renderizarCapaReels(); });
+$('rd-urgencia').addEventListener('change', e => { estado.dados.urgencia = e.target.value; });
+$('legenda-reels').addEventListener('input', e => { estado.dados.legenda = e.target.value; });
+$('btn-copiar-reels').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('legenda-reels').value); avisar('Legenda copiada.'); }
+  catch { $('legenda-reels').select(); avisar('Selecione e copie com Ctrl+C.', true); }
+});
+$('rd-postagem').addEventListener('change', async e => {
+  const v = e.target.value || null;
+  const { error } = await sb.from('pecas').update({ data_postagem: v }).eq('id', estado.id);
+  if (error) return avisar('Não foi possível salvar a data: ' + error.message, true);
+  estado.meta.data_postagem = v; avisar(v ? 'Data de postagem salva.' : 'Data removida.');
+});
+$('rd-gravado').addEventListener('change', async e => {
+  const v = e.target.checked ? new Date().toISOString() : null;
+  const { error } = await sb.from('pecas').update({ gravado_em: v }).eq('id', estado.id);
+  if (error){ e.target.checked = !e.target.checked; return avisar('Não foi possível salvar: ' + error.message, true); }
+  estado.meta.gravado_em = v; avisar(v ? 'Marcado como gravado.' : 'Desmarcado.');
+});
+function aprovado(){ return ['aprovada','publicada'].includes(estado.meta.status); }
+$('btn-baixar-capa').addEventListener('click', async () => {
+  if (!aprovado()) return avisar('Aprove o roteiro no painel de revisão para liberar a capa.', true);
+  if (typeof htmlToImage === 'undefined') return avisar('A ferramenta de exportação não carregou. Recarregue a página.', true);
+  await document.fonts.ready;
+  const el = $('rd-capa-previa').querySelector('.slide'), btn = $('btn-baixar-capa'); btn.disabled = true;
+  try {
+    const blob = await htmlToImage.toBlob(el, { width:1080, height:1920, pixelRatio:1, cacheBust:false });
+    baixarBlob(blob, nomeArquivo() + '_capa-reels.png'); avisar('Capa baixada.');
+  } catch (err) { console.error('[Tarsila] capa', err); avisar('Falha ao gerar a capa. Tente novamente.', true); }
+  finally { btn.disabled = false; }
+});
+function baixarBlob(blob, nome){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+$('btn-baixar-roteiro').addEventListener('click', () => {
+  const d = estado.dados, m = estado.meta;
+  const txt = [`ROTEIRO · ${semMarcacao(d.capa.titulo)}`, `${NOMES_FORMATO[m.formato]||''} · ${m.duracao} s`, m.fonte_url ? 'Fonte: ' + m.fonte_url : '', '',
+    ...d.blocos.map((b, i) => `${i+1}. ${(NOMES_ETAPA[b.etapa]||b.etapa).toUpperCase()} · ${b.quem} · ${b.segundos} s\n${b.fala}\n[Tela] ${b.texto_tela}\n[Imagem] ${b.imagem}\n`),
+    '', 'LEGENDA', d.legenda || ''].join('\n');
+  baixarBlob(new Blob([txt], { type:'text/plain;charset=utf-8' }), nomeArquivo() + '_roteiro.txt');
+});
+$('btn-tp-um').addEventListener('click', async () => {
+  try { await salvarEdicoes(); } catch (e) { return avisar('Não foi possível salvar: ' + e.message, true); }
+  if (!aprovado() && !window.confirm('Este roteiro ainda não foi aprovado. Abrir no teleprompter só para ensaiar?')) return;
+  abrirTeleprompter([estado.id]);
+});
+
+/* ---------- teleprompter ---------- */
+const tp = { lista:[], i:0, rodando:false, ultimo:0, resto:0 };
+async function abrirTeleprompter(ids){
+  const { data, error } = await sb.from('pecas').select('id,titulo,formato,duracao,conteudo,gravado_em').in('id', ids);
+  if (error || !Array.isArray(data) || !data.length) return alert('Não foi possível abrir o teleprompter.');
+  tp.lista = ids.map(id => data.find(x => x.id === id)).filter(Boolean); tp.i = 0;
+  let pref = {}; try { pref = JSON.parse(localStorage.getItem('estudio_tp') || '{}'); } catch {}
+  if (pref.vel) $('tp-vel').value = pref.vel; if (pref.tam) $('tp-tam').value = pref.tam;
+  if (pref.modo) $('tp-modo').value = pref.modo; $('tp-espelho').checked = !!pref.espelho;
+  $('teleprompter').classList.remove('oculto'); document.body.style.overflow = 'hidden';
+  mostrarTp();
+}
+function salvarPrefTp(){
+  try { localStorage.setItem('estudio_tp', JSON.stringify({ vel:$('tp-vel').value, tam:$('tp-tam').value, modo:$('tp-modo').value, espelho:$('tp-espelho').checked })); } catch {}
+}
+function mostrarTp(){
+  pararTp();
+  const r = tp.lista[tp.i], c = r.conteudo || {}, topicos = $('tp-modo').value === 'topicos';
+  $('tp-titulo').textContent = `${tp.i+1} de ${tp.lista.length} · ${r.titulo} · ${NOMES_FORMATO[r.formato]||''} · ${r.duracao||45} s${r.gravado_em ? ' · já gravado' : ''}`;
+  $('tp-ant').disabled = tp.i === 0; $('tp-prox').disabled = tp.i >= tp.lista.length - 1;
+  $('tp-gravado').textContent = r.gravado_em ? '✓ Gravado' : 'Marcar como gravado';
+  const rolo = $('tp-rolo');
+  rolo.style.fontSize = $('tp-tam').value + 'px';
+  rolo.classList.toggle('espelho', $('tp-espelho').checked);
+  rolo.innerHTML = (c.blocos||[]).map(b => `<div class="tp-bloco">
+      <span class="tp-quem ${b.quem === 'Giovanna' ? 'giovanna' : ''}">${esc(b.quem)} · ${esc(NOMES_ETAPA[b.etapa]||b.etapa)}</span>
+      ${topicos && (b.topicos||[]).length ? `<ul>${b.topicos.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : `<div class="tp-fala">${esc(b.fala)}</div>`}
+      ${b.texto_tela ? `<span class="tp-tela">Tela: ${esc(b.texto_tela)}</span>` : ''}
+    </div>`).join('') + '<div class="tp-bloco" style="opacity:.4;font-size:.5em">— fim —</div>';
+  rolo.scrollTop = 0;
+}
+function passoTp(t){
+  if (!tp.rodando) return;
+  const dt = tp.ultimo ? (t - tp.ultimo) / 1000 : 0; tp.ultimo = t;
+  const rolo = $('tp-rolo');
+  tp.resto += dt * Number($('tp-vel').value);
+  const px = Math.floor(tp.resto); tp.resto -= px;
+  if (px) rolo.scrollTop += px;
+  if (rolo.scrollTop + rolo.clientHeight >= rolo.scrollHeight - 1) return pararTp();
+  requestAnimationFrame(passoTp);
+}
+function iniciarTp(){ tp.rodando = true; tp.ultimo = 0; tp.resto = 0; $('tp-play').textContent = '❚❚ Pausar'; requestAnimationFrame(passoTp); }
+function pararTp(){ tp.rodando = false; $('tp-play').textContent = '▶ Rolar'; }
+function fecharTp(){ pararTp(); $('teleprompter').classList.add('oculto'); document.body.style.overflow = ''; salvarPrefTp();
+  if (!$('pg-reels').classList.contains('oculto') && !$('reels-lista-view').classList.contains('oculto')) carregarListaReels(); }
+$('tp-play').addEventListener('click', () => tp.rodando ? pararTp() : iniciarTp());
+$('tp-inicio').addEventListener('click', () => { pararTp(); $('tp-rolo').scrollTop = 0; });
+$('tp-ant').addEventListener('click', () => { if (tp.i > 0){ tp.i--; mostrarTp(); } });
+$('tp-prox').addEventListener('click', () => { if (tp.i < tp.lista.length - 1){ tp.i++; mostrarTp(); } });
+$('tp-fechar').addEventListener('click', fecharTp);
+$('tp-tam').addEventListener('input', () => { $('tp-rolo').style.fontSize = $('tp-tam').value + 'px'; salvarPrefTp(); });
+$('tp-vel').addEventListener('input', salvarPrefTp);
+$('tp-modo').addEventListener('change', () => { salvarPrefTp(); mostrarTp(); });
+$('tp-espelho').addEventListener('change', () => { $('tp-rolo').classList.toggle('espelho', $('tp-espelho').checked); salvarPrefTp(); });
+$('tp-gravado').addEventListener('click', async () => {
+  const r = tp.lista[tp.i], v = r.gravado_em ? null : new Date().toISOString();
+  const { error } = await sb.from('pecas').update({ gravado_em: v }).eq('id', r.id);
+  if (error) return alert('Não foi possível salvar: ' + error.message);
+  r.gravado_em = v; if (estado.id === r.id){ estado.meta.gravado_em = v; $('rd-gravado').checked = !!v; }
+  mostrarTp();
+});
+document.addEventListener('keydown', e => {
+  if ($('teleprompter').classList.contains('oculto')) return;
+  if (e.key === 'Escape') fecharTp();
+  else if (e.key === ' '){ e.preventDefault(); tp.rodando ? pararTp() : iniciarTp(); }
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); $('tp-vel').value = Math.min(160, +$('tp-vel').value + 10); salvarPrefTp(); }
+  else if (e.key === 'ArrowDown'){ e.preventDefault(); $('tp-vel').value = Math.max(10, +$('tp-vel').value - 10); salvarPrefTp(); }
+});
+$('btn-modo-gravacao').addEventListener('click', async () => {
+  const { data } = await sb.from('pecas').select('id,conteudo,criado_em,gravado_em').eq('modelo','reels').eq('status','aprovada').is('gravado_em', null).order('criado_em');
+  const lst = Array.isArray(data) ? data : [];
+  if (!lst.length) return alert('Não há roteiros aprovados aguardando gravação.');
+  lst.sort((a,b) => ((b.conteudo||{}).urgencia === 'postar_logo') - ((a.conteudo||{}).urgencia === 'postar_logo'));
+  abrirTeleprompter(lst.map(x => x.id));
 });
 
 /* ---------------- Início ---------------- */

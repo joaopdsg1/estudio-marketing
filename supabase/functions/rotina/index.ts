@@ -1,5 +1,5 @@
 // Estúdio de Marketing · Edge Function "rotina"
-// Tarefas agendadas: pauta semanal (Atena), briefing diário (Péricles) e Radar (Rondon).
+// Tarefas agendadas: pauta semanal e pauta mensal de Reels (Atena), briefing diário (Péricles) e Radar (Rondon).
 // Chamada pelo agendador (cabeçalho x-cron-secret) ou pela tela (usuário logado).
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
@@ -59,7 +59,7 @@ Responda somente com o JSON no formato solicitado.`;
 
 const SISTEMA_PERICLES = `Você é Péricles, gestor do Estúdio de Marketing da Palácio Gomes Advocacia. Toda manhã você escreve ao advogado João Pedro um resumo curto do que precisa da decisão dele hoje.
 
-Regras: português do Brasil, tom direto e cordial, no máximo 5 frases curtas, sem listas, sem emojis, sem cumprimentos longos. Comece pelo que é mais urgente (peças aguardando aprovação, bloqueios, pauta da semana a aprovar). Se não houver nada pendente, diga isso em uma frase. Não invente dados: use apenas os números fornecidos.`;
+Regras: português do Brasil, tom direto e cordial, no máximo 5 frases curtas, sem listas, sem emojis, sem cumprimentos longos. Comece pelo que é mais urgente (peças aguardando aprovação, bloqueios, pauta da semana a aprovar, gravação de Reels próxima, Reels marcado para postar hoje). Se não houver nada pendente, diga isso em uma frase. Não invente dados: use apenas os números fornecidos.`;
 
 const SCHEMA_ATENA = {
   type: "object", additionalProperties: false,
@@ -157,13 +157,13 @@ Deno.serve(async (req) => {
 
   /* =============== PAUTA SEMANAL (ATENA) =============== */
   if (corpo.tarefa === "pauta_semanal") {
-    const { data: existentes } = await admin.from("pautas").select("id,status").eq("semana", semana);
+    const { data: existentes } = await admin.from("pautas").select("id,status").eq("semana", semana).eq("tipo", "carrossel");
     const abertas = (existentes || []).filter((p) => p.status === "proposta");
     if ((existentes || []).length && !corpo.forcar)
       return json({ ok: true, aviso: "A pauta desta semana já existe.", semana });
     if (abertas.length) await admin.from("pautas").update({ status: "descartada" }).in("id", abertas.map((p) => p.id));
 
-    const n = (cfg.posts_por_semana || 2) + 1;
+    const n = (cfg.posts_por_semana || 2) + 1; // carrosséis; o Reels semanal tem pauta mensal própria
     const { data: radar } = await admin.from("radar_itens").select("id,categoria,titulo,resumo,fonte,data_publicacao,gancho_juridico,estrategia_em_tese,relevancia,url")
       .eq("semana", semana).eq("status", "novo").order("relevancia", { ascending: false }).limit(15);
     const [{ data: recentes }, { data: descartadas }, { data: regras }] = await Promise.all([
@@ -195,6 +195,82 @@ ${(radar || []).map((x) => `- id ${x.id} [${x.categoria} · relevância ${x.rele
     return json({ ok: true, semana, pautas: linhas.length, resumo: r.resumo_semana, origem });
   }
 
+  /* =============== PAUTA MENSAL DE REELS (ATENA) =============== */
+  if (corpo.tarefa === "pauta_reels") {
+    const lote = iso(hoje).slice(0, 7); // AAAA-MM
+    const { data: existentes } = await admin.from("pautas").select("id,status").eq("tipo", "reels").eq("lote", lote);
+    const abertas = (existentes || []).filter((p) => p.status === "proposta");
+    if ((existentes || []).length && !corpo.forcar)
+      return json({ ok: true, aviso: "A pauta de Reels deste mês já existe.", lote });
+    if (abertas.length) await admin.from("pautas").update({ status: "descartada" }).in("id", abertas.map((p) => p.id));
+
+    const desde = new Date(hoje); desde.setDate(desde.getDate() - 42);
+    const [{ data: radar }, { data: feitos }, { data: descartadas }, { data: regras }] = await Promise.all([
+      admin.from("radar_itens").select("id,categoria,titulo,resumo,fonte,data_publicacao,gancho_juridico,estrategia_em_tese,risco_etico,relevancia,url,status")
+        .gte("criado_em", desde.toISOString()).neq("status", "descartado").order("relevancia", { ascending: false }).limit(25),
+      admin.from("pecas").select("titulo,radar_id").eq("modelo", "reels").neq("status", "rejeitada").order("criado_em", { ascending: false }).limit(20),
+      admin.from("pautas").select("tema").eq("tipo", "reels").eq("status", "descartada").order("criado_em", { ascending: false }).limit(10),
+      admin.from("aprendizados").select("regra").eq("ativo", true).in("agente", ["atena", "glauber", "todas"]),
+    ]);
+    const jaEmReels = new Set((feitos || []).map((p) => p.radar_id).filter(Boolean));
+    const candidatos = (radar || []).filter((x) => !jaEmReels.has(x.id));
+    if (!candidatos.length) return json({ erro: "O Radar não tem notícias das últimas 6 semanas ainda não usadas em Reels. Rode o radar e tente de novo." }, 422);
+
+    const SISTEMA_ATENA_REELS = `Você é Atena, estrategista de conteúdo do Estúdio de Marketing da Palácio Gomes Advocacia (recuperação de crédito para empresas, com foco em escolas particulares). Você monta a pauta MENSAL de Reels: o advogado grava todos os vídeos do mês num único dia e publica 1 por semana, ao longo das 4 a 6 semanas seguintes.
+
+CADA REELS É UM ESTUDO DE CASO A PARTIR DE UMA NOTÍCIA DO RADAR (nunca vídeo de dicas). Escolha apenas notícias da lista, informando o radar_id.
+CRITÉRIOS DE ESCOLHA:
+- A notícia permite explicar um instrumento jurídico de cobrança útil a uma escola ou empresa credora (penhora, bloqueio, protesto, negativação, prescrição, execução, fraude contra credores, acordo, limites do CDC etc.).
+- Prefira casos que continuem relevantes por semanas ou cuja lição vale independentemente da novidade; marque "urgencia" = "postar_logo" só quando o interesse depender de a notícia estar em evidência.
+- Varie os instrumentos jurídicos e as categorias. Evite pautas descartadas.
+- "angulo": em uma frase, a ponte entre a notícia e a realidade da escola, e a estratégia em tese para o credor.
+- "conscientizacao": em uma frase, que risco ou complexidade da cobrança o vídeo faz o gestor perceber (ex.: cobrança abusiva, prescrição, prova, escolha do instrumento), sem nunca convidar à contratação.
+- "formato": "joao", "giovanna" ou "dupla" — distribua entre os dois apresentadores ao longo do mês; use "dupla" em no máximo 2 vídeos.
+- "duracao": 30, 45 ou 60 (prefira 45; 60 só quando a estratégia exigir).
+
+REGRAS ÉTICAS (Provimento 205/2021 e Código de Ética, art. 42, II): sem opinar sobre o mérito, sobre o devedor ou sobre os advogados das partes; estratégia sempre em tese; nunca resultados, clientes ou chamadas para contratação. Se uma notícia tiver risco ético alto (ex.: exposição de pessoa em situação de vulnerabilidade), não a escolha.
+
+Responda somente com o JSON no formato solicitado.`;
+    const SCHEMA_REELS = {
+      type: "object", additionalProperties: false, required: ["resumo_lote", "pautas"],
+      properties: {
+        resumo_lote: { type: "string" },
+        pautas: { type: "array", items: { type: "object", additionalProperties: false,
+          required: ["tema", "radar_id", "angulo", "conscientizacao", "formato", "duracao", "urgencia", "justificativa"],
+          properties: {
+            tema: { type: "string" }, radar_id: { type: "string" }, angulo: { type: "string" }, conscientizacao: { type: "string" },
+            formato: { type: "string", enum: ["joao", "giovanna", "dupla"] },
+            duracao: { type: "string", enum: ["30", "45", "60"] },
+            urgencia: { type: "string", enum: ["atemporal", "postar_logo"] },
+            justificativa: { type: "string" } } } },
+      },
+    };
+    const msg = `HOJE: ${hoje.toLocaleDateString("pt-BR")}. LOTE: ${lote}.
+Proponha 5 pautas de Reels (o advogado aprova 4 ou 5), em ordem de prioridade.
+
+NOTÍCIAS DISPONÍVEIS NO RADAR (últimas 6 semanas, ainda não usadas em Reels):
+${candidatos.map((x) => `- id ${x.id} [${x.categoria} · relevância ${x.relevancia}${x.status === "usado" ? " · já virou carrossel" : ""}] ${x.titulo} (${x.fonte}, ${x.data_publicacao}). ${x.resumo} | Gancho: ${x.gancho_juridico || "-"} | Estratégia em tese: ${x.estrategia_em_tese || "-"}${x.risco_etico ? " | Cuidado: " + x.risco_etico : ""}`).join("\n")}
+
+PAUTAS DE REELS DESCARTADAS (evitar):
+${(descartadas || []).map((p) => `- ${p.tema}`).join("\n") || "- nenhuma"}
+${(regras || []).length ? `\nREGRAS DO ADVOGADO:\n${regras!.map((r) => `- ${r.regra}`).join("\n")}` : ""}`;
+    const { r, falha } = await chamar("atena", SISTEMA_ATENA_REELS, msg, SCHEMA_REELS);
+    if (!r) return json({ erro: "Atena: " + falha }, 502);
+    const porId = Object.fromEntries(candidatos.map((x) => [x.id, x]));
+    const usados = new Set<string>();
+    const linhas = (r.pautas || []).filter((p: any) => porId[p.radar_id] && !usados.has(p.radar_id) && usados.add(p.radar_id))
+      .slice(0, 6).map((p: any, i: number) => ({
+        tipo: "reels", modelo: "reels", pilar: "Casos em Pauta", lote, semana: `${lote}-01`, ordem: i + 1,
+        tema: p.tema, angulo: p.angulo, justificativa: `${p.justificativa} · Consciência: ${p.conscientizacao}`,
+        formato: p.formato, duracao: Number(p.duracao) || 45, urgencia: p.urgencia,
+        radar_id: p.radar_id, fonte_url: porId[p.radar_id].url, status: "proposta",
+      }));
+    if (!linhas.length) return json({ erro: "A Atena não indicou notícias válidas do Radar. Tente novamente." }, 502);
+    const { error } = await admin.from("pautas").insert(linhas);
+    if (error) return json({ erro: "Falha ao gravar a pauta de Reels: " + error.message }, 500);
+    return json({ ok: true, lote, pautas: linhas.length, resumo: r.resumo_lote, origem });
+  }
+
   /* =============== BRIEFING (PÉRICLES) =============== */
   if (corpo.tarefa === "briefing") {
     const [{ data: aguardando }, { data: bloqueadas }, { data: aprovadas }, { data: publicadas }, { data: pautasSemana }, { data: gastoAgora }] = await Promise.all([
@@ -202,9 +278,26 @@ ${(radar || []).map((x) => `- id ${x.id} [${x.categoria} · relevância ${x.rele
       admin.from("pecas").select("id,titulo").eq("status", "bloqueada"),
       admin.from("pecas").select("id,titulo").eq("status", "aprovada"),
       admin.from("pecas").select("id").eq("status", "publicada").gte("atualizado_em", semana),
-      admin.from("pautas").select("id,tema,status,dia_sugerido").eq("semana", semana).order("ordem"),
+      admin.from("pautas").select("id,tema,status,dia_sugerido").eq("semana", semana).eq("tipo", "carrossel").order("ordem"),
       admin.rpc("custo_mes"),
     ]);
+    const lote = iso(hoje).slice(0, 7);
+    const [{ data: reels }, { data: pautasReels }] = await Promise.all([
+      admin.from("pecas").select("id,titulo,status,gravado_em,data_postagem").eq("modelo", "reels").neq("status", "rejeitada").neq("status", "publicada"),
+      admin.from("pautas").select("id").eq("tipo", "reels").eq("lote", lote).eq("status", "proposta"),
+    ]);
+    const gravRaw = (cfgs || []).find((c) => c.chave === "proxima_gravacao")?.valor;
+    const proximaGravacao = typeof gravRaw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(gravRaw) ? gravRaw : null;
+    const diasGravacao = proximaGravacao ? Math.round((new Date(proximaGravacao + "T12:00:00").getTime() - new Date(iso(hoje) + "T12:00:00").getTime()) / 864e5) : null;
+    const rl = reels || [];
+    const reelsInfo = {
+      proxima_gravacao: proximaGravacao, dias_para_gravacao: diasGravacao,
+      pautas_reels_propostas: (pautasReels || []).length,
+      roteiros_aguardando: rl.filter((p) => ["aguardando_voce", "bloqueada"].includes(p.status)).length,
+      roteiros_prontos_para_gravar: rl.filter((p) => p.status === "aprovada" && !p.gravado_em).length,
+      gravados_a_publicar: rl.filter((p) => p.status === "aprovada" && p.gravado_em).length,
+      reels_postar_hoje: rl.filter((p) => p.gravado_em && p.data_postagem === iso(hoje)).map((p) => p.titulo),
+    };
     const meta = cfg.posts_por_semana || 2;
     const dados = {
       data: iso(hoje), semana,
@@ -215,6 +308,7 @@ ${(radar || []).map((x) => `- id ${x.id} [${x.categoria} · relevância ${x.rele
       pautas_propostas: (pautasSemana || []).filter((p) => p.status === "proposta").length,
       pautas_aprovadas: (pautasSemana || []).filter((p) => ["aprovada", "produzida"].includes(p.status)).length,
       consumo_usd: Number(gastoAgora ?? 0), teto_usd: teto,
+      reels: reelsInfo,
     };
     const msg = `Dados de hoje (${DIAS[hoje.getDay()]}, ${hoje.toLocaleDateString("pt-BR")}):
 - Peças aguardando aprovação: ${dados.aguardando.length}${dados.aguardando.length ? " (" + dados.aguardando.map((p) => p.titulo).join("; ") + ")" : ""}
@@ -222,7 +316,14 @@ ${(radar || []).map((x) => `- id ${x.id} [${x.categoria} · relevância ${x.rele
 - Aprovadas e ainda não publicadas: ${dados.aprovadas_nao_publicadas.length}
 - Publicadas nesta semana: ${dados.publicadas_semana} de ${meta}
 - Pautas da semana aguardando aprovação: ${dados.pautas_propostas} (já aprovadas: ${dados.pautas_aprovadas})
-- Consumo de IA no mês: US$ ${dados.consumo_usd.toFixed(2)} de US$ ${teto}`;
+- Consumo de IA no mês: US$ ${dados.consumo_usd.toFixed(2)} de US$ ${teto}
+REELS (1 por semana, gravados em lote uma vez por mês):
+- Próxima gravação: ${proximaGravacao ? `${new Date(proximaGravacao + "T12:00:00").toLocaleDateString("pt-BR")} (${diasGravacao === 0 ? "hoje" : diasGravacao! > 0 ? `em ${diasGravacao} dia(s)` : "data já passou; pedir nova data"})` : "não marcada"}
+- Pautas de Reels do mês aguardando aprovação: ${reelsInfo.pautas_reels_propostas}
+- Roteiros aguardando decisão: ${reelsInfo.roteiros_aguardando}
+- Roteiros aprovados prontos para gravar: ${reelsInfo.roteiros_prontos_para_gravar}
+- Vídeos gravados a publicar: ${reelsInfo.gravados_a_publicar}${reelsInfo.reels_postar_hoje.length ? `\n- Reels marcado para postar hoje: ${reelsInfo.reels_postar_hoje.join("; ")}` : ""}
+Se a gravação estiver a 3 dias ou menos, avise quantos roteiros estão prontos e quantos ainda faltam aprovar.`;
     const { r } = await chamar("pericles", SISTEMA_PERICLES, msg);
     const resumo = r || "Não consegui redigir o resumo hoje; os números abaixo estão atualizados.";
     await admin.from("briefings").upsert({ data: dados.data, resumo, dados }, { onConflict: "data" });
