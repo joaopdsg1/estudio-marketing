@@ -25,6 +25,7 @@ Site interno, separado do SENESCAL, onde agentes de IA produzem conteúdo para o
 | v002 | 1 | Tarsila: 3 modelos de carrossel (Lista, Pergunta e Resposta, Mito × Fato), editor manual, prévia, aviso de texto excedente, rascunhos (tabela `pecas`), exportação PNG 1080×1350 em ZIP |
 | v003 | 2 | Clarice (redação) e Têmis (revisão OAB) via Edge Function `agente`; Fila de peças; painel de revisão com aprovar / reescrever / nova revisão / rejeitar; aprendizados; consumo do mês e teto de US$ 12 |
 | v004 | 3 | Atena (pauta semanal, segunda 6h30) e Péricles (resumo do dia, seg–sex 7h) via Edge Function `rotina` + pg_cron; Mesa com resumo, pauta da semana (aprovar e produzir / descartar) |
+| v005 | 4 | Rondon: Radar semanal (casos públicos, números, setores) com pesquisa na web restrita a fontes confiáveis e links verificados; perfis de referência; Atena usa o Radar; Clarice com o estilo do João e regras de casos públicos; Têmis item 12 |
 
 ## Contrato do conteúdo de um carrossel (`pecas.conteudo`)
 

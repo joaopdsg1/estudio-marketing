@@ -158,6 +158,26 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 .item-pauta .acoes-p{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .item-pauta.descartada{opacity:.45}
 @media (max-width:760px){.item-pauta{grid-template-columns:28px 1fr}.item-pauta .acoes-p{grid-column:2;justify-content:flex-start}}
+/* Radar */
+.radar-cat{margin-bottom:28px}
+.radar-cat h3{font-size:26px;color:var(--petroleo);margin-bottom:10px}
+.radar-item{background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:14px 18px;margin-bottom:10px}
+.radar-item .t{font-weight:400;color:var(--grafite);font-size:16px}
+.radar-item .meta{font-size:13px;color:#7a8290;margin:2px 0 8px}
+.radar-item .linha-r{font-size:14px;margin-top:4px}
+.radar-item .linha-r b{font-weight:400;color:var(--petroleo)}
+.radar-item .risco{font-size:13px;background:#FFF6E0;border:1px solid #F0D58A;color:var(--alerta);border-radius:6px;padding:6px 10px;margin-top:8px}
+.radar-item .acoes-r{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.radar-item.usado{opacity:.6}
+.radar-item a{color:var(--petroleo)}
+.relev{color:var(--nevoa);letter-spacing:1px}
+.caixa{background:#fff;border:1.5px solid var(--linha);border-radius:12px;padding:6px 20px 18px;margin-bottom:24px}
+.caixa h3{font-size:26px;color:var(--petroleo);margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.form-linha{display:grid;grid-template-columns:2fr 1fr 2fr 2fr auto;gap:8px;align-items:end;margin-top:8px}
+@media (max-width:760px){.form-linha{grid-template-columns:1fr}}
+.fontes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.fonte-chip{font-size:13px;border:1px solid var(--linha);border-radius:20px;padding:3px 10px;cursor:pointer;background:var(--gelo)}
+.fonte-chip.off{opacity:.45;text-decoration:line-through}
 .legenda-box{margin-top:22px;background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:4px 20px 18px}
 
 /* ================= SLIDES (1080 × 1350) ================= */
@@ -247,6 +267,7 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
       <button data-pg="mesa" class="ativo">Mesa</button>
       <button data-pg="fila">Fila de peças</button>
       <button data-pg="tarsila">Tarsila · Carrosséis</button>
+      <button data-pg="radar">Radar</button>
     </nav>
     <div class="usuario"><span id="nome-usuario"></span><button id="btn-sair" type="button">Sair</button></div>
   </header>
@@ -278,7 +299,7 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
           <select id="np-pilar">
             <option>Gestão de Inadimplência</option><option>Diálogo com o Gestor Escolar</option>
             <option>Gestão de Contratos</option><option>Relações Consumeristas</option>
-            <option>Casos Ilustrativos</option><option>Relações Societárias e Sucessão</option></select></div>
+            <option>Casos Ilustrativos</option><option>Casos em Pauta</option><option>Relações Societárias e Sucessão</option></select></div>
       </div>
       <label for="np-obs">Observações para a Clarice (opcional)</label>
       <textarea id="np-obs" rows="2" placeholder="Ex.: enfatizar a importância de formalizar o acordo por escrito"></textarea>
@@ -287,6 +308,41 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
     </div>
     <div style="overflow-x:auto"><table class="fila"><thead><tr><th>Peça</th><th>Modelo · pilar</th><th>Situação</th><th>Custo IA</th><th>Atualizada</th></tr></thead>
       <tbody id="lista-fila"><tr><td colspan="5">Carregando…</td></tr></tbody></table></div>
+  </main>
+
+  <!-- Radar -->
+  <main class="pagina oculto" id="pg-radar">
+    <h1>Radar da semana · Rondon</h1>
+    <p class="sub">Notícias dos últimos 7 dias em fontes confiáveis. Toda segunda, às 5h, antes da pauta da Atena. Confira sempre a fonte antes de publicar.</p>
+    <div class="decisao" style="margin:-10px 0 20px">
+      <button class="btn" id="btn-rodar-radar" type="button">Rodar o radar agora</button>
+      <button class="btn sec" id="btn-radar-pauta" type="button">Pedir nova pauta à Atena com este radar</button>
+    </div>
+    <div class="progresso" id="prog-radar"></div>
+    <div id="radar-lista"></div>
+    <div class="caixa">
+      <h3><span>Perfis de referência</span><button class="btn sec mini" id="btn-sugerir-perfis" type="button">Pedir sugestões ao Rondon</button></h3>
+      <p class="dica" style="font-size:13px;color:#7a8290">Concorrentes e perfis que falam do tema. O Rondon sugere; você aceita ou recusa. A análise dos posts continua dependendo do link ou da transcrição que você colar.</p>
+      <div class="form-linha">
+        <div><label for="pf-nome">Nome</label><input id="pf-nome"></div>
+        <div><label for="pf-tipo">Tipo</label><select id="pf-tipo"><option value="instagram">Instagram</option><option value="site">Site</option><option value="youtube">YouTube</option><option value="linkedin">LinkedIn</option><option value="outro">Outro</option></select></div>
+        <div><label for="pf-end">@ ou endereço</label><input id="pf-end"></div>
+        <div><label for="pf-obs">Observação</label><input id="pf-obs"></div>
+        <div><button class="btn" id="btn-add-perfil" type="button">Adicionar</button></div>
+      </div>
+      <div class="progresso" id="prog-perfis"></div>
+      <div style="overflow-x:auto;margin-top:14px"><table class="fila"><thead><tr><th>Nome</th><th>Tipo</th><th>Endereço</th><th>Observação</th><th>Situação</th></tr></thead><tbody id="lista-perfis"></tbody></table></div>
+    </div>
+    <div class="caixa">
+      <h3>Fontes confiáveis</h3>
+      <p class="dica" style="font-size:13px;color:#7a8290">O Rondon só pesquisa nestes sites. Clique para ativar ou desativar. Alguns sites (ex.: Estadão, UOL) bloqueiam o robô de pesquisa e ficam desativados.</p>
+      <div class="fontes" id="lista-fontes"></div>
+      <div class="form-linha" style="grid-template-columns:2fr 2fr auto">
+        <div><label for="fn-dom">Domínio (ex.: valor.globo.com)</label><input id="fn-dom"></div>
+        <div><label for="fn-nome">Nome</label><input id="fn-nome"></div>
+        <div><button class="btn sec" id="btn-add-fonte" type="button">Adicionar fonte</button></div>
+      </div>
+    </div>
   </main>
 
   <!-- Tarsila -->
@@ -342,8 +398,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v004';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 3 (Atena + Péricles)',
+const VERSAO = 'v005';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 4 (Radar do Rondon)',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -360,7 +416,7 @@ const EQUIPE = [
   {nome:'Clarice',  funcao:'Redatora',               etapa:2, ativo:true, pg:'fila'},
   {nome:'Têmis',    funcao:'Revisora OAB',           etapa:2, ativo:true, pg:'fila'},
   {nome:'Tarsila',  funcao:'Arte dos carrosséis',    etapa:1, ativo:true, pg:'tarsila'},
-  {nome:'Rondon',   funcao:'Análise de referências', etapa:4},
+  {nome:'Rondon',   funcao:'Radar e referências',    etapa:4, ativo:true, pg:'radar'},
   {nome:'Glauber',  funcao:'Roteiros de Reels',      etapa:5},
 ];
 
@@ -372,11 +428,12 @@ function mostrar(tela){
   $('tela-app').classList.toggle('oculto', tela !== 'app');
 }
 function irPara(pg){
-  ['mesa','fila','tarsila'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
+  ['mesa','fila','tarsila','radar'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
   document.querySelectorAll('header.topo-app nav button').forEach(b => b.classList.toggle('ativo', b.dataset.pg === pg));
   if (pg === 'tarsila'){ renderizarEditor(); renderizarPrevia(); renderizarRevisao(); carregarListaRascunhos(); }
   if (pg === 'fila'){ carregarFila(); }
   if (pg === 'mesa'){ carregarMesa(); }
+  if (pg === 'radar'){ carregarRadar(); }
 }
 document.querySelectorAll('header.topo-app nav button').forEach(b => b.addEventListener('click', () => irPara(b.dataset.pg)));
 
@@ -752,7 +809,7 @@ const NOMES_STATUS = { rascunho:'Rascunho', em_producao:'Em produção', em_revi
 const NOMES_MODELO = { lista:'Lista', pergunta:'Pergunta e Resposta', mitofato:'Mito × Fato' };
 const CRITERIOS = {0:'Instrução do advogado',1:'Promessa de resultado',2:'Clientes, casos ou valores',3:'Captação / mercantilização',
   4:'Comparação / autopromoção',5:'Sensacionalismo',6:'Fundamento jurídico',7:'Ressalva informativa',8:'Caso concreto / ilustrativo',
-  9:'Persuasão / incitação',10:'Consulta individual',11:'Exposição de devedores'};
+  9:'Persuasão / incitação',10:'Consulta individual',11:'Exposição de devedores',12:'Uso de caso público'};
 const usd = v => 'US$ ' + Number(v||0).toFixed(2).replace('.', ',');
 
 async function carregarConsumo(){
@@ -1029,6 +1086,7 @@ async function carregarPautas(){
           · <span class="selo ${p.status==='produzida'?'aprovada':p.status==='aprovada'?'em_revisao':'aguardando_voce'}">${{proposta:'Para decidir',aprovada:'Em produção',produzida:'Produzida'}[p.status]||p.status}</span></div>
         ${p.angulo ? `<div class="angulo"><span style="color:var(--petroleo)">Ângulo:</span> ${esc(p.angulo)}</div>` : ''}
         ${p.justificativa ? `<div class="angulo" style="color:#7a8290">${esc(p.justificativa)}</div>` : ''}
+        ${p.fonte_url ? `<div class="angulo"><a href="${esc(p.fonte_url)}" target="_blank" rel="noopener" style="color:var(--petroleo)">Notícia de origem (Radar) ↗</a></div>` : ''}
         <div class="progresso" id="pp-${p.id}"></div>
       </div>
       <div class="acoes-p">
@@ -1057,8 +1115,16 @@ async function carregarPautas(){
     alvoProgresso = 'pp-' + id;
     try {
       await sb.from('pautas').update({ status:'aprovada' }).eq('id', id);
+      let obs = p.angulo ? 'Ângulo sugerido pela Atena: ' + p.angulo : '';
+      if (p.radar_id){
+        const { data: n } = await sb.from('radar_itens').select('*').eq('id', p.radar_id).maybeSingle();
+        if (n){
+          obs += `\nNOTÍCIA DE BASE: ${n.titulo} — ${n.fonte}, ${n.data_publicacao}. ${n.url}\nResumo: ${n.resumo}\nGancho jurídico: ${n.gancho_juridico}\nEstratégia em tese: ${n.estrategia_em_tese}${n.risco_etico ? '\nCuidado ético: ' + n.risco_etico : ''}`;
+          await sb.from('radar_itens').update({ status:'usado' }).eq('id', n.id);
+        }
+      }
       const { data: nova, error } = await sb.from('pecas').insert({ titulo: p.tema.slice(0,200), tema: p.tema, modelo: p.modelo, pilar: p.pilar,
-        observacoes: p.angulo ? 'Ângulo sugerido pela Atena: ' + p.angulo : null, origem:'clarice', status:'em_producao', conteudo:{} }).select('id').single();
+        observacoes: obs || null, origem:'clarice', status:'em_producao', conteudo:{} }).select('id').single();
       if (error) throw new Error(error.message);
       await sb.from('pautas').update({ peca_id: nova.id }).eq('id', id);
       await cicloClariceTemis(nova.id, true);
@@ -1070,6 +1136,111 @@ async function carregarPautas(){
     } finally { alvoProgresso = 'progresso'; }
   }));
 }
+
+
+/* =========================================================
+   ETAPA 4 · Radar do Rondon
+   ========================================================= */
+const CATEGORIAS = [['caso_publico','Casos públicos'],['numeros','Números e pesquisas'],['setores','Setores: educação e pós-pagos']];
+async function carregarRadar(){
+  const semana = segundaISO();
+  const { data } = await sb.from('radar_itens').select('*').eq('semana', semana).neq('status','descartado').order('relevancia',{ascending:false});
+  const itens = Array.isArray(data) ? data : [];
+  $('radar-lista').innerHTML = CATEGORIAS.map(([cat, nome]) => {
+    const lst = itens.filter(i => i.categoria === cat);
+    return `<div class="radar-cat"><h3>${nome}</h3>${lst.length ? lst.map(i => `
+      <div class="radar-item${i.status==='usado'?' usado':''}" data-id="${i.id}">
+        <div class="t">${esc(i.titulo)}</div>
+        <div class="meta">${esc(i.fonte||'')} · ${esc(i.data_publicacao||'sem data')} · <span class="relev" title="relevância">${'●'.repeat(i.relevancia||0)}${'○'.repeat(5-(i.relevancia||0))}</span>${i.status==='usado'?' · já virou pauta':''}</div>
+        <div class="linha-r">${esc(i.resumo||'')}</div>
+        ${i.gancho_juridico ? `<div class="linha-r"><b>Gancho jurídico:</b> ${esc(i.gancho_juridico)}</div>` : ''}
+        ${i.estrategia_em_tese ? `<div class="linha-r"><b>Estratégia em tese:</b> ${esc(i.estrategia_em_tese)}</div>` : ''}
+        ${i.risco_etico ? `<div class="risco">${esc(i.risco_etico)}</div>` : ''}
+        <div class="acoes-r">
+          ${/^https?:\/\//.test(i.url||'') ? `<a href="${esc(i.url)}" target="_blank" rel="noopener">Abrir notícia ↗</a>` : ''}
+          ${i.status==='novo' ? `<button class="btn mini" data-acao="pauta" type="button">Virar pauta</button>
+          <button class="btn sec mini" data-acao="descartar" type="button">Descartar</button>` : ''}
+        </div>
+      </div>`).join('') : '<p class="dica" style="color:#7a8290;font-size:14px">Nada encontrado nesta semana.</p>'}</div>`;
+  }).join('');
+  document.querySelectorAll('#radar-lista [data-acao]').forEach(b => b.addEventListener('click', async () => {
+    const id = b.closest('.radar-item').dataset.id, i = itens.find(x => x.id === id);
+    if (b.dataset.acao === 'descartar'){ await sb.from('radar_itens').update({ status:'descartado' }).eq('id', id); return carregarRadar(); }
+    const { data: ps } = await sb.from('pautas').select('ordem').eq('semana', semana);
+    const ordem = Math.max(0, ...(Array.isArray(ps) ? ps.map(x => x.ordem) : [0])) + 1;
+    const { error } = await sb.from('pautas').insert({ semana, ordem, tema: i.titulo, modelo: 'lista',
+      pilar: i.categoria === 'numeros' ? 'Gestão de Inadimplência' : 'Casos em Pauta',
+      angulo: i.estrategia_em_tese || i.gancho_juridico, justificativa: 'Notícia do Radar: ' + (i.fonte||'') + ', ' + (i.data_publicacao||''),
+      radar_id: i.id, fonte_url: i.url, status: 'proposta' });
+    if (error) return alert('Não foi possível criar a pauta: ' + error.message);
+    $('prog-radar').textContent = 'Pauta criada. Ela aparece na Mesa, em "Pauta da semana", para você aprovar e produzir.';
+    carregarRadar();
+  }));
+  carregarPerfis(); carregarFontes();
+}
+$('btn-rodar-radar').addEventListener('click', async e => {
+  e.target.disabled = true; const prog = $('prog-radar'); prog.innerHTML = '';
+  const linha = t => { const d = document.createElement('div'); d.className = 'rodando'; d.textContent = t; prog.appendChild(d); return d; };
+  for (const [tarefa, nome] of [['radar_casos','casos públicos'],['radar_numeros','números e pesquisas'],['radar_setores','setores']]){
+    const l = linha(`Rondon pesquisando ${nome}…`);
+    try { const r = await chamarRotina(tarefa); l.className = 'feito'; l.textContent = `${nome}: ${r.itens} notícia(s)${r.descartados_sem_fonte ? ` (${r.descartados_sem_fonte} descartada(s) por falta de fonte verificável)` : ''}`; }
+    catch (err) { l.className = 'falhou'; l.textContent = `${nome}: falhou — ${err.message}`; }
+    await carregarRadar();
+  }
+  e.target.disabled = false; carregarConsumo();
+});
+$('btn-radar-pauta').addEventListener('click', async e => {
+  if (!window.confirm('A Atena vai descartar as pautas desta semana ainda não decididas e propor novas usando o radar. Continuar?')) return;
+  e.target.disabled = true; $('prog-radar').textContent = 'Atena montando a pauta com o radar…';
+  try { await chamarRotina('pauta_semanal', { forcar: true }); $('prog-radar').textContent = 'Pauta nova pronta. Veja na Mesa.'; }
+  catch (err) { $('prog-radar').textContent = 'Falhou: ' + err.message; }
+  e.target.disabled = false;
+});
+
+async function carregarPerfis(){
+  const { data } = await sb.from('perfis_referencia').select('*').neq('status','recusado').order('criado_em');
+  const lst = Array.isArray(data) ? data : [];
+  const link = p => { const e = p.endereco || ''; const url = /^https?:\/\//.test(e) ? e : (p.tipo==='instagram' && e ? 'https://instagram.com/' + e.replace(/^@/,'') : '');
+    return url ? `<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--petroleo)">${esc(e)}</a>` : esc(e); };
+  $('lista-perfis').innerHTML = lst.length ? lst.map(p => `<tr data-id="${p.id}">
+    <td>${esc(p.nome)}</td><td>${esc(p.tipo)}</td><td>${link(p)}</td><td>${esc(p.observacao||'')}</td>
+    <td>${p.status==='sugerido' ? `<span class="selo em_revisao">Sugerido pelo Rondon</span>
+      <div style="margin-top:6px;display:flex;gap:4px"><button class="btn mini" data-pf="ativo" type="button">Aceitar</button><button class="btn sec mini" data-pf="recusado" type="button">Recusar</button></div>`
+      : `<span class="selo aprovada">Ativo</span> <button class="btn sec mini" data-pf="recusado" type="button" title="Remover">✕</button>`}</td></tr>`).join('')
+    : '<tr><td colspan="5">Nenhum perfil cadastrado ainda.</td></tr>';
+  document.querySelectorAll('#lista-perfis [data-pf]').forEach(b => b.addEventListener('click', async () => {
+    await sb.from('perfis_referencia').update({ status: b.dataset.pf }).eq('id', b.closest('tr').dataset.id); carregarPerfis();
+  }));
+}
+$('btn-add-perfil').addEventListener('click', async () => {
+  const nome = $('pf-nome').value.trim(); if (!nome) return;
+  const { error } = await sb.from('perfis_referencia').insert({ nome, tipo: $('pf-tipo').value, endereco: $('pf-end').value.trim() || null,
+    observacao: $('pf-obs').value.trim() || null, origem: 'joao', status: 'ativo' });
+  if (error) return alert('Não foi possível adicionar: ' + error.message);
+  ['pf-nome','pf-end','pf-obs'].forEach(i => $(i).value = ''); carregarPerfis();
+});
+$('btn-sugerir-perfis').addEventListener('click', async e => {
+  e.target.disabled = true; $('prog-perfis').textContent = 'Rondon procurando perfis…';
+  try { const r = await chamarRotina('radar_perfis'); $('prog-perfis').textContent = `${r.sugeridos} sugestão(ões) nova(s).`; carregarPerfis(); carregarConsumo(); }
+  catch (err) { $('prog-perfis').textContent = 'Falhou: ' + err.message; }
+  e.target.disabled = false;
+});
+async function carregarFontes(){
+  const { data } = await sb.from('fontes_confiaveis').select('*').order('nome');
+  const lst = Array.isArray(data) ? data : [];
+  $('lista-fontes').innerHTML = lst.map(f => `<span class="fonte-chip${f.ativo?'':' off'}" data-dom="${esc(f.dominio)}" title="${esc(f.dominio)}">${esc(f.nome||f.dominio)}</span>`).join('');
+  document.querySelectorAll('#lista-fontes .fonte-chip').forEach(c => c.addEventListener('click', async () => {
+    const f = lst.find(x => x.dominio === c.dataset.dom);
+    await sb.from('fontes_confiaveis').update({ ativo: !f.ativo }).eq('dominio', f.dominio); carregarFontes();
+  }));
+}
+$('btn-add-fonte').addEventListener('click', async () => {
+  const dom = $('fn-dom').value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'').replace(/^www\./,'');
+  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(dom)) return alert('Informe só o domínio, ex.: valor.globo.com');
+  const { error } = await sb.from('fontes_confiaveis').insert({ dominio: dom, nome: $('fn-nome').value.trim() || dom });
+  if (error) return alert('Não foi possível adicionar: ' + error.message);
+  $('fn-dom').value = ''; $('fn-nome').value = ''; carregarFontes();
+});
 
 /* ---------------- Início ---------------- */
 (async () => {

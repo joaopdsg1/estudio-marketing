@@ -22,16 +22,23 @@ const SISTEMA_CLARICE = `Você é Clarice, redatora do Estúdio de Marketing da 
 
 PÚBLICO: diretor(a) ou mantenedor(a) de escola particular de pequeno e médio porte (principal); gestores de clínicas e empresas credoras (secundário). Nunca o devedor. Fale de gestor para gestor: técnico, sóbrio, didático e próximo. Sem juridiquês desnecessário, sem gírias, sem emojis nos slides.
 
-PILARES: Gestão de Inadimplência · Diálogo com o Gestor Escolar · Gestão de Contratos · Relações Consumeristas · Casos Ilustrativos · Relações Societárias/Sucessão (eventual).
+PILARES: Gestão de Inadimplência · Diálogo com o Gestor Escolar · Gestão de Contratos · Relações Consumeristas · Casos Ilustrativos · Casos em Pauta (notícias reais) · Relações Societárias/Sucessão (eventual).
 
 REGRAS ÉTICAS INEGOCIÁVEIS (Provimento 205/2021 e Código de Ética da OAB):
 - Conteúdo meramente informativo. Nada de "contrate", "fale conosco agora", "consulta grátis", preços, descontos, urgência artificial.
 - Nenhuma promessa ou sugestão de resultado ("recuperamos", "garantimos", percentuais de êxito, prazos de recuperação).
-- Nenhum caso concreto, cliente, decisão judicial obtida, valor recuperado ou depoimento.
+- Nenhum caso do escritório: clientes, decisões obtidas, valores recuperados ou depoimentos. Casos públicos noticiados só entram conforme as regras de CASOS EM PAUTA abaixo.
 - No pilar Casos Ilustrativos: a situação é hipotética, construída do zero, e o campo "ilustrativo" deve ser true. Foque na análise e na decisão, nunca no desfecho.
 - Sem autoengrandecimento ("o melhor", "referência", "especialistas número 1") e sem comparação com outros escritórios.
 - Não convide o leitor a mandar dúvidas jurídicas individuais nos comentários ou direct.
 - Nunca exponha, ridicularize ou estereotipe devedores. A marca é "cobrança humanizada".
+
+CASOS EM PAUTA (notícia real como gancho) — quando as observações trouxerem uma notícia:
+- Cite a fonte: na legenda, "Fonte: <veículo>, <data>". Relate o fato só como noticiado, sem adjetivos sobre as pessoas envolvidas.
+- O foco é o INSTITUTO jurídico e a ESTRATÉGIA POSSÍVEL EM TESE para o credor ("em situações assim, a lei permite…", com o dispositivo). Mostre ao credor que existem caminhos, sem prometer resultado.
+- Nunca opine sobre o mérito, sobre o devedor ou sobre a atuação dos advogados das partes.
+- Nunca diga que o escritório atua, atuaria ou atuou no caso; nunca "fale conosco", "agende", "nós conseguimos".
+- O fechamento pode dizer, de forma genérica: "Cada caso exige análise de um advogado especializado em recuperação de crédito."
 
 PRECISÃO JURÍDICA:
 - Toda afirmação legal traz lei e artigo no campo "rotulo" do slide.
@@ -58,7 +65,7 @@ Seja rigorosa e objetiva. Na dúvida, aponte. Cite sempre o trecho exato.
 
 CHECKLIST (avalie TODOS os itens, em slides E legenda):
  1. Promessa ou sugestão de resultado ("recuperamos X%", "garantimos", prazos de êxito).
- 2. Menção a clientes, casos concretos, valores obtidos ou números de processo.
+ 2. Menção a clientes do escritório, casos patrocinados por ele, valores obtidos ou números de processo.
  3. Captação ou mercantilização: "contrate", preço, gratuidade, desconto, urgência artificial (Prov. 205/2021, art. 3º, I).
  4. Comparação com outros escritórios ou autopromoção (art. 3º, IV).
  5. Sensacionalismo ou exploração de temas para atrair clientela.
@@ -68,6 +75,7 @@ CHECKLIST (avalie TODOS os itens, em slides E legenda):
  9. Expressões persuasivas, de autoengrandecimento ou incitação direta ao litígio ou à contratação (art. 3º, IV e §1º).
 10. Convite a consultas jurídicas individuais (comentários, direct, "mande sua dúvida").
 11. Conteúdo que exponha, ridicularize ou estereotipe devedores (CDC, art. 42).
+12. Uso de caso público noticiado: falta de fonte na legenda; opinião sobre o mérito ou sobre a atuação dos advogados das partes (Código de Ética, art. 42, II); adjetivos ou exposição da pessoa além do noticiado; estratégia apresentada como promessa ou como serviço do escritório; convite ao escritório (Prov. 205/2021, art. 3º, §1º). Estratégia apresentada em tese, com dispositivo, é permitida.
 
 GRAVIDADE de cada apontamento:
 - "alta": viola regra ética ou contém erro jurídico → parecer não pode ser "aprovado".
@@ -123,7 +131,7 @@ const FERRAMENTA_TEMIS = {
       apontamentos: { type: "array", items: { type: "object",
         required: ["criterio", "onde", "trecho", "problema", "sugestao", "gravidade"],
         properties: {
-          criterio: { type: "integer", minimum: 1, maximum: 11 },
+          criterio: { type: "integer", minimum: 1, maximum: 12 },
           onde: { type: "string", description: "Ex.: capa, slide 3, fechamento, legenda" },
           trecho: { type: "string" }, problema: { type: "string" }, sugestao: { type: "string" },
           gravidade: { type: "string", enum: ["alta", "media", "baixa"] } } } },
@@ -218,6 +226,10 @@ Deno.serve(async (req) => {
   if (!peca) return json({ erro: "Peça não encontrada." }, 404);
   const { data: regras } = await admin.from("aprendizados").select("regra")
     .eq("ativo", true).in("agente", [agente, "todas"]).order("criado_em");
+  const { data: cfgEstilo } = await admin.from("config").select("valor").eq("chave", "estilo_joao").maybeSingle();
+  const estilo = agente === "clarice" && cfgEstilo?.valor
+    ? `\n\nESTILO DO ADVOGADO (imite o tom: perguntas que puxam o leitor, analogias do dia a dia, contrastes claros, frases curtas; nunca copie trechos):\n«${String(cfgEstilo.valor).slice(0, 3000)}»`
+    : "";
   const extra = (regras || []).length
     ? `\n\nREGRAS DEFINIDAS PELO ADVOGADO (têm prioridade):\n${regras!.map((r, i) => `${i + 1}. ${r.regra}`).join("\n")}`
     : "";
@@ -226,7 +238,7 @@ Deno.serve(async (req) => {
   const M = MODELOS[agente];
   let sistema: string, mensagem: string, ferramenta: Record<string, unknown>;
   if (agente === "clarice") {
-    sistema = SISTEMA_CLARICE + extra;
+    sistema = SISTEMA_CLARICE + estilo + extra;
     ferramenta = ferramentaClarice(peca.modelo);
     const temParecer = peca.parecer && peca.parecer.parecer === "ajustar" && peca.conteudo?.capa;
     mensagem = `MODELO DE CARROSSEL: ${NOMES_MODELO[peca.modelo]}
