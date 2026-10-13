@@ -329,6 +329,12 @@ Desenhada com o João em 12/10/2026.
 - **Custo real:** Atena (pauta de Reels) ≈ US$ 0,04. Roteiro revisado estimado em US$ 0,15–0,25 (≈ US$ 1 por mês).
 - **Aceite:** um lote real roteirizado, revisado pela Têmis e lido no teleprompter pelo João.
 
+### v007 — Instruções da equipe ✅ publicada
+- Tela "Instruções": regras permanentes por agente (Clarice, Glauber, Têmis, Atena, Rondon ou todos). Criar, editar, desligar e religar; mostra de qual peça a regra veio. Só o gestor altera.
+- As regras entram nas instruções de cada agente em toda tarefa, sem custo extra. O Rondon passou a recebê-las no Radar.
+- Ao rejeitar uma peça, "transformar em regra" agora vem desmarcado: pedidos sobre uma peça só não devem virar regra permanente.
+- Ajustes estruturais (novos formatos, instruções-base, agendamentos) continuam pelo Claude.
+
 ### Etapa 6 (opcional) — Painel visual
 - O "escritório" animado, no estilo dos prints de referência, lendo `agente_execucoes`.
 - Puramente estético, por isso fica por último.
