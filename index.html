@@ -212,6 +212,13 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 #tp-rolo .tp-tela{font-size:.38em;color:#6c7685;display:block;margin-top:.3em}
 #tp-rolo ul{list-style:disc;padding-left:1.1em}
 #tp-guia{position:absolute;left:0;right:0;top:45vh;height:2px;background:rgba(255,255,255,.12);pointer-events:none}
+/* Instruções da equipe */
+.regra{border-top:1px solid var(--linha);padding:12px 0;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
+.regra .txt{white-space:pre-wrap}
+.regra .meta{font-size:12.5px;color:#7a8290;margin-top:4px}
+.regra .acoes-p{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.regra.off .txt{color:#9aa3af;text-decoration:line-through}
+@media (max-width:760px){.regra{grid-template-columns:1fr}.regra .acoes-p{justify-content:flex-start}}
 .legenda-box{margin-top:22px;background:#fff;border:1.5px solid var(--linha);border-radius:10px;padding:4px 20px 18px}
 
 /* ================= SLIDES (1080 × 1350) ================= */
@@ -304,6 +311,7 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
       <button data-pg="tarsila">Tarsila · Carrosséis</button>
       <button data-pg="reels">Glauber · Reels</button>
       <button data-pg="radar">Radar</button>
+      <button data-pg="instrucoes">Instruções</button>
     </nav>
     <div class="usuario"><span id="nome-usuario"></span><button id="btn-sair" type="button">Sair</button></div>
   </header>
@@ -424,6 +432,25 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
     </div>
   </main>
 
+  <!-- Instruções da equipe -->
+  <main class="pagina oculto" id="pg-instrucoes">
+    <h1>Instruções da equipe</h1>
+    <p class="sub">Regras permanentes que cada agente recebe em todas as tarefas. Elas têm prioridade sobre as instruções-base, mas nunca liberam o que a OAB veda.</p>
+    <div class="nova">
+      <h3>Nova regra</h3>
+      <div class="linha">
+        <div><label for="ins-agente">Para quem</label><select id="ins-agente"></select></div>
+        <div class="dica" id="ins-dica" style="font-size:13px;color:#7a8290;align-self:end;padding-bottom:8px"></div>
+      </div>
+      <label for="ins-regra">Regra</label>
+      <textarea id="ins-regra" rows="2" placeholder="Ex.: nunca usar a palavra &quot;calote&quot;; sempre citar a Lei 9.870/1999 quando o tema for mensalidade escolar"></textarea>
+      <div class="dica" style="font-size:12.5px;color:#7a8290;margin-top:4px">Escreva como regra geral, que valha para todas as próximas peças. Pedidos sobre uma peça só use "Pedir reescrita" no painel de revisão.</div>
+      <div class="decisao"><button class="btn" id="btn-add-regra" type="button">Adicionar regra</button></div>
+      <div class="progresso" id="prog-instrucoes"></div>
+    </div>
+    <div id="lista-instrucoes"></div>
+  </main>
+
   <!-- Radar -->
   <main class="pagina oculto" id="pg-radar">
     <h1>Radar da semana · Rondon</h1>
@@ -531,8 +558,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v006';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 5 (Glauber · Reels)',
+const VERSAO = 'v007';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Etapa 5 + Instruções da equipe',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -562,12 +589,13 @@ function mostrar(tela){
 }
 function irPara(pg, opcoes={}){
   if (pg === 'tarsila' && estado.modelo === 'reels') estado = { id:null, modelo:'lista', dados: vazio('lista'), meta:null };
-  ['mesa','fila','tarsila','reels','radar'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
+  ['mesa','fila','tarsila','reels','radar','instrucoes'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
   document.querySelectorAll('header.topo-app nav button').forEach(b => b.classList.toggle('ativo', b.dataset.pg === pg));
   if (pg === 'tarsila'){ renderizarEditor(); renderizarPrevia(); renderizarRevisao(); carregarListaRascunhos(); }
   if (pg === 'fila'){ carregarFila(); }
   if (pg === 'mesa'){ carregarMesa(); }
   if (pg === 'radar'){ carregarRadar(); }
+  if (pg === 'instrucoes'){ carregarInstrucoes(); }
   if (pg === 'reels'){
     $('reels-lista-view').classList.toggle('oculto', !!opcoes.detalhe);
     $('reels-detalhe-view').classList.toggle('oculto', !opcoes.detalhe);
@@ -1098,7 +1126,8 @@ function renderizarRevisao(){
   <div class="caixa-acao oculto" id="rv-caixa-rejeitar">
     <label for="rv-motivo" style="margin-top:0">Motivo da rejeição</label>
     <textarea id="rv-motivo" rows="2" placeholder="Ex.: não usar a palavra 'calote' em nenhum conteúdo"></textarea>
-    <label class="check"><input type="checkbox" id="rv-regra" checked> Transformar em regra permanente ${redator === 'glauber' ? 'para o Glauber' : 'para a Clarice'}</label>
+    <label class="check"><input type="checkbox" id="rv-regra"> Transformar em regra permanente ${redator === 'glauber' ? 'para o Glauber' : 'para a Clarice'}</label>
+    <div class="dica" style="font-size:12.5px;color:#7a8290">Marque só se o motivo valer para todas as próximas peças. As regras ficam em "Instruções".</div>
     <div class="decisao"><button class="btn vermelho" id="rv-rejeitar" type="button">Confirmar rejeição</button></div>
   </div>
   <div class="progresso" id="rv-progresso"></div>
@@ -1779,6 +1808,76 @@ $('btn-modo-gravacao').addEventListener('click', async () => {
   if (!lst.length) return alert('Não há roteiros aprovados aguardando gravação.');
   lst.sort((a,b) => ((b.conteudo||{}).urgencia === 'postar_logo') - ((a.conteudo||{}).urgencia === 'postar_logo'));
   abrirTeleprompter(lst.map(x => x.id));
+});
+
+/* =========================================================
+   v007 · Instruções da equipe (tabela aprendizados)
+   ========================================================= */
+const DESTINOS = [
+  ['todas',  'Todos os agentes', 'Vale para Clarice, Glauber, Têmis, Atena e Rondon.'],
+  ['clarice','Clarice · carrosséis', 'Redação dos carrosséis.'],
+  ['glauber','Glauber · Reels', 'Roteiros dos vídeos.'],
+  ['temis',  'Têmis · revisão OAB', 'O que ela deve apontar ou tolerar na revisão.'],
+  ['atena',  'Atena · pautas', 'Escolha de temas da pauta semanal e da pauta de Reels.'],
+  ['rondon', 'Rondon · Radar', 'O que buscar ou ignorar nas notícias.'],
+];
+$('ins-agente').innerHTML = DESTINOS.map(([v,n]) => `<option value="${v}">${n}</option>`).join('');
+const dicaDestino = () => { $('ins-dica').textContent = (DESTINOS.find(d => d[0] === $('ins-agente').value) || [])[2] || ''; };
+$('ins-agente').addEventListener('change', dicaDestino); dicaDestino();
+
+async function carregarInstrucoes(){
+  const podeEditar = usuario.papel === 'gestor';
+  $('btn-add-regra').disabled = !podeEditar;
+  if (!podeEditar) $('prog-instrucoes').textContent = 'Só o gestor pode criar ou alterar regras.';
+  const { data, error } = await sb.from('aprendizados').select('*').order('criado_em');
+  if (error){ $('lista-instrucoes').innerHTML = '<p>Não foi possível carregar as regras.</p>'; return; }
+  const regras = Array.isArray(data) ? data : [];
+  const ids = [...new Set(regras.map(r => r.origem_peca).filter(Boolean))];
+  let titulos = {};
+  if (ids.length){
+    const { data: ps } = await sb.from('pecas').select('id,titulo').in('id', ids);
+    (Array.isArray(ps) ? ps : []).forEach(p => titulos[p.id] = p.titulo);
+  }
+  const dt = d => d ? new Date(d).toLocaleDateString('pt-BR') : '';
+  $('lista-instrucoes').innerHTML = DESTINOS.map(([ag, nome]) => {
+    const lst = regras.filter(r => r.agente === ag);
+    const ativas = lst.filter(r => r.ativo), off = lst.filter(r => !r.ativo);
+    const linha = r => `<div class="regra${r.ativo ? '' : ' off'}" data-id="${r.id}">
+        <div><div class="txt">${esc(r.regra)}</div>
+          <textarea class="oculto" rows="2">${esc(r.regra)}</textarea>
+          <div class="meta">Criada em ${dt(r.criado_em)}${r.origem_peca ? ` · ao rejeitar “${esc((titulos[r.origem_peca] || 'peça').slice(0,60))}”` : ' · criada aqui'}${r.atualizado_em ? ` · editada em ${dt(r.atualizado_em)}` : ''}</div></div>
+        ${podeEditar ? `<div class="acoes-p">
+          <button class="btn sec mini" data-acao="editar" type="button">Editar</button>
+          <button class="btn mini oculto" data-acao="salvar" type="button">Salvar</button>
+          <button class="btn ${r.ativo ? 'vermelho' : 'sec'} mini" data-acao="alternar" type="button">${r.ativo ? 'Desligar' : 'Religar'}</button></div>` : ''}
+      </div>`;
+    return `<div class="caixa"><h3><span>${nome}</span><small style="font:300 13px Slab;color:#7a8290">${ativas.length} ativa(s)</small></h3>
+      ${ativas.length ? ativas.map(linha).join('') : '<p class="dica" style="font-size:14px;color:#7a8290;padding:6px 0">Nenhuma regra ativa.</p>'}
+      ${off.length ? `<details style="margin-top:8px"><summary style="font-size:13px;color:#7a8290;cursor:pointer">${off.length} desligada(s)</summary>${off.map(linha).join('')}</details>` : ''}
+    </div>`;
+  }).join('');
+  document.querySelectorAll('#lista-instrucoes .regra [data-acao]').forEach(b => b.addEventListener('click', async () => {
+    const el = b.closest('.regra'), id = el.dataset.id, r = regras.find(x => x.id === id);
+    if (b.dataset.acao === 'editar'){
+      el.querySelector('.txt').classList.add('oculto'); el.querySelector('textarea').classList.remove('oculto');
+      b.classList.add('oculto'); el.querySelector('[data-acao=salvar]').classList.remove('oculto'); el.querySelector('textarea').focus(); return;
+    }
+    const mudanca = b.dataset.acao === 'salvar'
+      ? { regra: el.querySelector('textarea').value.trim(), atualizado_em: new Date().toISOString() }
+      : { ativo: !r.ativo, atualizado_em: new Date().toISOString() };
+    if (mudanca.regra === '') return alert('A regra não pode ficar vazia. Para tirar de uso, clique em Desligar.');
+    const { error } = await sb.from('aprendizados').update(mudanca).eq('id', id);
+    if (error) return alert('Não foi possível salvar: ' + error.message);
+    carregarInstrucoes();
+  }));
+}
+$('btn-add-regra').addEventListener('click', async () => {
+  const regra = $('ins-regra').value.trim(), prog = $('prog-instrucoes');
+  if (regra.length < 5){ prog.textContent = 'Escreva a regra.'; return; }
+  const { error } = await sb.from('aprendizados').insert({ agente: $('ins-agente').value, regra });
+  if (error){ prog.textContent = 'Não foi possível adicionar: ' + error.message; return; }
+  $('ins-regra').value = ''; prog.textContent = 'Regra adicionada. Ela vale a partir da próxima tarefa do agente.';
+  carregarInstrucoes();
 });
 
 /* ---------------- Início ---------------- */

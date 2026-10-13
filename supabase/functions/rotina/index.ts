@@ -210,7 +210,7 @@ ${(radar || []).map((x) => `- id ${x.id} [${x.categoria} · relevância ${x.rele
         .gte("criado_em", desde.toISOString()).neq("status", "descartado").order("relevancia", { ascending: false }).limit(25),
       admin.from("pecas").select("titulo,radar_id").eq("modelo", "reels").neq("status", "rejeitada").order("criado_em", { ascending: false }).limit(20),
       admin.from("pautas").select("tema").eq("tipo", "reels").eq("status", "descartada").order("criado_em", { ascending: false }).limit(10),
-      admin.from("aprendizados").select("regra").eq("ativo", true).in("agente", ["atena", "glauber", "todas"]),
+      admin.from("aprendizados").select("regra").eq("ativo", true).in("agente", ["atena", "todas"]),
     ]);
     const jaEmReels = new Set((feitos || []).map((p) => p.radar_id).filter(Boolean));
     const candidatos = (radar || []).filter((x) => !jaEmReels.has(x.id));
@@ -367,7 +367,9 @@ Se a gravação estiver a 3 dias ou menos, avise quantos roteiros estão prontos
     const T = TAREFAS_RADAR[corpo.tarefa!];
     const { data: fontes } = await admin.from("fontes_confiaveis").select("dominio").eq("ativo", true);
     const dominios = (fontes || []).map((f) => f.dominio);
-    const sistemaR = `Você é Rondon, pesquisador do Estúdio de Marketing da Palácio Gomes Advocacia (recuperação de crédito para empresas e escolas). Pesquise na web SOMENTE notícias publicadas ${janela}. Descarte qualquer conteúdo mais antigo ou sem data verificável. Não especule nem complete lacunas: relate apenas o que as fontes dizem, citando-as. Responda em português.`;
+    const { data: regrasR } = await admin.from("aprendizados").select("regra").eq("ativo", true).in("agente", ["rondon", "todas"]);
+    const extraR = (regrasR || []).length ? `\n\nREGRAS DEFINIDAS PELO ADVOGADO (têm prioridade):\n${regrasR!.map((r) => `- ${r.regra}`).join("\n")}` : "";
+    const sistemaR = `Você é Rondon, pesquisador do Estúdio de Marketing da Palácio Gomes Advocacia (recuperação de crédito para empresas e escolas). Pesquise na web SOMENTE notícias publicadas ${janela}. Descarte qualquer conteúdo mais antigo ou sem data verificável. Não especule nem complete lacunas: relate apenas o que as fontes dizem, citando-as. Responda em português.` + extraR;
     const busca = await chamar("rondon", sistemaR, `${T.pedido}\n\nPara cada notícia encontrada (até 6, as mais relevantes): o que aconteceu, quem divulgou, a data de publicação e qual instrumento ou tema jurídico aparece.`,
       undefined, [{ type: "web_search_20250305", name: "web_search", max_uses: 6, user_location: local, ...(dominios.length ? { allowed_domains: dominios } : {}) }]);
     if (!busca.r) return json({ erro: "Rondon: " + busca.falha }, 502);
