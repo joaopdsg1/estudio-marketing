@@ -335,6 +335,16 @@ Desenhada com o João em 12/10/2026.
 - Ao rejeitar uma peça, "transformar em regra" agora vem desmarcado: pedidos sobre uma peça só não devem virar regra permanente.
 - Ajustes estruturais (novos formatos, instruções-base, agendamentos) continuam pelo Claude.
 
+### v008 — Texto justificado ✅
+- Parágrafos dos slides (resposta da Pergunta e texto do fechamento) justificados, última linha à esquerda, hifenização automática onde o navegador suporta.
+
+### v009 — Design do mês (Tarsila) ✅ publicada
+- Decisão do João (13/10/2026): 1 variação por mês; a Tarsila propõe todo mês, mas a troca só acontece quando ele aprova.
+- Variação dentro da identidade (cores, fontes, logo e elementos fixos). Parâmetros: fundo, elemento e posição da marca-d'água de capa, conteúdo e fechamento; posição e tamanho do título; fio; numeração; marcador dos itens; rótulo em texto ou etiqueta; conteúdo claro, escuro ou alternado.
+- Prévia com o último carrossel aprovado nos 3 modelos, ao lado do design em uso. Aprovar, recusar (motivo opcional) ou pedir outra proposta com instrução.
+- Biblioteca de designs aprovados; cada peça guarda o seu design (as antigas não mudam); seletor de design por peça na Tarsila.
+- Agendamento: dia 1º às 6h50. Péricles avisa quando há proposta. Custo ≈ US$ 0,02 por proposta.
+
 ### Etapa 6 (opcional) — Painel visual
 - O "escritório" animado, no estilo dos prints de referência, lendo `agente_execucoes`.
 - Puramente estético, por isso fica por último.

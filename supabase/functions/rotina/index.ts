@@ -1,5 +1,5 @@
 // Estúdio de Marketing · Edge Function "rotina"
-// Tarefas agendadas: pauta semanal e pauta mensal de Reels (Atena), briefing diário (Péricles) e Radar (Rondon).
+// Tarefas agendadas: pauta semanal e pauta mensal de Reels (Atena), design do mês (Tarsila), briefing diário (Péricles) e Radar (Rondon).
 // Chamada pelo agendador (cabeçalho x-cron-secret) ou pela tela (usuário logado).
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
@@ -16,6 +16,7 @@ const MODELOS = {
   pericles: { id: "claude-haiku-5-5", entrada: 0.10, saida: 0.50 },
   rondon: { id: "claude-sonnet-5-5", entrada: 2, saida: 10 },
   rondon_extrator: { id: "claude-haiku-5-5", entrada: 0.10, saida: 0.50 },
+  tarsila: { id: "claude-sonnet-5-5", entrada: 2, saida: 10 },
 };
 const PRECO_BUSCA = 0.01; // US$ por busca na web
 
@@ -99,7 +100,7 @@ Deno.serve(async (req) => {
   }
   if (!origem) return json({ erro: "Não autorizado." }, 401);
 
-  let corpo: { tarefa?: string; forcar?: boolean };
+  let corpo: { tarefa?: string; forcar?: boolean; pedido?: string };
   try { corpo = await req.json(); } catch { return json({ erro: "Requisição inválida." }, 400); }
   const CHAVE = Deno.env.get("ANTHROPIC_API_KEY");
   if (!CHAVE) return json({ erro: "Chave da API não cadastrada." }, 503);
@@ -271,6 +272,63 @@ ${(regras || []).length ? `\nREGRAS DO ADVOGADO:\n${regras!.map((r) => `- ${r.re
     return json({ ok: true, lote, pautas: linhas.length, resumo: r.resumo_lote, origem });
   }
 
+  /* =============== DESIGN DO MÊS (TARSILA) =============== */
+  if (corpo.tarefa === "design_mensal") {
+    const mes = iso(hoje).slice(0, 7);
+    const { data: propostos } = await admin.from("designs").select("id").eq("status", "proposto");
+    if ((propostos || []).length && !corpo.forcar)
+      return json({ ok: true, aviso: "Já existe uma proposta de design aguardando sua decisão.", mes });
+    if ((propostos || []).length) await admin.from("designs").update({ status: "recusado", motivo: corpo.pedido ? "Substituída: " + corpo.pedido : "Substituída por nova proposta." }).in("id", propostos!.map((d) => d.id));
+    const [{ data: padrao }, { data: historico }, { data: regras }] = await Promise.all([
+      admin.from("designs").select("nome,parametros").eq("padrao", true).maybeSingle(),
+      admin.from("designs").select("nome,parametros,status,motivo,pedido").order("criado_em", { ascending: false }).limit(8),
+      admin.from("aprendizados").select("regra").eq("ativo", true).in("agente", ["tarsila", "todas"]),
+    ]);
+    const BASE: Record<string, string> = { capa_fundo: "escuro", capa_marca: "caracol", capa_marca_pos: "inferior_direita", capa_titulo_pos: "centro", capa_titulo_tam: "grande",
+      conteudo_fundo: "claro", conteudo_marca: "coluna", conteudo_marca_pos: "inferior_direita", fio: "curto", numeracao: "fracao", marcador: "caracol", rotulo: "texto",
+      fechamento_fundo: "escuro", fechamento_marca: "caracol", fechamento_marca_pos: "superior_esquerda" };
+    const POS = ["inferior_direita", "superior_esquerda", "centro_direita"], MARCA = ["caracol", "coluna", "nenhuma"];
+    const OPCOES: Record<string, string[]> = { capa_fundo: ["escuro", "claro"], capa_marca: MARCA, capa_marca_pos: POS, capa_titulo_pos: ["topo", "centro", "base"],
+      capa_titulo_tam: ["grande", "medio"], conteudo_fundo: ["claro", "escuro", "alternado"], conteudo_marca: MARCA, conteudo_marca_pos: POS,
+      fio: ["curto", "longo", "nenhum"], numeracao: ["fracao", "simples", "nenhuma"], marcador: ["caracol", "numero", "traco"], rotulo: ["texto", "etiqueta"],
+      fechamento_fundo: ["escuro", "claro"], fechamento_marca: MARCA, fechamento_marca_pos: POS };
+    const atual = { ...BASE, ...((padrao?.parametros as Record<string, string>) || {}) };
+    const SISTEMA_TARSILA = `Você é Tarsila, diretora de arte do Estúdio de Marketing da Palácio Gomes Advocacia. Todo mês você propõe UMA variação do design dos carrosséis do Instagram (slides 1080 × 1350: capa, slides de conteúdo e fechamento).
+
+IDENTIDADE FIXA (não muda): cores petróleo #0D507B, profundo #0A3D5E, névoa #5B88A6, céu #A9CBE3, gelo #F3F5F8; títulos em Cormorant Garamond, texto em Roboto Slab; logo Palácio; elementos gráficos caracol e coluna.
+O QUE VOCÊ PODE VARIAR: somente os parâmetros do formato pedido, escolhendo entre as opções permitidas.
+
+CRITÉRIOS:
+- Renove o feed sem perder o reconhecimento da marca: mude de 3 a 6 parâmetros em relação ao design em uso. Não mude tudo de uma vez.
+- Legibilidade em primeiro lugar (o público é diretor de escola, lendo no celular). Sobriedade de escritório de advocacia: nada de excesso.
+- Contraste entre capa e conteúdo ajuda a identificar o início do carrossel; "alternado" dá ritmo, mas use com moderação.
+- Título na "base" exige título curto; prefira "centro" ou "topo".
+- Não repita uma proposta recusada; respeite os motivos de recusa e o pedido do advogado, se houver.
+- "nome": 2 ou 3 palavras evocativas (ex.: "Coluna Clara"). "descricao": uma ou duas frases dizendo o que muda e por quê.
+
+Responda somente com o JSON no formato solicitado.`;
+    const SCHEMA_D = { type: "object", additionalProperties: false, required: ["nome", "descricao", "parametros"], properties: {
+      nome: { type: "string" }, descricao: { type: "string" },
+      parametros: { type: "object", additionalProperties: false, required: Object.keys(OPCOES),
+        properties: Object.fromEntries(Object.entries(OPCOES).map(([k, v]) => [k, { type: "string", enum: v }])) } } };
+    const msg = `MÊS: ${mes}.
+DESIGN EM USO ("${padrao?.nome || "Original"}"):
+${JSON.stringify(atual)}
+
+HISTÓRICO RECENTE (mais novo primeiro):
+${(historico || []).map((d) => `- ${d.nome} [${d.status}]${d.motivo ? " · motivo: " + d.motivo : ""}${d.pedido ? " · pedido: " + d.pedido : ""} ${JSON.stringify(d.parametros)}`).join("\n") || "- nenhum"}
+${corpo.pedido ? `\nPEDIDO DO ADVOGADO PARA ESTA PROPOSTA: ${corpo.pedido}` : ""}${(regras || []).length ? `\nREGRAS DO ADVOGADO:\n${regras!.map((r) => `- ${r.regra}`).join("\n")}` : ""}`;
+    const { r, falha } = await chamar("tarsila", SISTEMA_TARSILA, msg, SCHEMA_D);
+    if (!r) return json({ erro: "Tarsila: " + falha }, 502);
+    const params: Record<string, string> = {};
+    for (const [k, v] of Object.entries(OPCOES)) params[k] = v.includes(r.parametros?.[k]) ? r.parametros[k] : atual[k];
+    const mudancas = Object.keys(OPCOES).filter((k) => params[k] !== atual[k]).length;
+    const { error } = await admin.from("designs").insert({ nome: String(r.nome || "Proposta").slice(0, 60), descricao: r.descricao, parametros: params,
+      status: "proposto", origem: "tarsila", mes, pedido: corpo.pedido || null });
+    if (error) return json({ erro: "Falha ao gravar a proposta: " + error.message }, 500);
+    return json({ ok: true, mes, nome: r.nome, mudancas, origem });
+  }
+
   /* =============== BRIEFING (PÉRICLES) =============== */
   if (corpo.tarefa === "briefing") {
     const [{ data: aguardando }, { data: bloqueadas }, { data: aprovadas }, { data: publicadas }, { data: pautasSemana }, { data: gastoAgora }] = await Promise.all([
@@ -282,9 +340,10 @@ ${(regras || []).length ? `\nREGRAS DO ADVOGADO:\n${regras!.map((r) => `- ${r.re
       admin.rpc("custo_mes"),
     ]);
     const lote = iso(hoje).slice(0, 7);
-    const [{ data: reels }, { data: pautasReels }] = await Promise.all([
+    const [{ data: reels }, { data: pautasReels }, { data: designsProp }] = await Promise.all([
       admin.from("pecas").select("id,titulo,status,gravado_em,data_postagem").eq("modelo", "reels").neq("status", "rejeitada").neq("status", "publicada"),
       admin.from("pautas").select("id").eq("tipo", "reels").eq("lote", lote).eq("status", "proposta"),
+      admin.from("designs").select("nome").eq("status", "proposto"),
     ]);
     const gravRaw = (cfgs || []).find((c) => c.chave === "proxima_gravacao")?.valor;
     const proximaGravacao = typeof gravRaw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(gravRaw) ? gravRaw : null;
@@ -309,6 +368,7 @@ ${(regras || []).length ? `\nREGRAS DO ADVOGADO:\n${regras!.map((r) => `- ${r.re
       pautas_aprovadas: (pautasSemana || []).filter((p) => ["aprovada", "produzida"].includes(p.status)).length,
       consumo_usd: Number(gastoAgora ?? 0), teto_usd: teto,
       reels: reelsInfo,
+      design_proposto: (designsProp || []).map((d) => d.nome)[0] || null,
     };
     const msg = `Dados de hoje (${DIAS[hoje.getDay()]}, ${hoje.toLocaleDateString("pt-BR")}):
 - Peças aguardando aprovação: ${dados.aguardando.length}${dados.aguardando.length ? " (" + dados.aguardando.map((p) => p.titulo).join("; ") + ")" : ""}
@@ -323,7 +383,7 @@ REELS (1 por semana, gravados em lote uma vez por mês):
 - Roteiros aguardando decisão: ${reelsInfo.roteiros_aguardando}
 - Roteiros aprovados prontos para gravar: ${reelsInfo.roteiros_prontos_para_gravar}
 - Vídeos gravados a publicar: ${reelsInfo.gravados_a_publicar}${reelsInfo.reels_postar_hoje.length ? `\n- Reels marcado para postar hoje: ${reelsInfo.reels_postar_hoje.join("; ")}` : ""}
-Se a gravação estiver a 3 dias ou menos, avise quantos roteiros estão prontos e quantos ainda faltam aprovar.`;
+Se a gravação estiver a 3 dias ou menos, avise quantos roteiros estão prontos e quantos ainda faltam aprovar.${dados.design_proposto ? `\n- A Tarsila propôs um novo design de carrossel ("${dados.design_proposto}") aguardando aprovação na aba Tarsila.` : ""}`;
     const { r } = await chamar("pericles", SISTEMA_PERICLES, msg);
     const resumo = r || "Não consegui redigir o resumo hoje; os números abaixo estão atualizados.";
     await admin.from("briefings").upsert({ data: dados.data, resumo, dados }, { onConflict: "data" });

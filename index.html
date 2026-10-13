@@ -212,6 +212,11 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 #tp-rolo .tp-tela{font-size:.38em;color:#6c7685;display:block;margin-top:.3em}
 #tp-rolo ul{list-style:disc;padding-left:1.1em}
 #tp-guia{position:absolute;left:0;right:0;top:45vh;height:2px;background:rgba(255,255,255,.12);pointer-events:none}
+/* Design do mês */
+.linha-d{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
+.mini-d{width:216px;height:270px;overflow:hidden;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,.12);flex:none}
+.mini-d .escala{transform:scale(.2);transform-origin:0 0;width:1080px;height:1350px}
+@media (max-width:760px){.mini-d{width:162px;height:202.5px}.mini-d .escala{transform:scale(.15)}}
 /* Instruções da equipe */
 .regra{border-top:1px solid var(--linha);padding:12px 0;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
 .regra .txt{white-space:pre-wrap}
@@ -257,6 +262,21 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 .slide .mito-txt{font:300 40px/1.4 Slab;color:#6B7480;text-decoration:line-through;text-decoration-color:rgba(107,116,128,.55);text-decoration-thickness:3px}
 .slide .fato-txt{font:400 40px/1.42 Slab;color:var(--grafite)}
 .slide .divisor{height:2px;background:var(--linha);margin:48px 0}
+.slide .lei.etiqueta{display:table;border:2px solid currentColor;border-radius:40px;padding:6px 18px;font-size:22px}
+.slide .num-item{font:600 52px/1 Cormorant;color:var(--petroleo);margin-top:2px}
+.slide .traco-item{display:block;width:40px;height:4px;background:var(--petroleo);margin-top:26px}
+.slide.escuro .num-item{color:var(--ceu)} .slide.escuro .traco-item{background:var(--ceu)}
+.slide.escuro h2,.slide.escuro .q{color:#fff}
+.slide.escuro li{border-color:rgba(255,255,255,.18)} .slide.escuro li:last-child{border-bottom-color:rgba(255,255,255,.18)}
+.slide.escuro .divisor{background:rgba(255,255,255,.18)}
+.slide.escuro .mito-txt{color:#AEB9C6;text-decoration-color:rgba(174,185,198,.6)}
+.slide.escuro .fato-txt{color:#fff}
+.slide.escuro .tag.pergunta,.slide.escuro .tag.fato{background:var(--ceu);color:var(--profundo)}
+.slide.escuro .tag.mito{border-color:#AEB9C6;color:#AEB9C6}
+.slide.claro h1{color:var(--petroleo)}
+.slide.claro .kicker{color:var(--nevoa)}
+.slide.claro .rodape-s{color:var(--petroleo)}
+.slide.claro .ressalva{color:var(--grafite)}
 .slide .ressalva{text-align:right;font-size:21px;line-height:1.6;opacity:.72;letter-spacing:.06em;font-weight:300}
 
 @media (max-width:1000px){
@@ -491,6 +511,7 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
   <main class="pagina oculto" id="pg-tarsila">
     <h1>Tarsila · Carrosséis</h1>
     <p class="sub">Digite o conteúdo, confira a prévia e baixe os slides prontos (1080 × 1350 px).</p>
+    <div class="caixa" id="design-mes"></div>
 
     <div class="barra">
       <div class="campo">
@@ -500,6 +521,10 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
           <option value="pergunta">Pergunta e Resposta</option>
           <option value="mitofato">Mito × Fato</option>
         </select>
+      </div>
+      <div class="campo">
+        <label for="sel-design">Design</label>
+        <select id="sel-design"></select>
       </div>
       <div class="campo">
         <label for="sel-rascunho">Abrir rascunho</label>
@@ -559,8 +584,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v008';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Texto justificado nos slides',
+const VERSAO = 'v009';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Design do mês (Tarsila)',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -576,7 +601,7 @@ const EQUIPE = [
   {nome:'Atena',    funcao:'Estrategista',           etapa:3, ativo:true, pg:'mesa'},
   {nome:'Clarice',  funcao:'Redatora',               etapa:2, ativo:true, pg:'fila'},
   {nome:'Têmis',    funcao:'Revisora OAB',           etapa:2, ativo:true, pg:'fila'},
-  {nome:'Tarsila',  funcao:'Arte: carrosséis e capas', etapa:1, ativo:true, pg:'tarsila'},
+  {nome:'Tarsila',  funcao:'Arte e design do mês',   etapa:1, ativo:true, pg:'tarsila'},
   {nome:'Rondon',   funcao:'Radar e referências',    etapa:4, ativo:true, pg:'radar'},
   {nome:'Glauber',  funcao:'Roteiros de Reels',      etapa:5, ativo:true, pg:'reels'},
 ];
@@ -589,10 +614,10 @@ function mostrar(tela){
   $('tela-app').classList.toggle('oculto', tela !== 'app');
 }
 function irPara(pg, opcoes={}){
-  if (pg === 'tarsila' && estado.modelo === 'reels') estado = { id:null, modelo:'lista', dados: vazio('lista'), meta:null };
+  if (pg === 'tarsila' && estado.modelo === 'reels') estado = { id:null, modelo:'lista', dados: vazio('lista'), meta:null, design:null };
   ['mesa','fila','tarsila','reels','radar','instrucoes'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
   document.querySelectorAll('header.topo-app nav button').forEach(b => b.classList.toggle('ativo', b.dataset.pg === pg));
-  if (pg === 'tarsila'){ renderizarEditor(); renderizarPrevia(); renderizarRevisao(); carregarListaRascunhos(); }
+  if (pg === 'tarsila'){ atualizarSelDesign(); renderizarEditor(); renderizarPrevia(); renderizarRevisao(); carregarListaRascunhos(); renderizarDesignMes(); }
   if (pg === 'fila'){ carregarFila(); }
   if (pg === 'mesa'){ carregarMesa(); }
   if (pg === 'radar'){ carregarRadar(); }
@@ -627,6 +652,7 @@ async function abrirApp(sessao){
     </div>`).join('');
   document.querySelectorAll('.agente[data-pg]').forEach(c => c.addEventListener('click', () => irPara(c.dataset.pg)));
   $('rodape-versao').textContent = 'Estúdio de Marketing ' + VERSAO;
+  await carregarDesigns();
   mostrar('app'); irPara('mesa');
 }
 $('form-login').addEventListener('submit', async ev => {
@@ -726,55 +752,85 @@ function fmt(s){
 function semMarcacao(s){ return String(s||'').replace(/\*+/g,''); }
 
 /* ---------- geração dos slides ---------- */
-function htmlCapa(d, total){
-  return `<section class="slide escuro" data-tipo="capa">
-    <img class="marca-agua" src="assets/caracol-branco.svg" alt="" style="width:1150px;right:-420px;bottom:-330px;opacity:.10">
-    <div class="topo"><img src="assets/logo-branco.svg" alt=""><span class="pag">01 / ${pad(total)}</span></div>
-    <div class="conteudo" style="margin-top:250px">
-      ${d.capa.kicker ? `<div class="kicker">${fmt(d.capa.kicker)}</div><div class="fio"></div>` : ''}
-      <h1>${fmt(d.capa.titulo) || '<span style="opacity:.35">Título da capa</span>'}</h1>
+/* ---------- design (parâmetros aprovados pelo advogado; padrão = visual original) ---------- */
+const DESIGN_BASE = {
+  capa_fundo:'escuro', capa_marca:'caracol', capa_marca_pos:'inferior_direita', capa_titulo_pos:'centro', capa_titulo_tam:'grande',
+  conteudo_fundo:'claro', conteudo_marca:'coluna', conteudo_marca_pos:'inferior_direita',
+  fio:'curto', numeracao:'fracao', marcador:'caracol', rotulo:'texto',
+  fechamento_fundo:'escuro', fechamento_marca:'caracol', fechamento_marca_pos:'superior_esquerda'
+};
+let designs = [], designPadrao = null;
+const paramsDe = d => ({ ...DESIGN_BASE, ...((d && d.parametros) || {}) });
+function designAtual(){ return paramsDe(estado.design || designPadrao); }
+function marcaAgua(tipo, escuro, pos, ehCapa){
+  if (tipo === 'nenhuma') return '';
+  const cor = escuro ? 'branco' : 'indigo';
+  const op = escuro ? .10 : (tipo === 'coluna' ? .05 : .06);
+  const P = tipo === 'caracol'
+    ? { inferior_direita:'width:1150px;right:-420px;bottom:-330px', superior_esquerda:'width:1150px;left:-430px;top:-360px', centro_direita:'width:900px;right:-470px;top:220px' }
+    : { inferior_direita:'height:1180px;right:-170px;top:110px', superior_esquerda:'height:1180px;left:-200px;top:-140px', centro_direita:'height:980px;right:-110px;top:190px' };
+  return `<img class="marca-agua" src="assets/${tipo}-${cor}.svg" alt="" style="${P[pos] || Object.values(P)[0]};opacity:${op}">`;
+}
+function numeroPag(D, n, total){ return D.numeracao === 'nenhuma' ? '' : D.numeracao === 'simples' ? pad(n) : `${pad(n)} / ${pad(total)}`; }
+function fioHtml(D){ return D.fio === 'nenhum' ? '<div style="height:36px"></div>' : `<div class="fio"${D.fio === 'longo' ? ' style="width:320px"' : ''}></div>`; }
+function rotuloHtml(D, txt){ return txt ? `<div class="lei${D.rotulo === 'etiqueta' ? ' etiqueta' : ''}">${fmt(txt)}</div>` : ''; }
+function htmlCapa(d, total, D = designAtual()){
+  const esc_ = D.capa_fundo === 'escuro';
+  const topo = { topo:140, centro:250, base:430 }[D.capa_titulo_pos] ?? 250;
+  return `<section class="slide ${esc_ ? 'escuro' : 'claro'}" data-tipo="capa">
+    ${marcaAgua(D.capa_marca, esc_, D.capa_marca_pos, true)}
+    <div class="topo"><img src="assets/logo-${esc_ ? 'branco' : 'indigo'}.svg" alt=""><span class="pag">${numeroPag(D, 1, total)}</span></div>
+    <div class="conteudo" style="margin-top:${topo}px">
+      ${d.capa.kicker ? `<div class="kicker">${fmt(d.capa.kicker)}</div>${fioHtml(D)}` : ''}
+      <h1${D.capa_titulo_tam === 'medio' ? ' style="font-size:90px"' : ''}>${fmt(d.capa.titulo) || '<span style="opacity:.35">Título da capa</span>'}</h1>
     </div>
     <div class="rodape-s"><span>@PALACIOGOMES.ADV</span><span>ARRASTE →</span></div>
   </section>`;
 }
-function htmlConteudo(modelo, s, n, total){
-  const cab = `<img class="marca-agua" src="assets/coluna-indigo.svg" alt="" style="height:1180px;right:-170px;top:110px;opacity:.05">
-    <div class="topo"><img src="assets/logo-indigo.svg" alt=""><span class="pag">${pad(n)} / ${pad(total)}</span></div>`;
-  const rot = s.rotulo ? `<div class="lei">${fmt(s.rotulo)}</div>` : '';
+function marcadorItem(D, i, escuro){
+  if (D.marcador === 'numero') return `<span class="num-item">${pad(i+1)}</span>`;
+  if (D.marcador === 'traco') return `<span class="traco-item"></span>`;
+  return `<img src="assets/caracol-${escuro ? 'branco' : 'indigo'}.svg" alt="">`;
+}
+function htmlConteudo(modelo, s, n, total, D = designAtual()){
+  const escuro = D.conteudo_fundo === 'escuro' || (D.conteudo_fundo === 'alternado' && n % 2 === 1);
+  const cab = `${marcaAgua(D.conteudo_marca, escuro, D.conteudo_marca_pos)}
+    <div class="topo"><img src="assets/logo-${escuro ? 'branco' : 'indigo'}.svg" alt=""><span class="pag">${numeroPag(D, n, total)}</span></div>`;
+  const rot = rotuloHtml(D, s.rotulo);
   let corpo = '';
   if (modelo === 'lista'){
     const itens = (s.itens||[]).filter(t => String(t).trim());
-    corpo = `${rot}<h2>${fmt(s.titulo)}</h2><div class="fio"></div>
-      <ul>${itens.map(t => `<li><img src="assets/caracol-indigo.svg" alt=""><span>${fmt(t)}</span></li>`).join('')}</ul>`;
+    corpo = `${rot}<h2>${fmt(s.titulo)}</h2>${fioHtml(D)}
+      <ul>${itens.map((t, i) => `<li>${marcadorItem(D, i, escuro)}<span>${fmt(t)}</span></li>`).join('')}</ul>`;
   } else if (modelo === 'pergunta'){
     corpo = `${rot}<span class="tag pergunta">Pergunta</span><div class="q">${fmt(s.pergunta)}</div>
-      <div class="fio"></div><p>${fmt(s.resposta)}</p>`;
+      ${fioHtml(D)}<p>${fmt(s.resposta)}</p>`;
   } else {
     corpo = `${rot}<span class="tag mito">Mito</span><div class="mito-txt">${fmt(s.mito)}</div>
       <div class="divisor"></div><span class="tag fato">Fato</span><div class="fato-txt">${fmt(s.fato)}</div>`;
   }
-  return `<section class="slide claro" data-tipo="conteudo">${cab}<div class="conteudo" style="margin-top:110px">${corpo}</div></section>`;
+  return `<section class="slide ${escuro ? 'escuro' : 'claro'}" data-tipo="conteudo">${cab}<div class="conteudo" style="margin-top:110px">${corpo}</div></section>`;
 }
-function htmlFechamento(d, total){
-  const f = d.fechamento;
-  return `<section class="slide escuro" data-tipo="fechamento">
-    <img class="marca-agua" src="assets/caracol-branco.svg" alt="" style="width:1150px;left:-430px;top:-360px;opacity:.10">
-    <div class="topo" style="justify-content:flex-end"><span class="pag">${pad(total)} / ${pad(total)}</span></div>
+function htmlFechamento(d, total, D = designAtual()){
+  const f = d.fechamento, esc_ = D.fechamento_fundo === 'escuro';
+  return `<section class="slide ${esc_ ? 'escuro' : 'claro'}" data-tipo="fechamento">
+    ${marcaAgua(D.fechamento_marca, esc_, D.fechamento_marca_pos)}
+    <div class="topo" style="justify-content:flex-end"><span class="pag">${numeroPag(D, total, total)}</span></div>
     <div class="conteudo" style="margin-top:250px">
-      ${f.rotulo ? `<div class="lei">${fmt(f.rotulo)}</div>` : ''}
+      ${rotuloHtml(D, f.rotulo)}
       <h1 style="font-size:92px">${fmt(f.titulo)}</h1>
-      ${f.texto ? `<div class="fio"></div><p style="opacity:.9">${fmt(f.texto)}</p>` : ''}
+      ${f.texto ? `${fioHtml(D)}<p style="opacity:.9">${fmt(f.texto)}</p>` : ''}
     </div>
     <div class="rodape-s" style="align-items:flex-end">
-      <img src="assets/logo-branco.svg" alt="" style="height:120px">
+      <img src="assets/logo-${esc_ ? 'branco' : 'indigo'}.svg" alt="" style="height:120px">
       <span class="ressalva">${d.ilustrativo ? RESSALVA_ILUSTRATIVO : RESSALVA}</span>
     </div>
   </section>`;
 }
 function pad(n){ return String(n).padStart(2,'0'); }
-function gerarSlides(){
-  const d = estado.dados, total = d.slides.length + 2;
-  return [htmlCapa(d,total), ...d.slides.map((s,i) => htmlConteudo(estado.modelo, s, i+2, total)), htmlFechamento(d,total)];
+function gerarSlides(D = designAtual(), d = estado.dados, modelo = estado.modelo){
+  const total = d.slides.length + 2;
+  return [htmlCapa(d,total,D), ...d.slides.map((s,i) => htmlConteudo(modelo, s, i+2, total, D)), htmlFechamento(d,total,D)];
 }
 
 /* ---------- prévia + verificação de texto excedente ---------- */
@@ -899,8 +955,8 @@ $('sel-modelo').addEventListener('change', e => {
   renderizarEditor(); renderizarPrevia();
 });
 $('btn-exemplo').addEventListener('click', () => {
-  estado = { id:null, modelo:estado.modelo, dados: clonar(EXEMPLOS[estado.modelo]), meta:null };
-  $('sel-rascunho').value = '';
+  estado = { id:null, modelo:estado.modelo, dados: clonar(EXEMPLOS[estado.modelo]), meta:null, design:null };
+  $('sel-rascunho').value = ''; atualizarSelDesign();
   renderizarEditor(); renderizarPrevia(); renderizarRevisao(); avisar('Exemplo carregado.');
 });
 
@@ -915,7 +971,7 @@ async function carregarListaRascunhos(){
 }
 $('sel-rascunho').addEventListener('change', async e => {
   const id = e.target.value;
-  if (!id){ estado = { id:null, modelo:estado.modelo, dados: vazio(estado.modelo), meta:null }; renderizarEditor(); renderizarPrevia(); renderizarRevisao(); return; }
+  if (!id){ estado = { id:null, modelo:estado.modelo, dados: vazio(estado.modelo), meta:null, design:null }; atualizarSelDesign(); renderizarEditor(); renderizarPrevia(); renderizarRevisao(); return; }
   await abrirPeca(id);
 });
 $('btn-salvar').addEventListener('click', async () => {
@@ -923,7 +979,7 @@ $('btn-salvar').addEventListener('click', async () => {
   if (!titulo) return avisar('Preencha o título da capa antes de salvar.', true);
   const btn = $('btn-salvar'); btn.disabled = true;
   const { legenda, ...conteudo } = estado.dados;
-  const registro = { titulo, modelo:estado.modelo, conteudo, legenda };
+  const registro = { titulo, modelo:estado.modelo, conteudo, legenda, design_id: (estado.design || designPadrao || {}).id || null };
   if (estado.meta && estado.meta.origem === 'clarice') registro.versao = (estado.meta.versao || 1) + 1;
   const q = estado.id ? sb.from('pecas').update(registro).eq('id', estado.id).select('id').single()
                       : sb.from('pecas').insert(registro).select('id').single();
@@ -1020,9 +1076,10 @@ async function abrirPeca(id){
   if (error) return avisar('Não foi possível abrir a peça.', true);
   if (data.modelo === 'reels') return abrirRoteiro(data);
   estado = { id:data.id, modelo:data.modelo, dados:{...vazio(data.modelo), ...data.conteudo, legenda:data.legenda || ''},
+    design: designs.find(x => x.id === data.design_id) || null,
     meta:{ origem:data.origem, status:data.status, versao:data.versao, parecer:data.parecer, pontos:data.pontos_verificacao||[],
            tema:data.tema, pilar:data.pilar, motivo:data.motivo_rejeicao } };
-  renderizarEditor(); renderizarPrevia(); renderizarRevisao();
+  atualizarSelDesign(); renderizarEditor(); renderizarPrevia(); renderizarRevisao();
   if ($('sel-rascunho')) $('sel-rascunho').value = id;
 }
 
@@ -1071,7 +1128,7 @@ $('btn-produzir').addEventListener('click', async () => {
   try {
     const { data, error } = await sb.from('pecas').insert({
       titulo: tema.slice(0,200), tema, modelo: $('np-modelo').value, pilar: $('np-pilar').value,
-      observacoes: $('np-obs').value.trim() || null, origem:'clarice', status:'em_producao', conteudo:{} }).select('id').single();
+      observacoes: $('np-obs').value.trim() || null, origem:'clarice', status:'em_producao', conteudo:{}, design_id: designPadrao && designPadrao.id }).select('id').single();
     if (error) throw new Error(error.message);
     pecaId = data.id;
     await cicloClariceTemis(pecaId, true);
@@ -1234,6 +1291,7 @@ async function carregarBriefing(){
       ${chip(`${d.publicadas_semana ?? 0}/${d.meta_semana ?? 2}`, 'publicadas na semana', 'fila', false)}
       ${chip(d.pautas_propostas, 'pautas a decidir', 'pauta', true)}
       ${d.reels ? chip((d.reels.pautas_reels_propostas||0) + (d.reels.roteiros_aguardando||0), 'Reels a decidir', 'reels', true) : ''}
+      ${d.design_proposto ? chip('1', 'design a aprovar', 'tarsila', true) : ''}
       ${d.reels ? chip(d.reels.roteiros_prontos_para_gravar, d.reels.proxima_gravacao ? 'prontos p/ gravar em ' + new Date(d.reels.proxima_gravacao + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : 'prontos p/ gravar', 'reels', false) : ''}
     </div>` : ''}
     <div class="progresso" id="prog-briefing" style="color:var(--ceu)"></div>`;
@@ -1303,7 +1361,7 @@ async function carregarPautas(){
         }
       }
       const { data: nova, error } = await sb.from('pecas').insert({ titulo: p.tema.slice(0,200), tema: p.tema, modelo: p.modelo, pilar: p.pilar,
-        observacoes: obs || null, origem:'clarice', status:'em_producao', conteudo:{} }).select('id').single();
+        observacoes: obs || null, origem:'clarice', status:'em_producao', conteudo:{}, design_id: designPadrao && designPadrao.id }).select('id').single();
       if (error) throw new Error(error.message);
       await sb.from('pautas').update({ peca_id: nova.id }).eq('id', id);
       await cicloClariceTemis(nova.id, true);
@@ -1815,12 +1873,13 @@ $('btn-modo-gravacao').addEventListener('click', async () => {
    v007 · Instruções da equipe (tabela aprendizados)
    ========================================================= */
 const DESTINOS = [
-  ['todas',  'Todos os agentes', 'Vale para Clarice, Glauber, Têmis, Atena e Rondon.'],
+  ['todas',  'Todos os agentes', 'Vale para Clarice, Glauber, Têmis, Atena, Rondon e Tarsila.'],
   ['clarice','Clarice · carrosséis', 'Redação dos carrosséis.'],
   ['glauber','Glauber · Reels', 'Roteiros dos vídeos.'],
   ['temis',  'Têmis · revisão OAB', 'O que ela deve apontar ou tolerar na revisão.'],
   ['atena',  'Atena · pautas', 'Escolha de temas da pauta semanal e da pauta de Reels.'],
   ['rondon', 'Rondon · Radar', 'O que buscar ou ignorar nas notícias.'],
+  ['tarsila','Tarsila · design do mês', 'Preferências para as propostas de design (ex.: "nunca capa clara").'],
 ];
 $('ins-agente').innerHTML = DESTINOS.map(([v,n]) => `<option value="${v}">${n}</option>`).join('');
 const dicaDestino = () => { $('ins-dica').textContent = (DESTINOS.find(d => d[0] === $('ins-agente').value) || [])[2] || ''; };
@@ -1880,6 +1939,111 @@ $('btn-add-regra').addEventListener('click', async () => {
   $('ins-regra').value = ''; prog.textContent = 'Regra adicionada. Ela vale a partir da próxima tarefa do agente.';
   carregarInstrucoes();
 });
+
+/* =========================================================
+   v009 · Design do mês (Tarsila)
+   ========================================================= */
+async function carregarDesigns(){
+  const { data } = await sb.from('designs').select('*').order('criado_em');
+  designs = Array.isArray(data) ? data : [];
+  designPadrao = designs.find(d => d.padrao) || null;
+  if (estado.design) estado.design = designs.find(d => d.id === estado.design.id) || null;
+  atualizarSelDesign();
+}
+function atualizarSelDesign(){
+  const sel = $('sel-design'); if (!sel) return;
+  const aprovados = designs.filter(d => d.status === 'aprovado');
+  const atual = estado.design || designPadrao;
+  sel.innerHTML = aprovados.map(d => `<option value="${d.id}">${esc(d.nome)}${d.padrao ? ' (padrão)' : ''}</option>`).join('') || '<option value="">Original</option>';
+  if (atual) sel.value = atual.id;
+}
+$('sel-design').addEventListener('change', async e => {
+  estado.design = designs.find(d => d.id === e.target.value) || null;
+  renderizarPrevia();
+  if (estado.id && estado.modelo !== 'reels'){
+    const { error } = await sb.from('pecas').update({ design_id: e.target.value || null }).eq('id', estado.id);
+    avisar(error ? 'Não foi possível salvar o design: ' + error.message : 'Design da peça alterado.', !!error);
+  }
+});
+
+async function amostraDesign(){
+  // usa o último carrossel aprovado como conteúdo de exemplo; completa com os exemplos dos outros modelos
+  const { data } = await sb.from('pecas').select('modelo,conteudo').in('status',['aprovada','publicada']).neq('modelo','reels').order('atualizado_em',{ascending:false}).limit(1);
+  const real = Array.isArray(data) && data[0] && data[0].conteudo && data[0].conteudo.capa ? data[0] : null;
+  const base = real ? { ...vazio(real.modelo), ...real.conteudo } : clonar(EXEMPLOS.lista);
+  const modeloReal = real ? real.modelo : 'lista';
+  const slides = ['lista','pergunta','mitofato'].map(m => ({ modelo:m, s: (m === modeloReal && base.slides && base.slides[0]) || EXEMPLOS[m].slides[0] }));
+  return { d: base, slides };
+}
+function fileiraDesign(D, am){
+  const total = 5;
+  const lst = [htmlCapa(am.d, total, D), ...am.slides.map((x, i) => htmlConteudo(x.modelo, x.s, i + 2, total, D)), htmlFechamento(am.d, total, D)];
+  return `<div class="linha-d">${lst.map(h => `<div class="mini-d"><div class="escala">${h}</div></div>`).join('')}</div>`;
+}
+async function renderizarDesignMes(){
+  const box = $('design-mes'); if (!box) return;
+  const gestor = usuario.papel === 'gestor';
+  const prop = designs.filter(d => d.status === 'proposto').slice(-1)[0];
+  const am = await amostraDesign();
+  const nomeAtual = designPadrao ? designPadrao.nome : 'Original';
+  let h = '';
+  if (prop){
+    h = `<h3><span>Design do mês · proposta da Tarsila: <em style="font-style:italic">${esc(prop.nome)}</em></span></h3>
+      <p class="dica" style="font-size:14px;color:#5a6372;margin:2px 0 10px">${esc(prop.descricao || '')}${prop.pedido ? ` <span style="color:#7a8290">(pedido: ${esc(prop.pedido)})</span>` : ''}</p>
+      <h4 style="font-weight:400;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa)">Proposta</h4>${fileiraDesign(paramsDe(prop), am)}
+      <h4 style="font-weight:400;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa)">Em uso hoje · ${esc(nomeAtual)}</h4>${fileiraDesign(paramsDe(designPadrao), am)}
+      ${gestor ? `<div class="decisao">
+        <button class="btn verde" id="ds-aprovar" type="button">Aprovar e usar nas próximas peças</button>
+        <button class="btn sec" id="ds-mostrar-outra" type="button">Pedir outra proposta</button>
+        <button class="btn vermelho" id="ds-mostrar-recusar" type="button">Recusar</button></div>
+      <div class="caixa-acao oculto" id="ds-caixa-outra"><label for="ds-pedido" style="margin-top:0">O que mudar</label>
+        <textarea id="ds-pedido" rows="2" placeholder="Ex.: capa mais limpa, sem caracol; manter o conteúdo claro"></textarea>
+        <div class="decisao"><button class="btn" id="ds-outra" type="button">Pedir à Tarsila</button></div></div>
+      <div class="caixa-acao oculto" id="ds-caixa-recusar"><label for="ds-motivo" style="margin-top:0">Motivo (opcional, ajuda as próximas propostas)</label>
+        <textarea id="ds-motivo" rows="2"></textarea>
+        <div class="decisao"><button class="btn vermelho" id="ds-recusar" type="button">Confirmar recusa</button></div></div>` : ''}`;
+  } else {
+    h = `<h3><span>Design em uso: ${esc(nomeAtual)}</span>${gestor ? '<button class="btn sec mini" id="ds-pedir" type="button">Pedir proposta à Tarsila agora</button>' : ''}</h3>
+      <p class="dica" style="font-size:13px;color:#7a8290;margin:2px 0 6px">Todo dia 1º a Tarsila propõe uma variação. Nada muda até você aprovar. Peças antigas mantêm o design com que foram feitas.</p>`;
+  }
+  const aprovados = designs.filter(d => d.status === 'aprovado');
+  if (aprovados.length > 1) h += `<details style="margin-top:6px"><summary style="font-size:13px;color:#7a8290;cursor:pointer">Biblioteca de designs aprovados (${aprovados.length})</summary>
+    ${aprovados.map(d => `<div class="regra" style="grid-template-columns:1fr auto"><div><b style="font-weight:400">${esc(d.nome)}</b>${d.padrao ? ' <span class="selo aprovada">padrão</span>' : ''}<div class="meta">${esc(d.descricao || '')}</div></div>
+      ${gestor && !d.padrao ? `<div class="acoes-p"><button class="btn sec mini" data-padrao="${d.id}" type="button">Tornar padrão</button></div>` : ''}</div>`).join('')}</details>`;
+  h += `<div class="progresso" id="prog-design"></div>`;
+  box.innerHTML = h;
+
+  const on = (id, fn) => { const el = $(id); if (el) el.addEventListener('click', fn); };
+  const prog = t => { $('prog-design').textContent = t; };
+  const pedir = async (pedido) => {
+    box.querySelectorAll('button').forEach(b => b.disabled = true); prog('Tarsila desenhando a proposta…');
+    try { const r = await chamarRotina('design_mensal', { forcar: true, pedido: pedido || undefined }); await carregarDesigns(); await renderizarDesignMes(); carregarConsumo(); if (r && r.aviso) $('prog-design').textContent = r.aviso; }
+    catch (e) { prog('Falhou: ' + e.message); box.querySelectorAll('button').forEach(b => b.disabled = false); }
+  };
+  on('ds-pedir', () => pedir(''));
+  on('ds-mostrar-outra', () => $('ds-caixa-outra').classList.toggle('oculto'));
+  on('ds-mostrar-recusar', () => $('ds-caixa-recusar').classList.toggle('oculto'));
+  on('ds-outra', () => { const t = $('ds-pedido').value.trim(); if (!t) return prog('Diga o que mudar.'); pedir(t); });
+  on('ds-recusar', async () => {
+    const { error } = await sb.from('designs').update({ status:'recusado', motivo: $('ds-motivo').value.trim() || null }).eq('id', prop.id);
+    if (error) return prog('Não foi possível recusar: ' + error.message);
+    await carregarDesigns(); renderizarDesignMes();
+  });
+  const tornarPadrao = async (id, aprovar) => {
+    if (designPadrao && designPadrao.id !== id){
+      const { error: e1 } = await sb.from('designs').update({ padrao:false }).eq('id', designPadrao.id);
+      if (e1) return prog('Não foi possível trocar o padrão: ' + e1.message);
+    }
+    const mud = aprovar ? { padrao:true, status:'aprovado', aprovado_em:new Date().toISOString(), aprovado_por:usuario.id } : { padrao:true };
+    const { error } = await sb.from('designs').update(mud).eq('id', id);
+    if (error) return prog('Não foi possível salvar: ' + error.message);
+    await carregarDesigns(); if (!estado.id) estado.design = null;
+    atualizarSelDesign(); renderizarPrevia(); await renderizarDesignMes();
+    $('prog-design').textContent = aprovar ? 'Design aprovado. As próximas peças já saem com ele.' : 'Padrão alterado.';
+  };
+  on('ds-aprovar', () => tornarPadrao(prop.id, true));
+  box.querySelectorAll('[data-padrao]').forEach(b => b.addEventListener('click', () => tornarPadrao(b.dataset.padrao, false)));
+}
 
 /* ---------------- Início ---------------- */
 (async () => {
