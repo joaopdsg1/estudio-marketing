@@ -704,8 +704,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v014';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Capa dos artigos',
+const VERSAO = 'v015';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Site no resumo do Péricles',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -1448,6 +1448,8 @@ async function carregarBriefing(){
       ${d.reels ? chip((d.reels.pautas_reels_propostas||0) + (d.reels.roteiros_aguardando||0), 'Reels a decidir', 'reels', true) : ''}
       ${d.design_proposto ? chip('1', 'design a aprovar', 'tarsila', true) : ''}
       ${d.paradas ? chip(d.paradas, 'paradas no meio', 'fila', true) : ''}
+      ${d.site && ((d.site.artigos_aguardando||[]).length + (d.site.artigos_bloqueados||[]).length) ? chip((d.site.artigos_aguardando||[]).length + (d.site.artigos_bloqueados||[]).length, 'artigos do site', 'site', true) : ''}
+      ${d.site && d.site.gbp_pendente ? chip('1', 'post do Google', 'site', false) : ''}
       ${d.reels ? chip(d.reels.roteiros_prontos_para_gravar, d.reels.proxima_gravacao ? 'prontos p/ gravar em ' + new Date(d.reels.proxima_gravacao + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : 'prontos p/ gravar', 'reels', false) : ''}
     </div>` : ''}
     <div class="progresso" id="prog-briefing" style="color:var(--ceu)"></div>`;

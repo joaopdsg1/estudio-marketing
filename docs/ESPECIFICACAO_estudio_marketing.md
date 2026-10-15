@@ -338,6 +338,10 @@ Reformulada a pedido do João (12/10/2026): o Rondon passou a ser o pesquisador 
 - No site: capa no topo do artigo (og:image e dados estruturados), destaque largo com cartão sobreposto para o artigo mais recente e grade de cartões para os demais; sem capa, entra a capa padrão (azul com o caracol).
 - Direito de imagem: usar só imagens próprias, licenciadas ou de banco gratuito; foto de pessoa real exige autorização (STJ, Súmula 403).
 
+### v015 — Site no resumo do Péricles ✅ publicada
+- O resumo diário passa a receber do Machado: artigos aguardando sua decisão, artigos bloqueados pela Têmis, artigos em produção, a última auditoria do site e a sugestão de post do Google ainda não usada.
+- O Péricles só menciona o site quando há algo pendente para você. Na Mesa, os atalhos "artigos do site" e "post do Google" levam à aba Site.
+
 ### Etapa 4 (original) — Analista de Referências
 - Cadastro manual de referências e relatório. Integração com a Meta só se a verificação do §8 for positiva.
 - **Aceite:** relatório comparativo de pelo menos 3 perfis, sem nenhum trecho copiado.

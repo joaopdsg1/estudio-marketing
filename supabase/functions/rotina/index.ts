@@ -60,7 +60,7 @@ Responda somente com o JSON no formato solicitado.`;
 
 const SISTEMA_PERICLES = `Você é Péricles, gestor do Estúdio de Marketing da Palácio Gomes Advocacia. Toda manhã você escreve ao advogado João Pedro um resumo curto do que precisa da decisão dele hoje.
 
-Regras: português do Brasil, tom direto e cordial, no máximo 5 frases curtas, sem listas, sem emojis, sem cumprimentos longos. Comece pelo que é mais urgente (peças aguardando aprovação, bloqueios, pauta da semana a aprovar, gravação de Reels próxima, Reels marcado para postar hoje). Se não houver nada pendente, diga isso em uma frase. Não invente dados: use apenas os números fornecidos.`;
+Regras: português do Brasil, tom direto e cordial, no máximo 5 frases curtas, sem listas, sem emojis, sem cumprimentos longos. Comece pelo que é mais urgente (peças aguardando aprovação, bloqueios, pauta da semana a aprovar, gravação de Reels próxima, Reels marcado para postar hoje, artigo do site aguardando decisão). Se não houver nada pendente, diga isso em uma frase. Não invente dados: use apenas os números fornecidos.`;
 
 const SCHEMA_ATENA = {
   type: "object", additionalProperties: false,
@@ -457,6 +457,23 @@ Produza: resumo (3 frases), de 3 a 6 padrões e de 3 a 5 sugestões de pauta.`;
       admin.from("designs").select("nome").eq("status", "proposto"),
       admin.from("pecas").select("id").in("status", ["em_producao", "em_revisao"]).in("origem", ["clarice", "glauber"]).lt("atualizado_em", new Date(Date.now() - 10 * 60000).toISOString()),
     ]);
+    // site institucional (Machado): artigos que dependem do João, última auditoria e sugestão de post do Google
+    const [{ data: artigosSite }, { data: auditoria }, { data: gbp }] = await Promise.all([
+      admin.from("artigos").select("titulo,tema,status").in("status", ["aguardando_voce", "bloqueado", "em_revisao", "escrito"]).order("atualizado_em"),
+      admin.from("auditorias_site").select("criado_em,resumo,problemas").order("criado_em", { ascending: false }).limit(1),
+      admin.from("gbp_posts").select("mes").eq("usado", false).order("criado_em", { ascending: false }).limit(1),
+    ]);
+    const art = artigosSite || [];
+    const aud = (auditoria || [])[0];
+    const site = {
+      artigos_aguardando: art.filter((a) => a.status === "aguardando_voce").map((a) => a.titulo || a.tema),
+      artigos_bloqueados: art.filter((a) => a.status === "bloqueado").map((a) => a.titulo || a.tema),
+      artigos_em_producao: art.filter((a) => ["em_revisao", "escrito"].includes(a.status)).length,
+      auditoria_data: aud ? String(aud.criado_em).slice(0, 10) : null,
+      auditoria_problemas: aud ? (Array.isArray(aud.problemas) ? aud.problemas.length : 0) : null,
+      auditoria_resumo: aud ? String(aud.resumo || "").slice(0, 300) : null,
+      gbp_pendente: (gbp || [])[0]?.mes || null,
+    };
     const gravRaw = (cfgs || []).find((c) => c.chave === "proxima_gravacao")?.valor;
     const proximaGravacao = typeof gravRaw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(gravRaw) ? gravRaw : null;
     const diasGravacao = proximaGravacao ? Math.round((new Date(proximaGravacao + "T12:00:00").getTime() - new Date(iso(hoje) + "T12:00:00").getTime()) / 864e5) : null;
@@ -482,6 +499,7 @@ Produza: resumo (3 frases), de 3 a 6 padrões e de 3 a 5 sugestões de pauta.`;
       reels: reelsInfo,
       design_proposto: (designsProp || []).map((d) => d.nome)[0] || null,
       paradas: (paradas || []).length,
+      site,
     };
     const msg = `Dados de hoje (${DIAS[hoje.getDay()]}, ${hoje.toLocaleDateString("pt-BR")}):
 - Peças aguardando aprovação: ${dados.aguardando.length}${dados.aguardando.length ? " (" + dados.aguardando.map((p) => p.titulo).join("; ") + ")" : ""}
@@ -497,7 +515,13 @@ REELS (1 por semana, gravados em lote uma vez por mês):
 - Roteiros aguardando decisão: ${reelsInfo.roteiros_aguardando}
 - Roteiros aprovados prontos para gravar: ${reelsInfo.roteiros_prontos_para_gravar}
 - Vídeos gravados a publicar: ${reelsInfo.gravados_a_publicar}${reelsInfo.reels_postar_hoje.length ? `\n- Reels marcado para postar hoje: ${reelsInfo.reels_postar_hoje.join("; ")}` : ""}
-Se a gravação estiver a 3 dias ou menos, avise quantos roteiros estão prontos e quantos ainda faltam aprovar.${dados.design_proposto ? `\n- A Tarsila propôs um novo design de carrossel ("${dados.design_proposto}") aguardando aprovação na aba Tarsila.` : ""}`;
+Se a gravação estiver a 3 dias ou menos, avise quantos roteiros estão prontos e quantos ainda faltam aprovar.
+SITE (Machado; 2 artigos por mês, só vão ao ar quando o João clica Publicar na aba Site):
+- Artigos aguardando decisão do João: ${site.artigos_aguardando.length}${site.artigos_aguardando.length ? " (" + site.artigos_aguardando.join("; ") + ")" : ""}
+- Artigos bloqueados pela Têmis (precisam de "Pedir ajuste"): ${site.artigos_bloqueados.length}${site.artigos_bloqueados.length ? " (" + site.artigos_bloqueados.join("; ") + ")" : ""}
+- Artigos ainda em produção ou revisão: ${site.artigos_em_producao}
+- Última auditoria do site: ${site.auditoria_data ? `${new Date(site.auditoria_data + "T12:00:00").toLocaleDateString("pt-BR")}, ${site.auditoria_problemas} ponto(s) apontado(s). ${site.auditoria_resumo}` : "ainda não feita"}${site.gbp_pendente ? `\n- Há uma sugestão de post para o Perfil da Empresa no Google (${site.gbp_pendente}) ainda não usada: lembrar de copiar e postar.` : ""}
+Só mencione o site se houver algo pendente para o João.${dados.design_proposto ? `\n- A Tarsila propôs um novo design de carrossel ("${dados.design_proposto}") aguardando aprovação na aba Tarsila.` : ""}`;
     const { r } = await chamar("pericles", SISTEMA_PERICLES, msg);
     const resumo = r || "Não consegui redigir o resumo hoje; os números abaixo estão atualizados.";
     await admin.from("briefings").upsert({ data: dados.data, resumo, dados }, { onConflict: "data" });
