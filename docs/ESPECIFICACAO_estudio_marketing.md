@@ -321,6 +321,17 @@ Reformulada a pedido do João (12/10/2026): o Rondon passou a ser o pesquisador 
 - Perfis monitorados (João, 15/10/2026): concorrentes diretos A+ Cobrança, MAC Cobrança, Positiva Cobrança, WS Cobrança, GVC Soluções, Neofin; concorrente indireto Isaac Educação (antecipação de crédito); referências Educa Legal, Deliane Santos, Voz Educa. Sites e links de artigos mantidos para análise manual.
 - Achado da 1ª análise: o que mais engaja nos concorrentes é institucional/comercial (vedado ao escritório); aproveitável é a forma (pergunta aberta, "momento certo de agir", listas, narrativa ilustrativa). Espaço livre: conteúdo técnico-jurídico sobre cobrança escolar.
 
+### v013 — Machado · Site ✅ publicada
+- Decisões do João (15/10/2026): site institucional fora do Canva (repositório `joaopdsg1/site-palacio`, Vercel, domínio palaciogomes.com.br); 2 artigos por mês; publicação só depois do clique dele em Publicar; token do GitHub restrito ao repositório do site, no Secret `GITHUB_SITE_TOKEN`.
+- **Machado (Sonnet 5.5):** artigo de 900 a 1.400 palavras, resposta direta na introdução (AEO), 4 a 6 seções, 3 a 5 perguntas frequentes, dispositivo legal em toda afirmação jurídica, fontes só do material recebido. Mesmas regras éticas dos demais agentes; sem chamada final (o site acrescenta ressalva, data, revisão com OAB e link institucional).
+- **Pesquisa:** para temas enviados pelo advogado, pesquisa na web (até 4 buscas) antes de escrever.
+- **Têmis:** checklist próprio de artigo (12 itens). Uma volta de correção automática.
+- **Publicar:** a função `site` monta a página (com dados estruturados Article, FAQPage e Breadcrumb), atualiza /publicacoes, sitemap.xml e llms.txt e grava tudo num único commit no GitHub; a Vercel publica em ~1 min. Também retira do site. Artigo publicado mantém o endereço quando é ajustado.
+- **Agenda:** artigo automático dias 1 e 15 (6h20), revisão 20 min depois; auditoria do site e post do Google no dia 2 (8h e 8h20).
+- **Custo real:** artigo ≈ US$ 0,11 (Machado) + revisão da Têmis; post do Google ≈ US$ 0,001; auditoria sem custo.
+- **Primeiro artigo:** "Bloqueio de Renda de Shows: O Caso Nego Di…", texto do João publicado exatamente como enviado, por decisão dele, sem revisão da Têmis (alerta registrado sobre a seção final de autopromoção e chamada à contratação).
+- **Limitação:** a função tem ~150 s por chamada; por isso a escrita e a revisão são chamadas separadas.
+
 ### Etapa 4 (original) — Analista de Referências
 - Cadastro manual de referências e relatório. Integração com a Meta só se a verificação do §8 for positiva.
 - **Aceite:** relatório comparativo de pelo menos 3 perfis, sem nenhum trecho copiado.

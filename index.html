@@ -321,6 +321,22 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
   .miniatura .escala{transform:scale(.25)}
   .barra .acoes{margin-left:0}
 }
+/* v013 · Machado · Site */
+.site-novo{grid-template-columns:1fr 2fr}
+.artigo-previa{background:#fff;border:1.5px solid var(--linha);border-radius:12px;padding:8px 26px 22px;margin-bottom:16px;max-width:820px}
+.artigo-previa h2{font-size:30px;color:var(--petroleo);margin:22px 0 8px}
+.artigo-previa h3{font-size:22px;color:var(--indigo);margin:18px 0 6px}
+.artigo-previa p{margin:8px 0;text-align:justify;text-align-last:left;hyphens:auto}
+.artigo-previa ul{margin:6px 0 6px 1.2em}
+.artigo-previa .faq-p{font-weight:400;color:var(--indigo);margin-top:12px}
+.campo-seo{display:grid;gap:4px;margin-bottom:10px}
+.campo-seo .cont{font-size:12px;color:#7a8290;text-align:right}
+.campo-seo .cont.estoura{color:var(--erro)}
+.selo.publicado{background:#EAF4EC;border-color:#B9DBC0;color:#2F6B3A}
+.selo.escrito,.selo.rascunho{background:var(--gelo)}
+.selo.bloqueado,.selo.descartado,.selo.retirado{background:#FBECEB;border-color:#EBC0BC;color:var(--erro)}
+.gbp-texto{white-space:pre-wrap;background:var(--gelo);border-radius:8px;padding:12px 14px;font-size:14.5px}
+@media (max-width:700px){.site-novo{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -358,6 +374,7 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
       <button data-pg="tarsila">Tarsila · Carrosséis</button>
       <button data-pg="reels">Glauber · Reels</button>
       <button data-pg="radar">Radar</button>
+      <button data-pg="site">Machado · Site</button>
       <button data-pg="instrucoes">Instruções</button>
     </nav>
     <div class="usuario"><span id="nome-usuario"></span><button id="btn-sair" type="button">Sair</button></div>
@@ -561,6 +578,47 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
     </div>
   </main>
 
+  <!-- Machado · Site -->
+  <main class="pagina oculto" id="pg-site">
+    <h1>Machado · Site</h1>
+    <p class="sub">Artigos de palaciogomes.com.br/publicacoes. O Machado escreve 2 por mês (dias 1 e 15) a partir das peças aprovadas, a Têmis revisa, e nada vai ao ar sem o seu clique em Publicar.</p>
+    <div id="site-lista-view">
+      <div class="caixa">
+        <h3><span>Novo artigo</span></h3>
+        <div class="form-linha site-novo">
+          <div><label for="na-origem">Partir de</label><select id="na-origem"><option value="tema">Um tema ou notícia</option><option value="peca">Uma peça aprovada</option></select></div>
+          <div id="na-tema-box"><label for="na-tema">Tema</label><input id="na-tema" placeholder="Ex.: penhora de renda de eventos para pagar dívidas"></div>
+          <div id="na-peca-box" class="oculto"><label for="na-peca">Peça</label><select id="na-peca"></select></div>
+        </div>
+        <label for="na-obs">Material e orientações (link da notícia, texto de base, pontos que não podem faltar)</label>
+        <textarea id="na-obs" rows="3"></textarea>
+        <label class="check"><input type="checkbox" id="na-pesquisar" checked> Pesquisar fatos e fontes na internet antes de escrever (recomendado para notícias)</label>
+        <div class="decisao"><button class="btn" id="btn-novo-artigo" type="button">Pedir artigo ao Machado</button></div>
+        <div class="progresso" id="prog-novo-artigo"></div>
+      </div>
+      <div class="caixa">
+        <h3><span>Artigos</span></h3>
+        <div style="overflow-x:auto"><table class="fila"><thead><tr><th>Artigo</th><th>Situação</th><th>Palavras</th><th>Atualizado</th></tr></thead><tbody id="site-artigos"></tbody></table></div>
+      </div>
+      <div class="caixa">
+        <h3><span>Saúde do site</span><button class="btn sec mini" id="btn-auditoria" type="button">Verificar agora</button></h3>
+        <p class="dica" style="font-size:13px;color:#7a8290">Todo dia 2 o Machado confere se as páginas abrem, se há links quebrados e se títulos e descrições estão no tamanho que o Google mostra. Não usa IA e não tem custo.</p>
+        <div id="site-auditoria"></div>
+        <div class="progresso" id="prog-auditoria"></div>
+      </div>
+      <div class="caixa">
+        <h3><span>Post do mês no Google</span><button class="btn sec mini" id="btn-gbp" type="button">Sugerir agora</button></h3>
+        <p class="dica" style="font-size:13px;color:#7a8290">Todo dia 2 o Machado sugere um post para o Perfil da Empresa no Google. Copie, revise e publique em Google Business Profile → Adicionar atualização, com o botão "Saiba mais" apontando para o link indicado.</p>
+        <div id="site-gbp"></div>
+        <div class="progresso" id="prog-gbp"></div>
+      </div>
+    </div>
+    <div id="site-detalhe-view" class="oculto">
+      <button class="btn sec mini" id="btn-voltar-site" type="button">← Voltar aos artigos</button>
+      <div id="site-detalhe" style="margin-top:16px"></div>
+    </div>
+  </main>
+
   <!-- Tarsila -->
   <main class="pagina oculto" id="pg-tarsila">
     <h1>Tarsila · Carrosséis</h1>
@@ -640,8 +698,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v012';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Referências que performaram',
+const VERSAO = 'v013';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Machado: artigos do site',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -660,6 +718,7 @@ const EQUIPE = [
   {nome:'Tarsila',  funcao:'Arte e design do mês',   etapa:1, ativo:true, pg:'tarsila'},
   {nome:'Rondon',   funcao:'Radar e referências',    etapa:4, ativo:true, pg:'radar'},
   {nome:'Glauber',  funcao:'Roteiros de Reels',      etapa:5, ativo:true, pg:'reels'},
+  {nome:'Machado',  funcao:'Artigos e SEO do site',  etapa:6, ativo:true, pg:'site'},
 ];
 
 let usuario = { id:null, papel:null };
@@ -671,13 +730,14 @@ function mostrar(tela){
 }
 function irPara(pg, opcoes={}){
   if (pg === 'tarsila' && estado.modelo === 'reels') estado = { id:null, modelo:'lista', dados: vazio('lista'), meta:null, design:null };
-  ['mesa','escritorio','fila','tarsila','reels','radar','instrucoes'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
+  ['mesa','escritorio','fila','tarsila','reels','radar','instrucoes','site'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
   document.querySelectorAll('header.topo-app nav button').forEach(b => b.classList.toggle('ativo', b.dataset.pg === pg));
   if (pg === 'tarsila'){ atualizarSelDesign(); renderizarEditor(); renderizarPrevia(); renderizarRevisao(); carregarListaRascunhos(); renderizarDesignMes(); }
   if (pg === 'fila'){ carregarFila(); }
   if (pg === 'mesa'){ carregarMesa(); }
   if (pg === 'radar'){ carregarRadar(); }
   if (pg === 'instrucoes'){ carregarInstrucoes(); }
+  if (pg === 'site'){ $('site-lista-view').classList.toggle('oculto', !!opcoes.detalhe); $('site-detalhe-view').classList.toggle('oculto', !opcoes.detalhe); if (!opcoes.detalhe) carregarSite(); window.scrollTo(0,0); }
   clearInterval(irPara.tEsc);
   if (pg === 'escritorio'){ carregarEscritorio(); irPara.tEsc = setInterval(() => { if (!document.hidden) carregarEscritorio(); }, 15000); }
   if (pg === 'reels'){
@@ -1965,13 +2025,14 @@ $('btn-modo-gravacao').addEventListener('click', async () => {
    v007 · Instruções da equipe (tabela aprendizados)
    ========================================================= */
 const DESTINOS = [
-  ['todas',  'Todos os agentes', 'Vale para Clarice, Glauber, Têmis, Atena, Rondon e Tarsila.'],
+  ['todas',  'Todos os agentes', 'Vale para Clarice, Glauber, Têmis, Atena, Rondon, Tarsila e Machado.'],
   ['clarice','Clarice · carrosséis', 'Redação dos carrosséis.'],
   ['glauber','Glauber · Reels', 'Roteiros dos vídeos.'],
   ['temis',  'Têmis · revisão OAB', 'O que ela deve apontar ou tolerar na revisão.'],
   ['atena',  'Atena · pautas', 'Escolha de temas da pauta semanal e da pauta de Reels.'],
   ['rondon', 'Rondon · Radar', 'O que buscar ou ignorar nas notícias.'],
   ['tarsila','Tarsila · design do mês', 'Preferências para as propostas de design (ex.: "nunca capa clara").'],
+  ['machado','Machado · artigos do site', 'Como escrever os artigos de palaciogomes.com.br (tom, extensão, temas a evitar).'],
 ];
 $('ins-agente').innerHTML = DESTINOS.map(([v,n]) => `<option value="${v}">${n}</option>`).join('');
 const dicaDestino = () => { $('ins-dica').textContent = (DESTINOS.find(d => d[0] === $('ins-agente').value) || [])[2] || ''; };
@@ -2190,9 +2251,10 @@ const POSTOS = [
   { id:'glauber', nome:'Glauber', funcao:'Roteiros de Reels', pg:'reels', cabelo:'#2A2A2A', pele:'#B97A55', roupa:'#9A6A00', estilo:'curto' },
   { id:'temis',   nome:'Têmis',   funcao:'Revisora OAB', pg:'fila', cabelo:'#D9D2C3', pele:'#EBC4A0', roupa:'#1A2230', estilo:'longo' },
   { id:'tarsila', nome:'Tarsila', funcao:'Arte e design', pg:'tarsila', cabelo:'#A3312B', pele:'#F1C9A5', roupa:'#0D507B', estilo:'longo' },
+  { id:'machado', nome:'Machado', funcao:'Artigos e SEO do site', pg:'site', cabelo:'#4A4038', pele:'#C9966E', roupa:'#26588A', estilo:'curto' },
 ];
 const VERBO = { pericles:'Escreveu o resumo do dia', atena:'Montou uma pauta', rondon:'Pesquisou o Radar', clarice:'Escreveu', glauber:'Roteirizou',
-  temis:'Revisou', tarsila:'Propôs um design', rondon_extrator:'Organizou o Radar' };
+  temis:'Revisou', tarsila:'Propôs um design', rondon_extrator:'Organizou o Radar', machado:'Trabalhou num artigo do site' };
 // cena 24×18 em pixels (personagem original, sem referência a jogos)
 function cenaPixel(a){
   const C = { h:a.cabelo, s:a.pele, e:'#1A2230', c:a.roupa, d:'#8A6A4A', D:'#6E5238', m:'#3B4350', t:'#A9CBE3', p:'#C4CBD4' };
@@ -2243,7 +2305,7 @@ async function carregarEscritorio(){
   const resumo = Array.isArray(br) && br[0] ? br[0].resumo : '';
   $('sala').innerHTML = POSTOS.map(a => {
     const meus = ex.filter(e => e.agente === a.id), ult = meus[0];
-    const trab = ult && ult.status === 'ok' && (Date.now() - new Date(ult.criado_em).getTime()) < 90000 || (a.id !== 'pericles' && emCurso > 0 && ['clarice','glauber','temis'].includes(a.id) && ult && (Date.now() - new Date(ult.criado_em).getTime()) < 300000);
+    const trab = ult && ult.status === 'ok' && (Date.now() - new Date(ult.criado_em).getTime()) < 90000 || (a.id !== 'pericles' && emCurso > 0 && ['clarice','glauber','temis','machado'].includes(a.id) && ult && (Date.now() - new Date(ult.criado_em).getTime()) < 300000);
     const deHoje = meus.filter(e => new Date(e.criado_em) >= hoje);
     const custo = deHoje.reduce((s, e) => s + Number(e.custo_usd || 0), 0);
     let fala = ult ? `${VERBO[a.id] || 'Trabalhou'}${ult.peca_id && tit[ult.peca_id] ? ` “${tit[ult.peca_id].slice(0,48)}”` : ''} · ${tempoAtras(ult.criado_em)}` : 'Sem tarefas nesta semana.';
@@ -2331,6 +2393,220 @@ $('btn-ref-manual').addEventListener('click', async e => {
   } catch (err) { $('prog-ref-manual').textContent = 'Falhou: ' + err.message; }
   e.target.disabled = false;
 });
+
+/* =========================================================
+   v013 · Machado · Site (artigos, auditoria e post do Google)
+   ========================================================= */
+const SITE = 'https://palaciogomes.com.br';
+const NOMES_ART = { rascunho:'Rascunho', escrito:'Escrito · falta revisão', em_revisao:'Têmis pede ajustes', aguardando_voce:'Aguardando você',
+  bloqueado:'Bloqueado pela Têmis', publicado:'Publicado', descartado:'Descartado', retirado:'Retirado do site' };
+const CRITERIOS_ART = { 1:'Promessa de resultado', 2:'Clientes, casos ou valores do escritório', 3:'Captação ou mercantilização', 4:'Comparação ou autopromoção',
+  5:'Sensacionalismo', 6:'Fundamento jurídico', 7:'Chamada ao contato ou à contratação', 8:'Caso concreto como feito do escritório',
+  9:'Expressões persuasivas', 10:'Referência de tempo que envelhece', 11:'Exposição de devedores', 12:'Uso de caso público' };
+let artigoAberto = null;
+
+async function chamarSite(tarefa, extra={}){
+  marcarEmCurso(1);
+  let data, error;
+  try { ({ data, error } = await sb.functions.invoke('site', { body: { tarefa, ...extra } })); }
+  finally { marcarEmCurso(-1); }
+  if (error){
+    let msg = error.message, corpo = null;
+    try { corpo = await error.context.json(); if (corpo && corpo.erro) msg = corpo.erro; } catch {}
+    const e = new Error(msg); e.corpo = corpo; throw e;
+  }
+  return data;
+}
+
+// Escreve (com pesquisa opcional), revisa e faz até 1 volta de correção automática
+async function cicloArtigo(id, alvo, { pesquisar=false, pedido='' } = {}){
+  let p;
+  if (pesquisar){ p = passoEm(alvo, 'Machado pesquisando fatos e fontes…'); await chamarSite('pesquisar', { artigo_id:id }); p.className='feito'; p.textContent='Pesquisa concluída'; }
+  p = passoEm(alvo, 'Machado escrevendo… (cerca de 1 minuto)');
+  await chamarSite('escrever', { artigo_id:id, ...(pedido ? { pedido } : {}) }); p.className='feito'; p.textContent='Artigo escrito';
+  p = passoEm(alvo, 'Têmis revisando…');
+  let r = await chamarSite('revisar', { artigo_id:id }); p.className='feito'; p.textContent='Têmis: ' + r.parecer;
+  if (r.parecer === 'ajustar'){
+    p = passoEm(alvo, 'Machado corrigindo conforme a Têmis…');
+    await chamarSite('escrever', { artigo_id:id }); p.className='feito'; p.textContent='Correção feita';
+    p = passoEm(alvo, 'Têmis revisando de novo…');
+    r = await chamarSite('revisar', { artigo_id:id }); p.className='feito'; p.textContent='Têmis: ' + r.parecer;
+  }
+  passoEm(alvo, r.parecer === 'aprovado' ? 'Pronto para você ler e publicar.' : r.parecer === 'bloquear' ? 'A Têmis bloqueou o tema. Veja o parecer.' : 'Ainda há apontamentos. Leia o parecer antes de decidir.', 'feito');
+  carregarConsumo();
+  return r;
+}
+
+async function carregarSite(){
+  const [{ data: arts }, { data: aud }, { data: gbp }, { data: pecas }] = await Promise.all([
+    sb.from('artigos').select('id,titulo,tema,status,palavras,atualizado_em,publicado_em,slug').order('atualizado_em',{ascending:false}).limit(60),
+    sb.from('auditorias_site').select('*').order('criado_em',{ascending:false}).limit(1),
+    sb.from('gbp_posts').select('*').order('criado_em',{ascending:false}).limit(1),
+    sb.from('pecas').select('id,titulo,modelo').in('status',['aprovada','publicada']).order('criado_em',{ascending:false}).limit(40)]);
+  const lst = Array.isArray(arts) ? arts : [];
+  $('site-artigos').innerHTML = lst.length ? lst.map(a => `<tr data-art="${a.id}" style="cursor:pointer">
+      <td><div>${esc(a.titulo || a.tema || 'Sem título')}</div>${a.status === 'publicado' && a.slug ? `<a href="${SITE}/publicacoes/${esc(a.slug)}" target="_blank" rel="noopener" style="color:var(--petroleo);font-size:13px">ver no site ↗</a>` : ''}</td>
+      <td><span class="selo ${a.status}">${NOMES_ART[a.status] || a.status}</span></td>
+      <td>${a.palavras || '—'}</td>
+      <td>${new Date(a.atualizado_em).toLocaleDateString('pt-BR')}</td></tr>`).join('')
+    : '<tr><td colspan="4">Nenhum artigo ainda.</td></tr>';
+  $('site-artigos').querySelectorAll('tr[data-art]').forEach(tr => tr.addEventListener('click', ev => { if (ev.target.closest('a')) return; abrirArtigo(tr.dataset.art); }));
+  $('na-peca').innerHTML = (Array.isArray(pecas) ? pecas : []).map(p => `<option value="${p.id}">${esc(p.titulo || 'Sem título')} · ${NOMES_MODELO[p.modelo] || p.modelo}</option>`).join('') || '<option value="">Nenhuma peça aprovada</option>';
+  const a = Array.isArray(aud) ? aud[0] : null;
+  $('site-auditoria').innerHTML = !a ? '<p class="dica" style="font-size:14px;color:#7a8290">Ainda não houve verificação.</p>'
+    : `<div class="dica" style="font-size:13px;color:#7a8290">Verificado em ${new Date(a.criado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</div>
+       <p style="margin:6px 0">${esc(a.resumo || '')}</p>
+       ${(a.problemas || []).length ? `<ul style="margin-left:1.1em;font-size:14px">${a.problemas.map(x => `<li><b style="font-weight:400;color:var(--petroleo)">${esc(x.pagina)}</b> · ${esc(x.detalhe)}</li>`).join('')}</ul>` : ''}`;
+  const g = Array.isArray(gbp) ? gbp[0] : null;
+  $('site-gbp').innerHTML = !g ? '<p class="dica" style="font-size:14px;color:#7a8290">Ainda não há sugestão.</p>'
+    : `<div class="dica" style="font-size:13px;color:#7a8290">Sugestão de ${esc(g.mes)}${g.usado ? ' · marcada como publicada' : ''}</div>
+       <div class="gbp-texto" id="gbp-texto">${esc(g.texto)}</div>
+       <div style="font-size:13px;margin-top:6px">Link do botão "Saiba mais": <a href="${esc(g.base)}" target="_blank" rel="noopener" style="color:var(--petroleo)">${esc(g.base)}</a></div>
+       <div class="decisao"><button class="btn sec mini" id="btn-gbp-copiar" type="button">Copiar texto</button>
+       ${g.usado ? '' : `<button class="btn mini" id="btn-gbp-usado" type="button">Marcar como publicado</button>`}</div>`;
+  if ($('btn-gbp-copiar')) $('btn-gbp-copiar').addEventListener('click', async () => { try { await navigator.clipboard.writeText(g.texto); $('prog-gbp').textContent = 'Texto copiado.'; } catch { $('prog-gbp').textContent = 'Selecione o texto e copie manualmente.'; } });
+  if ($('btn-gbp-usado')) $('btn-gbp-usado').addEventListener('click', async () => { await sb.from('gbp_posts').update({ usado:true }).eq('id', g.id); carregarSite(); });
+}
+
+$('na-origem').addEventListener('change', () => {
+  const peca = $('na-origem').value === 'peca';
+  $('na-tema-box').classList.toggle('oculto', peca); $('na-peca-box').classList.toggle('oculto', !peca);
+  $('na-pesquisar').checked = !peca;
+});
+$('btn-novo-artigo').addEventListener('click', async e => {
+  const origem = $('na-origem').value, obs = $('na-obs').value.trim(), tema = $('na-tema').value.trim(), peca_id = $('na-peca').value;
+  const prog = $('prog-novo-artigo'); prog.innerHTML = '';
+  if (origem === 'tema' && tema.length < 8) return prog.textContent = 'Descreva o tema em uma frase.';
+  if (origem === 'peca' && !peca_id) return prog.textContent = 'Escolha uma peça aprovada.';
+  e.target.disabled = true;
+  const linha = origem === 'peca' ? { origem, peca_id, tema: $('na-peca').selectedOptions[0].textContent, observacoes: obs || null } : { origem, tema, observacoes: obs || null };
+  const { data: novo, error } = await sb.from('artigos').insert(linha).select('id').single();
+  if (error){ prog.textContent = 'Não foi possível criar: ' + error.message; e.target.disabled = false; return; }
+  try {
+    await cicloArtigo(novo.id, 'prog-novo-artigo', { pesquisar: $('na-pesquisar').checked });
+    ['na-tema','na-obs'].forEach(i => $(i).value = '');
+    carregarSite(); abrirArtigo(novo.id);
+  } catch (err) { passoEm('prog-novo-artigo', 'Falhou: ' + err.message, 'falhou'); carregarSite(); }
+  e.target.disabled = false;
+});
+$('btn-auditoria').addEventListener('click', async e => {
+  e.target.disabled = true; $('prog-auditoria').textContent = 'Verificando as páginas…';
+  try { const r = await chamarSite('auditoria'); $('prog-auditoria').textContent = r.resumo || 'Verificação concluída.'; carregarSite(); }
+  catch (err) { $('prog-auditoria').textContent = 'Falhou: ' + err.message; }
+  e.target.disabled = false;
+});
+$('btn-gbp').addEventListener('click', async e => {
+  e.target.disabled = true; $('prog-gbp').textContent = 'Machado escrevendo o post…';
+  try { const r = await chamarSite('gbp_mes', { forcar:true }); $('prog-gbp').textContent = r.aviso || 'Sugestão pronta.'; carregarSite(); carregarConsumo(); }
+  catch (err) { $('prog-gbp').textContent = 'Falhou: ' + err.message; }
+  e.target.disabled = false;
+});
+$('btn-voltar-site').addEventListener('click', () => irPara('site'));
+
+function previaArtigo(a){
+  const c = a.conteudo || {};
+  const f = t => esc(t).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*+/g, '');
+  return `<div class="artigo-previa">
+    <h2>${f(a.titulo)}</h2><p style="color:#5a6372">${f(a.resumo)}</p>
+    ${(c.introducao||[]).map(p => `<p>${f(p)}</p>`).join('')}
+    ${(c.secoes||[]).map(s => `<h3>${f(s.titulo)}</h3>${(s.paragrafos||[]).map(p => `<p>${f(p)}</p>`).join('')}${(s.itens||[]).length ? `<ul>${s.itens.map(i => `<li>${f(i)}</li>`).join('')}</ul>` : ''}`).join('')}
+    ${(c.faq||[]).length ? `<h3>Perguntas frequentes</h3>${c.faq.map(q => `<p class="faq-p">${f(q.pergunta)}</p><p>${f(q.resposta)}</p>`).join('')}` : ''}
+    ${(c.fontes||[]).length ? `<h3>Fontes</h3><ul>${c.fontes.map(x => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener" style="color:var(--petroleo)">${esc(x.titulo || x.url)}</a></li>`).join('')}</ul>` : ''}
+    <p style="font-size:13px;color:#7a8290;border-top:1px solid var(--linha);padding-top:10px;margin-top:18px">No site, o artigo termina com a ressalva informativa, a data, a sua revisão (OAB) e o link "Como o escritório conduz a recuperação de crédito".</p>
+  </div>`;
+}
+
+async function abrirArtigo(id){
+  irPara('site', { detalhe:true });
+  const { data: a } = await sb.from('artigos').select('*').eq('id', id).maybeSingle();
+  artigoAberto = a;
+  if (!a){ $('site-detalhe').innerHTML = '<p>Artigo não encontrado.</p>'; return; }
+  const pr = a.parecer, c = a.conteudo || {};
+  const publicado = !!a.publicado_em && !['retirado','descartado'].includes(a.status); // está no ar (mesmo que em ajuste)
+  const corParecer = !pr ? '' : pr.parecer === 'aprovado' ? 'aprovada' : pr.parecer === 'bloquear' ? 'bloqueada' : 'em_revisao';
+  const nomeParecer = !pr ? '' : pr.parecer === 'aprovado' ? 'Sem objeções' : pr.parecer === 'bloquear' ? 'Bloqueado' : 'Pede ajustes';
+  let h = `<div class="revisao">
+    <h3>${esc(a.titulo || a.tema || 'Artigo')} <span class="selo ${a.status}">${NOMES_ART[a.status] || a.status}</span></h3>
+    <div class="dica" style="font-size:13px;color:#7a8290">${a.origem === 'peca' ? 'A partir de uma peça aprovada' : 'Tema: ' + esc(a.tema || '')} · versão ${a.versao || 0}${a.palavras ? ' · ' + a.palavras + ' palavras' : ''}${a.publicado_em ? ' · publicado em ' + new Date(a.publicado_em).toLocaleDateString('pt-BR') : ''}${publicado && a.status !== 'publicado' ? ' · <b style="font-weight:400;color:var(--alerta)">o site ainda mostra a versão anterior</b>' : ''}</div>
+    ${publicado && a.slug ? `<p style="margin-top:8px"><a href="${SITE}/publicacoes/${esc(a.slug)}" target="_blank" rel="noopener" style="color:var(--petroleo)">${SITE}/publicacoes/${esc(a.slug)} ↗</a></p>` : ''}`;
+  if (pr){
+    h += `<h4>Parecer da Têmis ${pr.versao !== a.versao ? '(sobre a versão ' + pr.versao + ')' : ''}</h4>
+      <div class="resumo"><span class="selo ${corParecer}">${nomeParecer}</span> ${esc(pr.resumo || '')}</div>`;
+    if ((pr.apontamentos||[]).length) h += `<ul>${pr.apontamentos.map(x => `<li><span class="g ${x.gravidade}">${x.gravidade}</span>
+      <b style="font-weight:400">${esc(CRITERIOS_ART[x.criterio] || 'Critério ' + x.criterio)}</b> · ${esc(x.onde)}<br>
+      ${x.trecho ? `<span class="trecho">“${esc(x.trecho)}”</span><br>` : ''}${esc(x.problema)}${x.sugestao ? `<br><span style="color:var(--petroleo)">Sugestão:</span> ${esc(x.sugestao)}` : ''}</li>`).join('')}</ul>`;
+    const cj = pr.conferencia_juridica || [];
+    if (cj.length) h += `<h4>Conferência jurídica</h4><ul>${cj.map(x => `<li><span class="g ${x.confianca==='alta'?'baixa':x.confianca==='media'?'media':'alta'}">confiança ${x.confianca}</span>
+      <b style="font-weight:400">${esc(x.dispositivo)}</b> ${x.sustenta ? '' : '<span style="color:var(--erro)">· não sustenta a afirmação</span>'}<br>${esc(x.afirmacao)}${x.observacao ? `<br><span class="trecho">${esc(x.observacao)}</span>` : ''}</li>`).join('')}</ul>`;
+  } else if (a.conteudo) h += `<h4>Parecer da Têmis</h4><div class="resumo">Ainda não revisado.</div>`;
+  if ((c.pontos_de_verificacao||[]).length) h += `<h4>Para você conferir (apontado pelo Machado)</h4><ul>${c.pontos_de_verificacao.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  if (a.conteudo){
+    h += `<h4>Como aparece no Google</h4>
+      <div class="campo-seo"><label for="ed-titulo" style="margin:0">Título</label><input id="ed-titulo" value="${esc(a.titulo || '')}"><div class="cont" id="ct-titulo"></div></div>
+      <div class="campo-seo"><label for="ed-desc" style="margin:0">Descrição</label><textarea id="ed-desc" rows="2">${esc(a.descricao || '')}</textarea><div class="cont" id="ct-desc"></div></div>
+      <div class="campo-seo"><label for="ed-resumo" style="margin:0">Resumo na lista de publicações</label><textarea id="ed-resumo" rows="2">${esc(a.resumo || '')}</textarea></div>
+      <div class="decisao" style="margin-top:4px"><button class="btn sec mini" id="art-salvar" type="button">Salvar título, descrição e resumo</button></div>`;
+  }
+  h += `<div class="decisao">
+    ${!a.conteudo ? `<button class="btn" id="art-escrever" type="button">Pedir ao Machado para escrever</button>` : ''}
+    ${a.conteudo && a.status !== 'bloqueado' && !['descartado','retirado'].includes(a.status) ? `<button class="btn verde" id="art-publicar" type="button">${publicado ? 'Republicar com as alterações' : 'Publicar no site'}</button>` : ''}
+    ${a.conteudo ? `<button class="btn sec" id="art-mostrar-ajuste" type="button">Pedir ajuste ao Machado</button>
+    <button class="btn sec" id="art-revisar" type="button">Pedir nova revisão à Têmis</button>` : ''}
+    ${publicado ? `<button class="btn vermelho" id="art-retirar" type="button">Retirar do site</button>` : ''}
+    ${!publicado && !['descartado','retirado'].includes(a.status) ? `<button class="btn vermelho" id="art-descartar" type="button">Descartar</button>` : ''}
+  </div>
+  <div class="caixa-acao oculto" id="art-caixa-ajuste">
+    <label for="art-pedido" style="margin-top:0">O que o Machado deve mudar</label>
+    <textarea id="art-pedido" rows="2" placeholder="Ex.: inclua um exemplo de escola com 30 alunos inadimplentes e encurte a seção 3"></textarea>
+    <div class="decisao"><button class="btn" id="art-ajustar" type="button">Ajustar e revisar</button></div>
+  </div>
+  <div class="progresso" id="prog-artigo"></div></div>`;
+  if (a.conteudo) h += previaArtigo(a);
+  $('site-detalhe').innerHTML = h;
+
+  const conta = (inp, out, max, min=0) => { const n = $(inp).value.length; $(out).textContent = `${n} caracteres · ideal ${min ? min + ' a ' : 'até '}${max}`; $(out).classList.toggle('estoura', n > max || n < min); };
+  if (a.conteudo){
+    const ct = () => { conta('ed-titulo','ct-titulo',60); conta('ed-desc','ct-desc',155,120); };
+    ['ed-titulo','ed-desc'].forEach(i => $(i).addEventListener('input', ct)); ct();
+    $('art-salvar').addEventListener('click', async () => {
+      const { error } = await sb.from('artigos').update({ titulo: $('ed-titulo').value.trim(), descricao: $('ed-desc').value.trim(), resumo: $('ed-resumo').value.trim(), atualizado_em: new Date().toISOString() }).eq('id', a.id);
+      $('prog-artigo').textContent = error ? 'Não foi possível salvar: ' + error.message : (publicado ? 'Salvo. Clique em "Republicar com as alterações" para levar ao site.' : 'Salvo.');
+    });
+  }
+  const trava = on => $('site-detalhe').querySelectorAll('.decisao button').forEach(b => b.disabled = on);
+  const rodar = async fn => { trava(true); $('prog-artigo').innerHTML = ''; try { await fn(); } catch (err) { passoEm('prog-artigo', 'Falhou: ' + err.message, 'falhou'); } trava(false); };
+  if ($('art-escrever')) $('art-escrever').addEventListener('click', () => rodar(async () => { await cicloArtigo(a.id, 'prog-artigo', { pesquisar: a.origem === 'tema' && !a.pesquisa }); abrirArtigo(a.id); }));
+  if ($('art-mostrar-ajuste')) $('art-mostrar-ajuste').addEventListener('click', () => $('art-caixa-ajuste').classList.toggle('oculto'));
+  if ($('art-ajustar')) $('art-ajustar').addEventListener('click', () => rodar(async () => {
+    const pedido = $('art-pedido').value.trim(); if (pedido.length < 5) throw new Error('Descreva o ajuste.');
+    await cicloArtigo(a.id, 'prog-artigo', { pedido }); abrirArtigo(a.id);
+  }));
+  if ($('art-revisar')) $('art-revisar').addEventListener('click', () => rodar(async () => {
+    const p = passoEm('prog-artigo', 'Têmis revisando…'); const r = await chamarSite('revisar', { artigo_id:a.id }); p.className='feito'; p.textContent = 'Têmis: ' + r.parecer; carregarConsumo(); abrirArtigo(a.id);
+  }));
+  if ($('art-publicar')) $('art-publicar').addEventListener('click', () => rodar(async () => {
+    if (!confirm(publicado ? 'Levar as alterações deste artigo para o site agora?' : 'Publicar este artigo em palaciogomes.com.br agora?')) return;
+    const p = passoEm('prog-artigo', 'Publicando no site…');
+    let r;
+    try { r = await chamarSite('publicar', { artigo_id:a.id }); }
+    catch (err) {
+      if (!(err.corpo && err.corpo.precisa_confirmar)) throw err;
+      p.className = 'falhou'; p.textContent = err.message;
+      if (!confirm('A Têmis ainda tem apontamentos sobre este artigo. Publicar mesmo assim, sob sua responsabilidade?')) return;
+      r = await chamarSite('publicar', { artigo_id:a.id, forcar:true });
+    }
+    p.className = 'feito'; p.textContent = 'Publicado. O site atualiza em cerca de 1 minuto.';
+    abrirArtigo(a.id);
+  }));
+  if ($('art-retirar')) $('art-retirar').addEventListener('click', () => rodar(async () => {
+    if (!confirm('Retirar este artigo do site? A página deixa de existir em cerca de 1 minuto.')) return;
+    const p = passoEm('prog-artigo', 'Retirando do site…'); await chamarSite('retirar', { artigo_id:a.id }); p.className='feito'; p.textContent='Retirado.'; abrirArtigo(a.id);
+  }));
+  if ($('art-descartar')) $('art-descartar').addEventListener('click', async () => {
+    if (!confirm('Descartar este artigo?')) return;
+    await sb.from('artigos').update({ status:'descartado', atualizado_em: new Date().toISOString() }).eq('id', a.id); irPara('site');
+  });
+}
 
 /* ---------------- Início ---------------- */
 (async () => {
