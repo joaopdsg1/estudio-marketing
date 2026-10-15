@@ -340,10 +340,11 @@ ${corpo.pedido ? `\nPEDIDO DO ADVOGADO PARA ESTA PROPOSTA: ${corpo.pedido}` : ""
       admin.rpc("custo_mes"),
     ]);
     const lote = iso(hoje).slice(0, 7);
-    const [{ data: reels }, { data: pautasReels }, { data: designsProp }] = await Promise.all([
+    const [{ data: reels }, { data: pautasReels }, { data: designsProp }, { data: paradas }] = await Promise.all([
       admin.from("pecas").select("id,titulo,status,gravado_em,data_postagem").eq("modelo", "reels").neq("status", "rejeitada").neq("status", "publicada"),
       admin.from("pautas").select("id").eq("tipo", "reels").eq("lote", lote).eq("status", "proposta"),
       admin.from("designs").select("nome").eq("status", "proposto"),
+      admin.from("pecas").select("id").in("status", ["em_producao", "em_revisao"]).in("origem", ["clarice", "glauber"]).lt("atualizado_em", new Date(Date.now() - 10 * 60000).toISOString()),
     ]);
     const gravRaw = (cfgs || []).find((c) => c.chave === "proxima_gravacao")?.valor;
     const proximaGravacao = typeof gravRaw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(gravRaw) ? gravRaw : null;
@@ -369,10 +370,12 @@ ${corpo.pedido ? `\nPEDIDO DO ADVOGADO PARA ESTA PROPOSTA: ${corpo.pedido}` : ""
       consumo_usd: Number(gastoAgora ?? 0), teto_usd: teto,
       reels: reelsInfo,
       design_proposto: (designsProp || []).map((d) => d.nome)[0] || null,
+      paradas: (paradas || []).length,
     };
     const msg = `Dados de hoje (${DIAS[hoje.getDay()]}, ${hoje.toLocaleDateString("pt-BR")}):
 - Peças aguardando aprovação: ${dados.aguardando.length}${dados.aguardando.length ? " (" + dados.aguardando.map((p) => p.titulo).join("; ") + ")" : ""}
 - Peças bloqueadas pela Têmis: ${dados.bloqueadas.length}
+- Peças que pararam no meio da produção (precisam do botão "Retomar" na Fila): ${dados.paradas}
 - Aprovadas e ainda não publicadas: ${dados.aprovadas_nao_publicadas.length}
 - Publicadas nesta semana: ${dados.publicadas_semana} de ${meta}
 - Pautas da semana aguardando aprovação: ${dados.pautas_propostas} (já aprovadas: ${dados.pautas_aprovadas})

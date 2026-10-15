@@ -345,6 +345,12 @@ Desenhada com o João em 12/10/2026.
 - Biblioteca de designs aprovados; cada peça guarda o seu design (as antigas não mudam); seletor de design por peça na Tarsila.
 - Agendamento: dia 1º às 6h50. Péricles avisa quando há proposta. Custo ≈ US$ 0,02 por proposta.
 
+### v010 — Retomar produção interrompida ✅
+- Problema real (13/10/2026): 5 pautas aprovadas de uma vez pararam no meio porque o ciclo redator → Têmis é comandado pela página aberta.
+- Correção: peças em produção/revisão sem atualização há mais de 10 minutos aparecem como paradas na Fila (e em Reels) com botão "Retomar"; a retomada continua do ponto exato (escrever, revisar ou ajustar) respeitando o limite de 2 voltas; a pauta de origem passa a "produzida".
+- Aviso fixo "Agentes trabalhando… não feche" e alerta do navegador ao tentar fechar. O Péricles cita as peças paradas.
+- Mover o ciclo inteiro para o servidor fica como opção futura (limite de tempo por execução no plano gratuito).
+
 ### Etapa 6 (opcional) — Painel visual
 - O "escritório" animado, no estilo dos prints de referência, lendo `agente_execucoes`.
 - Puramente estético, por isso fica por último.

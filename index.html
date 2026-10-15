@@ -195,6 +195,7 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 .capa-mini .escala{transform:scale(.25);transform-origin:0 0;width:1080px;height:1920px}
 .slide.vertical{height:1920px;padding:120px 96px}
 .selo.urg{background:#FBF1E6;border-color:#E8C9A6;color:#8A4B12}
+#aviso-trabalhando{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:40;background:var(--grafite);color:#fff;padding:10px 18px;border-radius:30px;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:calc(100% - 32px);text-align:center}
 /* Teleprompter */
 #teleprompter{position:fixed;inset:0;z-index:50;background:#05070a;color:#fff;display:flex;flex-direction:column}
 #tp-barra{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px;background:#111722;font:300 14px Slab,serif}
@@ -371,6 +372,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
       <div class="decisao"><button class="btn" id="btn-produzir" type="button">Produzir com Clarice e Têmis</button></div>
       <div class="progresso" id="progresso"></div>
     </div>
+    <div class="aviso oculto" id="aviso-paradas" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"></div>
+    <div class="progresso" id="prog-retomar"></div>
     <div style="overflow-x:auto"><table class="fila"><thead><tr><th>Peça</th><th>Modelo · pilar</th><th>Situação</th><th>Custo IA</th><th>Atualizada</th></tr></thead>
       <tbody id="lista-fila"><tr><td colspan="5">Carregando…</td></tr></tbody></table></div>
   </main>
@@ -558,6 +561,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
   <footer class="rodape" id="rodape-versao"></footer>
 </section>
 
+<div id="aviso-trabalhando" class="oculto" role="status">Agentes trabalhando… não feche nem recarregue esta página até terminar.</div>
+
 <!-- Teleprompter -->
 <div id="teleprompter" class="oculto" role="dialog" aria-label="Teleprompter">
   <div id="tp-barra">
@@ -584,8 +589,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v009';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Design do mês (Tarsila)',
+const VERSAO = 'v010';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Retomar produção interrompida',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -1054,7 +1059,7 @@ async function carregarConsumo(){
 async function carregarFila(){
   carregarConsumo();
   const [{ data: pecas, error }, { data: exec }] = await Promise.all([
-    sb.from('pecas').select('id,titulo,tema,modelo,pilar,status,origem,versao,atualizado_em').order('atualizado_em',{ascending:false}).limit(60),
+    sb.from('pecas').select('id,titulo,tema,modelo,pilar,status,origem,versao,atualizado_em').order('atualizado_em',{ascending:false}).limit(80),
     sb.from('agente_execucoes').select('peca_id,custo_usd').limit(2000)]);
   if (error){ $('lista-fila').innerHTML = '<tr><td colspan="5">Não foi possível carregar a fila.</td></tr>'; return; }
   const custo = {}; (exec||[]).forEach(e => { if (e.peca_id) custo[e.peca_id] = (custo[e.peca_id]||0) + Number(e.custo_usd); });
@@ -1064,11 +1069,21 @@ async function carregarFila(){
     <tr class="clicavel" data-id="${p.id}">
       <td><div style="font-weight:400">${esc(p.titulo)}</div>${p.tema && ehAgente(p.origem) ? `<div style="color:#7a8290;font-size:13px">Pauta: ${esc(p.tema.slice(0,90))}</div>` : ''}</td>
       <td>${NOMES_MODELO[p.modelo]}${p.pilar ? `<div style="color:#7a8290;font-size:13px">${esc(p.pilar)}</div>` : ''}</td>
-      <td><span class="selo ${p.status}">${NOMES_STATUS[p.status]}</span>${ehAgente(p.origem) ? `<div style="color:#7a8290;font-size:12px;margin-top:4px">versão ${p.versao}</div>` : ''}</td>
+      <td><span class="selo ${p.status}">${NOMES_STATUS[p.status]}</span>${pecaParada(p) ? ` <button class="btn mini" data-retomar="${p.id}" type="button">Retomar</button>` : ''}${ehAgente(p.origem) ? `<div style="color:#7a8290;font-size:12px;margin-top:4px">versão ${p.versao}</div>` : ''}</td>
       <td>${custo[p.id] ? usd(custo[p.id]) : '—'}</td>
       <td>${new Date(p.atualizado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td>
     </tr>`).join('') : '<tr><td colspan="5">Nenhuma peça ainda.</td></tr>';
-  document.querySelectorAll('#lista-fila tr.clicavel').forEach(tr => tr.addEventListener('click', async () => { await abrirPeca(tr.dataset.id); if (estado.modelo !== 'reels') irPara('tarsila'); }));
+  document.querySelectorAll('#lista-fila tr.clicavel').forEach(tr => tr.addEventListener('click', async ev => {
+    if (ev.target.dataset.retomar){ await retomarVarias([ev.target.dataset.retomar], 'prog-retomar', ev.target); return carregarFila(); }
+    await abrirPeca(tr.dataset.id); if (estado.modelo !== 'reels') irPara('tarsila'); }));
+  const paradas = (pecas||[]).filter(pecaParada);
+  const av = $('aviso-paradas');
+  av.classList.toggle('oculto', !paradas.length);
+  if (paradas.length){
+    av.innerHTML = `<span>${paradas.length} peça(s) pararam no meio da produção (a página foi fechada ou recarregada enquanto os agentes trabalhavam).</span>
+      <button class="btn mini" id="btn-retomar-todas" type="button">Retomar todas</button>`;
+    $('btn-retomar-todas').addEventListener('click', async e => { await retomarVarias(paradas.map(p => p.id), 'prog-retomar', e.target); carregarFila(); });
+  }
 }
 
 async function abrirPeca(id){
@@ -1084,8 +1099,17 @@ async function abrirPeca(id){
 }
 
 /* ---------- chamada às agentes ---------- */
+let emCurso = 0;
+function marcarEmCurso(delta){
+  emCurso = Math.max(0, emCurso + delta);
+  const b = $('aviso-trabalhando'); if (b) b.classList.toggle('oculto', emCurso === 0);
+}
+window.addEventListener('beforeunload', e => { if (emCurso > 0){ e.preventDefault(); e.returnValue = ''; } });
 async function chamarAgente(agente, peca_id){
-  const { data, error } = await sb.functions.invoke('agente', { body: { agente, peca_id } });
+  marcarEmCurso(1);
+  let data, error;
+  try { ({ data, error } = await sb.functions.invoke('agente', { body: { agente, peca_id } })); }
+  finally { marcarEmCurso(-1); }
   if (error){
     let msg = error.message;
     try { const corpo = await error.context.json(); if (corpo && corpo.erro) msg = corpo.erro; } catch {}
@@ -1097,13 +1121,22 @@ let alvoProgresso = 'progresso';
 function passo(txt, cls='rodando'){
   const d = document.createElement('div'); d.className = cls; d.textContent = txt; $(alvoProgresso).appendChild(d); return d;
 }
-async function cicloClariceTemis(peca_id, primeiraEscrita, redator='clarice'){
+function passoEm(alvo, txt, cls='rodando'){
+  const d = document.createElement('div'); d.className = cls; d.textContent = txt; const el = $(alvo); if (el) el.appendChild(d); return d;
+}
+async function cicloClariceTemis(peca_id, primeiraEscrita, redator='clarice', alvo=alvoProgresso){
   const nome = REDATOR[redator], oque = redator === 'glauber' ? 'o roteiro' : 'o carrossel';
+  const passo = (t, c) => passoEm(alvo, t, c);
   let p = passo(primeiraEscrita ? `${nome} escrevendo ${oque}…` : `${nome} reescrevendo conforme a instrução…`);
   await chamarAgente(redator, peca_id); p.className='feito';
-  p = passo('Têmis revisando…');
-  let r = await chamarAgente('temis', peca_id); p.className='feito'; p.textContent = `Têmis: ${r.parecer}`;
-  let voltas = 0;
+  return continuarCiclo(peca_id, redator, alvo, 0);
+}
+// Continua o ciclo a partir do estado salvo: revisa a versão atual (se ainda não revisada) e faz até 2 voltas de ajuste no total
+async function continuarCiclo(peca_id, redator, alvo, voltasFeitas, parecerAtual=null){
+  const nome = REDATOR[redator], passo = (t, c) => passoEm(alvo, t, c);
+  let r = parecerAtual, p;
+  if (!r){ p = passo('Têmis revisando…'); r = await chamarAgente('temis', peca_id); p.className='feito'; p.textContent = `Têmis: ${r.parecer}`; }
+  let voltas = voltasFeitas;
   while (r.parecer === 'ajustar' && voltas < 2){
     voltas++;
     p = passo(`${nome} ajustando (volta ${voltas} de 2)…`); await chamarAgente(redator, peca_id); p.className='feito';
@@ -1263,7 +1296,10 @@ function segundaISO(){
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 async function chamarRotina(tarefa, extra={}){
-  const { data, error } = await sb.functions.invoke('rotina', { body: { tarefa, ...extra } });
+  marcarEmCurso(1);
+  let data, error;
+  try { ({ data, error } = await sb.functions.invoke('rotina', { body: { tarefa, ...extra } })); }
+  finally { marcarEmCurso(-1); }
   if (error){
     let msg = error.message;
     try { const c = await error.context.json(); if (c && c.erro) msg = c.erro; } catch {}
@@ -1292,6 +1328,7 @@ async function carregarBriefing(){
       ${chip(d.pautas_propostas, 'pautas a decidir', 'pauta', true)}
       ${d.reels ? chip((d.reels.pautas_reels_propostas||0) + (d.reels.roteiros_aguardando||0), 'Reels a decidir', 'reels', true) : ''}
       ${d.design_proposto ? chip('1', 'design a aprovar', 'tarsila', true) : ''}
+      ${d.paradas ? chip(d.paradas, 'paradas no meio', 'fila', true) : ''}
       ${d.reels ? chip(d.reels.roteiros_prontos_para_gravar, d.reels.proxima_gravacao ? 'prontos p/ gravar em ' + new Date(d.reels.proxima_gravacao + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : 'prontos p/ gravar', 'reels', false) : ''}
     </div>` : ''}
     <div class="progresso" id="prog-briefing" style="color:var(--ceu)"></div>`;
@@ -1364,7 +1401,7 @@ async function carregarPautas(){
         observacoes: obs || null, origem:'clarice', status:'em_producao', conteudo:{}, design_id: designPadrao && designPadrao.id }).select('id').single();
       if (error) throw new Error(error.message);
       await sb.from('pautas').update({ peca_id: nova.id }).eq('id', id);
-      await cicloClariceTemis(nova.id, true);
+      await cicloClariceTemis(nova.id, true, 'clarice', 'pp-' + id);
       await sb.from('pautas').update({ status:'produzida' }).eq('id', id);
       setTimeout(carregarPautas, 1500);
     } catch (err) {
@@ -1591,7 +1628,7 @@ async function roteirizarPauta(p){
       'Urgência sugerida: ' + (p.urgencia === 'postar_logo' ? 'postar logo' : 'atemporal')].filter(Boolean).join('\n');
     const pecaId = await criarRoteiro({ tema: p.tema, formato: p.formato || 'joao', duracao: p.duracao || 45, radar: n, extra, lote: p.lote });
     await sb.from('pautas').update({ peca_id: pecaId }).eq('id', p.id);
-    await cicloClariceTemis(pecaId, true, 'glauber');
+    await cicloClariceTemis(pecaId, true, 'glauber', 'pr-' + p.id);
     await sb.from('pautas').update({ status:'produzida' }).eq('id', p.id);
   } catch (err) {
     passo('Falhou: ' + err.message, 'falhou');
@@ -1642,10 +1679,11 @@ async function carregarListaReels(){
       <td><span class="selo ${p.status}">${NOMES_STATUS[p.status]}</span></td>
       <td>${p.data_postagem ? dataBR(p.data_postagem) : '—'}</td>
       <td>${p.gravado_em ? '✓ ' + new Date(p.gravado_em).toLocaleDateString('pt-BR') : '—'}</td>
-      <td>${p.status === 'aprovada' ? `<button class="btn sec mini" data-tp="${p.id}" type="button">Teleprompter</button>` : ''}</td>
+      <td>${p.status === 'aprovada' ? `<button class="btn sec mini" data-tp="${p.id}" type="button">Teleprompter</button>` : ''}${pecaParada({...p, origem:'glauber'}) ? `<button class="btn mini" data-retomar="${p.id}" type="button">Retomar</button>` : ''}</td>
     </tr>`; }).join('') : '<tr><td colspan="5">Nenhum roteiro ainda.</td></tr>';
   document.querySelectorAll('#lista-reels tr.clicavel').forEach(tr => tr.addEventListener('click', ev => {
     if (ev.target.dataset.tp) return abrirTeleprompter([ev.target.dataset.tp]);
+    if (ev.target.dataset.retomar) return retomarVarias([ev.target.dataset.retomar], 'prog-lista-reels', ev.target).then(carregarListaReels);
     abrirPeca(tr.dataset.id);
   }));
 }
@@ -2043,6 +2081,48 @@ async function renderizarDesignMes(){
   };
   on('ds-aprovar', () => tornarPadrao(prop.id, true));
   box.querySelectorAll('[data-padrao]').forEach(b => b.addEventListener('click', () => tornarPadrao(b.dataset.padrao, false)));
+}
+
+/* =========================================================
+   v010 · Retomar produção interrompida
+   ========================================================= */
+const MIN_PARADA = 10; // minutos sem atualização para considerar a peça parada
+function pecaParada(p){
+  return ['em_producao','em_revisao'].includes(p.status) && ehAgente(p.origem) && (Date.now() - new Date(p.atualizado_em).getTime()) > MIN_PARADA * 60000;
+}
+async function retomarPeca(id, alvo){
+  const { data: p, error } = await sb.from('pecas').select('*').eq('id', id).single();
+  if (error) throw new Error('Peça não encontrada.');
+  const redator = p.origem === 'glauber' ? 'glauber' : 'clarice';
+  const passo = (t, c) => passoEm(alvo, t, c);
+  const escrita = redator === 'glauber' ? (p.conteudo && Array.isArray(p.conteudo.blocos) && p.conteudo.blocos.length) : (p.conteudo && p.conteudo.capa);
+  let r;
+  if (!escrita){
+    const pp = passo(`${REDATOR[redator]} escrevendo (retomada)…`); await chamarAgente(redator, id); pp.className = 'feito';
+    r = await continuarCiclo(id, redator, alvo, 0);
+  } else {
+    const pr = p.parecer, revisada = pr && String(pr.versao) === String(p.versao);
+    const voltas = Math.max(0, (p.historico || []).length - 1);
+    if (revisada && pr.parecer === 'ajustar' && voltas < 2){
+      const pp = passo(`${REDATOR[redator]} ajustando conforme o parecer (retomada)…`); await chamarAgente(redator, id); pp.className = 'feito';
+      r = await continuarCiclo(id, redator, alvo, voltas + 1);
+    } else {
+      r = await continuarCiclo(id, redator, alvo, voltas, revisada ? pr : null);
+    }
+  }
+  // pauta de origem, se houver, passa a "produzida"
+  await sb.from('pautas').update({ status:'produzida' }).eq('peca_id', id).eq('status','aprovada');
+  return r;
+}
+async function retomarVarias(ids, alvo, botao){
+  if (botao) botao.disabled = true;
+  $(alvo).innerHTML = '';
+  for (const id of ids){
+    try { await retomarPeca(id, alvo); }
+    catch (e) { passoEm(alvo, 'Falhou: ' + e.message, 'falhou'); }
+  }
+  if (botao) botao.disabled = false;
+  carregarConsumo();
 }
 
 /* ---------------- Início ---------------- */
