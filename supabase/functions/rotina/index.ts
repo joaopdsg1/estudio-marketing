@@ -398,13 +398,15 @@ Responda somente com o JSON no formato solicitado.`;
           relatorio.push(`${p.nome}: ${amigavel}`); continue;
         }
         const bd = d.business_discovery, posts = bd.media?.data || [];
+        // vídeos (com views) e posts estáticos (sem views) são comparados só entre si, para não inflar o índice dos vídeos
         const pont = (x: any) => (x.like_count || 0) + 3 * (x.comments_count || 0) + (x.view_count || 0) / 20;
-        const ord = posts.map(pont).sort((a: number, b: number) => a - b);
-        const mediana = ord.length ? ord[Math.floor(ord.length / 2)] || 1 : 1;
+        const grupo = (x: any) => (x.media_product_type === "REELS" || x.media_type === "VIDEO") ? "video" : "estatico";
+        const medianaDe = (g: string) => { const o = posts.filter((x: any) => grupo(x) === g).map(pont).sort((a: number, b: number) => a - b); return o.length ? o[Math.floor(o.length / 2)] || 1 : 1; };
+        const med: Record<string, number> = { video: medianaDe("video"), estatico: medianaDe("estatico") };
         const linhas = posts.map((x: any) => ({ perfil_id: p.id, origem: "instagram", ig_media_id: x.id, permalink: x.permalink, legenda: String(x.caption || "").slice(0, 2200),
           tipo: x.media_product_type === "REELS" ? "reels" : x.media_type === "CAROUSEL_ALBUM" ? "carrossel" : x.media_type === "VIDEO" ? "video" : "imagem",
           publicado_em: x.timestamp, curtidas: x.like_count ?? null, comentarios: x.comments_count ?? null, visualizacoes: x.view_count ?? null,
-          indice: Math.round((pont(x) / Math.max(1, mediana)) * 100) / 100, destaque: false, coletado_em: new Date().toISOString() }));
+          indice: Math.round((pont(x) / Math.max(1, med[grupo(x)])) * 100) / 100, destaque: false, coletado_em: new Date().toISOString() }));
         // destaques: 5 melhores dos últimos 180 dias, desde que acima da mediana do perfil
         const lim = Date.now() - 180 * 864e5;
         linhas.filter((l: any) => new Date(l.publicado_em).getTime() >= lim && l.indice > 1).sort((a: any, b: any) => b.indice - a.indice).slice(0, 5).forEach((l: any) => { l.destaque = true; });
@@ -425,7 +427,7 @@ Responda somente com o JSON no formato solicitado.`;
     ]);
     if (!(dest || []).length) return json({ ok: true, aviso: "Ainda não há posts de destaque para analisar.", relatorio, origem });
     const nomeP = Object.fromEntries((perfisN || []).map((p) => [p.id, p]));
-    const msg = `POSTS QUE PERFORMARAM ACIMA DA MÉDIA DO PRÓPRIO PERFIL (índice = desempenho ÷ mediana do perfil):
+    const msg = `POSTS QUE PERFORMARAM ACIMA DA MÉDIA DO PRÓPRIO PERFIL (índice = desempenho ÷ mediana do perfil no mesmo formato: vídeos comparados com vídeos, posts estáticos com estáticos):
 ${dest!.map((x, i) => `#${i + 1} [${nomeP[x.perfil_id || ""]?.nome || "post colado pelo advogado"}${nomeP[x.perfil_id || ""]?.seguidores ? ` · ${nomeP[x.perfil_id || ""].seguidores} seguidores` : ""}] ${x.tipo || "-"} · ${x.publicado_em ? String(x.publicado_em).slice(0, 10) : ""} · curtidas ${x.curtidas ?? "?"} · comentários ${x.comentarios ?? "?"} · views ${x.visualizacoes ?? "?"} · índice ${x.indice ?? "manual"}${x.observacao ? " · obs.: " + x.observacao : ""}
 LEGENDA (só para análise, não copiar): ${String(x.legenda || "").slice(0, 700)}${x.analise ? "\nANÁLISE ANTERIOR: " + x.analise : ""}`).join("\n\n")}
 ${(regrasRef || []).length ? `\nREGRAS DO ADVOGADO:\n${regrasRef!.map((r) => `- ${r.regra}`).join("\n")}` : ""}
