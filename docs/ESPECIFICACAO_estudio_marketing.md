@@ -317,6 +317,9 @@ Reformulada a pedido do João (12/10/2026): o Rondon passou a ser o pesquisador 
 - Coleta mensal (dia 1º, 7h30) ou manual: para cada perfil de Instagram ativo, Business Discovery da Meta (só contas profissionais; compartilhamentos e salvamentos não são públicos). Desempenho = curtidas + 3×comentários + views/20, dividido pela mediana do próprio perfil; 5 destaques por perfil nos últimos 180 dias.
 - Rondon (Sonnet) analisa destaques + posts colados à mão: padrões (tema × forma), como adaptar à OAB, 3 a 5 sugestões de carrossel; nunca copia texto. Sugestão vira pauta com um clique; a Atena recebe padrões e sugestões na pauta semanal.
 - Requisitos: conta profissional do escritório ligada a uma Página do Facebook; app no Meta for Developers; token (Página, sem expiração) no Secret `META_TOKEN`.
+- Em produção desde 15/10/2026 (app "Estúdio Palácio Gomes", modo de desenvolvimento, sem portfólio). Índice compara vídeos com vídeos e estáticos com estáticos.
+- Perfis monitorados (João, 15/10/2026): concorrentes diretos A+ Cobrança, MAC Cobrança, Positiva Cobrança, WS Cobrança, GVC Soluções, Neofin; concorrente indireto Isaac Educação (antecipação de crédito); referências Educa Legal, Deliane Santos, Voz Educa. Sites e links de artigos mantidos para análise manual.
+- Achado da 1ª análise: o que mais engaja nos concorrentes é institucional/comercial (vedado ao escritório); aproveitável é a forma (pergunta aberta, "momento certo de agir", listas, narrativa ilustrativa). Espaço livre: conteúdo técnico-jurídico sobre cobrança escolar.
 
 ### Etapa 4 (original) — Analista de Referências
 - Cadastro manual de referências e relatório. Integração com a Meta só se a verificação do §8 for positiva.
