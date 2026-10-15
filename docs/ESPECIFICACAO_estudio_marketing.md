@@ -351,9 +351,8 @@ Desenhada com o João em 12/10/2026.
 - Aviso fixo "Agentes trabalhando… não feche" e alerta do navegador ao tentar fechar. O Péricles cita as peças paradas.
 - Mover o ciclo inteiro para o servidor fica como opção futura (limite de tempo por execução no plano gratuito).
 
-### Etapa 6 (opcional) — Painel visual
-- O "escritório" animado, no estilo dos prints de referência, lendo `agente_execucoes`.
-- Puramente estético, por isso fica por último.
+### Etapa 6 — Escritório (painel visual) ✅ publicada (v011)
+- Aba "Escritório": 7 postos com personagens em pixel originais, luz verde quando o agente trabalhou nos últimos 90 s, vermelha em erro, frase com a última tarefa, tarefas e custo do dia; Péricles no posto central com o resumo do dia; lista das últimas 15 atividades. Lê `agente_execucoes` e atualiza a cada 15 s. Clicar no posto abre a tela do agente.
 
 ## 10. Decisões
 

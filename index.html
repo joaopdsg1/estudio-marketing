@@ -218,6 +218,30 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 .mini-d{width:216px;height:270px;overflow:hidden;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,.12);flex:none}
 .mini-d .escala{transform:scale(.2);transform-origin:0 0;width:1080px;height:1350px}
 @media (max-width:760px){.mini-d{width:162px;height:202.5px}.mini-d .escala{transform:scale(.15)}}
+/* Escritório */
+.sala{background:
+  linear-gradient(90deg,rgba(13,80,123,.05) 1px,transparent 1px) 0 0/48px 48px,
+  linear-gradient(rgba(13,80,123,.05) 1px,transparent 1px) 0 0/48px 48px,#E9EEF3;
+  border:1.5px solid var(--linha);border-radius:14px;padding:26px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px}
+.posto{background:#fff;border:1.5px solid var(--linha);border-radius:12px;padding:14px 14px 12px;position:relative;cursor:pointer}
+.posto.chefe{border-color:var(--petroleo);grid-column:1/-1;display:grid;grid-template-columns:200px 1fr;gap:18px;align-items:center}
+@media (max-width:760px){.posto.chefe{grid-template-columns:1fr}}
+.posto .cena{width:192px;height:144px;margin:0 auto;display:block;image-rendering:pixelated}
+.posto .cena .pessoa{transform-box:fill-box}
+.posto.trab .cena .pessoa{animation:digitar .5s steps(2) infinite}
+.posto.trab .cena .tela{animation:tela 1.2s steps(2) infinite}
+@keyframes digitar{50%{transform:translateY(1px)}}
+@keyframes tela{0%{fill:#A9CBE3}50%{fill:#E9F4FB}}
+.posto .nome-p{font-family:Cormorant,serif;font-weight:600;font-size:24px;color:var(--petroleo);line-height:1;margin-top:6px}
+.posto .func{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:4px 0 6px}
+.posto .fala{font-size:13px;background:var(--gelo);border-radius:10px;padding:7px 10px;position:relative;min-height:34px}
+.posto.trab .fala{background:#E7F0F7;color:var(--petroleo)}
+.posto .num{font-size:12px;color:#7a8290;margin-top:6px}
+.posto .luz{position:absolute;top:12px;right:12px;width:10px;height:10px;border-radius:50%;background:#C4CBD4}
+.posto.trab .luz{background:#3BA55C;box-shadow:0 0 0 4px rgba(59,165,92,.18)}
+.posto.erro .luz{background:var(--erro)}
+#esc-log div{font-size:13.5px;padding:6px 0;border-top:1px solid var(--linha)}
+#esc-log span{color:#7a8290}
 /* Instruções da equipe */
 .regra{border-top:1px solid var(--linha);padding:12px 0;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
 .regra .txt{white-space:pre-wrap}
@@ -329,6 +353,7 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
     <img src="assets/logo-branco.svg" alt="Palácio">
     <nav>
       <button data-pg="mesa" class="ativo">Mesa</button>
+      <button data-pg="escritorio">Escritório</button>
       <button data-pg="fila">Fila de peças</button>
       <button data-pg="tarsila">Tarsila · Carrosséis</button>
       <button data-pg="reels">Glauber · Reels</button>
@@ -347,6 +372,14 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
     <div class="consumo" id="consumo-mesa"></div>
     <h3 style="font-size:26px;color:var(--petroleo);margin:6px 0 14px">Equipe</h3>
     <div class="equipe" id="equipe"></div>
+  </main>
+
+  <!-- Escritório (painel visual) -->
+  <main class="pagina oculto" id="pg-escritorio">
+    <h1>Escritório</h1>
+    <p class="sub">A equipe trabalhando em tempo real. Atualiza sozinho a cada 15 segundos.</p>
+    <div class="sala" id="sala"></div>
+    <div class="caixa" style="margin-top:22px"><h3>Últimas atividades</h3><div id="esc-log"></div></div>
   </main>
 
   <!-- Fila -->
@@ -589,8 +622,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v010';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Retomar produção interrompida',
+const VERSAO = 'v011';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Escritório (painel visual)',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -620,13 +653,15 @@ function mostrar(tela){
 }
 function irPara(pg, opcoes={}){
   if (pg === 'tarsila' && estado.modelo === 'reels') estado = { id:null, modelo:'lista', dados: vazio('lista'), meta:null, design:null };
-  ['mesa','fila','tarsila','reels','radar','instrucoes'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
+  ['mesa','escritorio','fila','tarsila','reels','radar','instrucoes'].forEach(p => $('pg-'+p).classList.toggle('oculto', p !== pg));
   document.querySelectorAll('header.topo-app nav button').forEach(b => b.classList.toggle('ativo', b.dataset.pg === pg));
   if (pg === 'tarsila'){ atualizarSelDesign(); renderizarEditor(); renderizarPrevia(); renderizarRevisao(); carregarListaRascunhos(); renderizarDesignMes(); }
   if (pg === 'fila'){ carregarFila(); }
   if (pg === 'mesa'){ carregarMesa(); }
   if (pg === 'radar'){ carregarRadar(); }
   if (pg === 'instrucoes'){ carregarInstrucoes(); }
+  clearInterval(irPara.tEsc);
+  if (pg === 'escritorio'){ carregarEscritorio(); irPara.tEsc = setInterval(() => { if (!document.hidden) carregarEscritorio(); }, 15000); }
   if (pg === 'reels'){
     $('reels-lista-view').classList.toggle('oculto', !!opcoes.detalhe);
     $('reels-detalhe-view').classList.toggle('oculto', !opcoes.detalhe);
@@ -2123,6 +2158,89 @@ async function retomarVarias(ids, alvo, botao){
   }
   if (botao) botao.disabled = false;
   carregarConsumo();
+}
+
+/* =========================================================
+   Etapa 6 · Escritório (painel visual) — lê agente_execucoes
+   ========================================================= */
+const POSTOS = [
+  { id:'pericles', nome:'Péricles', funcao:'Gestor', pg:'mesa', cabelo:'#8C8F94', pele:'#E8B98F', roupa:'#0A3D5E', estilo:'curto', chefe:true },
+  { id:'atena',   nome:'Atena',   funcao:'Estrategista', pg:'mesa', cabelo:'#3A2A20', pele:'#F0C8A0', roupa:'#5B88A6', estilo:'longo' },
+  { id:'rondon',  nome:'Rondon',  funcao:'Radar e referências', pg:'radar', cabelo:'#1F1A17', pele:'#C98E62', roupa:'#2F6B3A', estilo:'curto' },
+  { id:'clarice', nome:'Clarice', funcao:'Redatora', pg:'fila', cabelo:'#6B3A1E', pele:'#F3CFAE', roupa:'#292465', estilo:'longo' },
+  { id:'glauber', nome:'Glauber', funcao:'Roteiros de Reels', pg:'reels', cabelo:'#2A2A2A', pele:'#B97A55', roupa:'#9A6A00', estilo:'curto' },
+  { id:'temis',   nome:'Têmis',   funcao:'Revisora OAB', pg:'fila', cabelo:'#D9D2C3', pele:'#EBC4A0', roupa:'#1A2230', estilo:'longo' },
+  { id:'tarsila', nome:'Tarsila', funcao:'Arte e design', pg:'tarsila', cabelo:'#A3312B', pele:'#F1C9A5', roupa:'#0D507B', estilo:'longo' },
+];
+const VERBO = { pericles:'Escreveu o resumo do dia', atena:'Montou uma pauta', rondon:'Pesquisou o Radar', clarice:'Escreveu', glauber:'Roteirizou',
+  temis:'Revisou', tarsila:'Propôs um design', rondon_extrator:'Organizou o Radar' };
+// cena 24×18 em pixels (personagem original, sem referência a jogos)
+function cenaPixel(a){
+  const C = { h:a.cabelo, s:a.pele, e:'#1A2230', c:a.roupa, d:'#8A6A4A', D:'#6E5238', m:'#3B4350', t:'#A9CBE3', p:'#C4CBD4' };
+  const linhas = [
+    '........................',
+    '......hhhh..............',
+    '.....hhhhhh.............',
+    '....hhhhhhhh.....mmmmmmm',
+    '....hssssssh.....mtttttm',
+    '....sesssses.....mtttttm',
+    '....ssssssss.....mtttttm',
+    '.....ssssss......mmmmmmm',
+    '......ssss..........m...',
+    '....cccccccc.......mmm..',
+    '...cccccccccc...........',
+    '..cccccccccccc..........',
+    'dddddddddddddddddddddddd',
+    'DDDDDDDDDDDDDDDDDDDDDDDD',
+    '.D....................D.',
+    '.D....................D.',
+    '.D....................D.',
+    'pppppppppppppppppppppppp',
+  ];
+  if (a.estilo === 'longo') ['....hssssssh','...hsesssesh','...hssssssh.','....hssssssh'].forEach((l,i) => { linhas[4+i] = l.padEnd(12,'.') + linhas[4+i].slice(12); });
+  let pessoa = '', resto = '';
+  linhas.forEach((l, y) => [...l].forEach((ch, x) => {
+    if (ch === '.') return;
+    const cls = ch === 't' ? ' class="tela"' : '';
+    const r = `<rect x="${x}" y="${y}" width="1" height="1" fill="${C[ch]}"${cls}/>`;
+    if ('hsec'.includes(ch) && y < 12) pessoa += r; else resto += r;
+  }));
+  return `<svg class="cena" viewBox="0 0 24 18" shape-rendering="crispEdges" aria-hidden="true"><g class="pessoa">${pessoa}</g>${resto}</svg>`;
+}
+function tempoAtras(d){
+  const m = Math.round((Date.now() - new Date(d).getTime()) / 60000);
+  if (m < 1) return 'agora'; if (m < 60) return `há ${m} min`;
+  const h = Math.round(m / 60); if (h < 24) return `há ${h} h`; return `há ${Math.round(h/24)} dia(s)`;
+}
+async function carregarEscritorio(){
+  const desde = new Date(Date.now() - 7*864e5).toISOString();
+  const { data } = await sb.from('agente_execucoes').select('agente,status,custo_usd,criado_em,peca_id,erro').gte('criado_em', desde).order('criado_em',{ascending:false}).limit(400);
+  const ex = (Array.isArray(data) ? data : []).map(e => ({ ...e, agente: e.agente === 'rondon_extrator' ? 'rondon' : e.agente }));
+  const ids = [...new Set(ex.slice(0,60).map(e => e.peca_id).filter(Boolean))];
+  let tit = {};
+  if (ids.length){ const { data: ps } = await sb.from('pecas').select('id,titulo').in('id', ids); (Array.isArray(ps)?ps:[]).forEach(p => tit[p.id] = p.titulo); }
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const { data: br } = await sb.from('briefings').select('resumo,data').order('data',{ascending:false}).limit(1);
+  const resumo = Array.isArray(br) && br[0] ? br[0].resumo : '';
+  $('sala').innerHTML = POSTOS.map(a => {
+    const meus = ex.filter(e => e.agente === a.id), ult = meus[0];
+    const trab = ult && ult.status === 'ok' && (Date.now() - new Date(ult.criado_em).getTime()) < 90000 || (a.id !== 'pericles' && emCurso > 0 && ['clarice','glauber','temis'].includes(a.id) && ult && (Date.now() - new Date(ult.criado_em).getTime()) < 300000);
+    const deHoje = meus.filter(e => new Date(e.criado_em) >= hoje);
+    const custo = deHoje.reduce((s, e) => s + Number(e.custo_usd || 0), 0);
+    let fala = ult ? `${VERBO[a.id] || 'Trabalhou'}${ult.peca_id && tit[ult.peca_id] ? ` “${tit[ult.peca_id].slice(0,48)}”` : ''} · ${tempoAtras(ult.criado_em)}` : 'Sem tarefas nesta semana.';
+    if (ult && ult.status === 'erro') fala = `Teve um problema ${tempoAtras(ult.criado_em)}. Veja a tela do agente.`;
+    if (ult && ult.status === 'bloqueado_teto') fala = 'Parado: teto mensal de custo atingido.';
+    if (a.chefe && resumo) fala = resumo;
+    return `<div class="posto${a.chefe ? ' chefe' : ''}${trab ? ' trab' : ''}${ult && ult.status !== 'ok' ? ' erro' : ''}" data-pg="${a.pg}">
+      <span class="luz" title="${trab ? 'trabalhando' : 'disponível'}"></span>
+      <div>${cenaPixel(a)}<div class="nome-p">${a.nome}</div><div class="func">${a.funcao}</div></div>
+      <div><div class="fala">${esc(fala)}</div>
+      <div class="num">Hoje: ${deHoje.length} tarefa(s) · ${usd(custo)} · semana: ${meus.length}</div></div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('#sala .posto').forEach(el => el.addEventListener('click', () => irPara(el.dataset.pg)));
+  const nomes = Object.fromEntries(POSTOS.map(a => [a.id, a.nome]));
+  $('esc-log').innerHTML = ex.slice(0, 15).map(e => `<div><b style="font-weight:400;color:var(--petroleo)">${nomes[e.agente] || e.agente}</b> · ${esc(VERBO[e.agente] || 'Trabalhou')}${e.peca_id && tit[e.peca_id] ? ` “${esc(tit[e.peca_id].slice(0,60))}”` : ''}${e.status !== 'ok' ? ' <span style="color:var(--erro)">(falhou)</span>' : ''} <span>· ${new Date(e.criado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})} · ${usd(e.custo_usd)}</span></div>`).join('') || '<p class="dica" style="color:#7a8290;font-size:14px">Nenhuma atividade nos últimos 7 dias.</p>';
 }
 
 /* ---------------- Início ---------------- */
