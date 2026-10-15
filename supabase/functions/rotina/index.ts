@@ -167,11 +167,16 @@ Deno.serve(async (req) => {
     const n = (cfg.posts_por_semana || 2) + 1; // carrosséis; o Reels semanal tem pauta mensal própria
     const { data: radar } = await admin.from("radar_itens").select("id,categoria,titulo,resumo,fonte,data_publicacao,gancho_juridico,estrategia_em_tese,relevancia,url")
       .eq("semana", semana).eq("status", "novo").order("relevancia", { ascending: false }).limit(15);
-    const [{ data: recentes }, { data: descartadas }, { data: regras }] = await Promise.all([
+    const [{ data: recentes }, { data: descartadas }, { data: regras }, { data: refs }] = await Promise.all([
       admin.from("pecas").select("titulo,pilar,modelo,status,criado_em").neq("status", "rejeitada").order("criado_em", { ascending: false }).limit(15),
       admin.from("pautas").select("tema").eq("status", "descartada").order("criado_em", { ascending: false }).limit(10),
       admin.from("aprendizados").select("regra").eq("ativo", true).in("agente", ["atena", "todas"]),
+      admin.from("referencias_analises").select("padroes,sugestoes,criado_em").order("criado_em", { ascending: false }).limit(1),
     ]);
+    const ref = (refs || [])[0];
+    const blocoRef = ref ? `\n\nREFERÊNCIAS QUE PERFORMARAM (análise do Rondon de ${String(ref.criado_em).slice(0, 10)}; modele o padrão, nunca copie; quando fizer sentido, uma das pautas pode partir delas):
+PADRÕES: ${(ref.padroes || []).map((x: any) => x.padrao + " → " + x.como_adaptar).join(" | ")}
+SUGESTÕES: ${(ref.sugestoes || []).filter((x: any) => !x.usada).map((x: any) => `${x.tema} [${x.modelo} · ${x.pilar}] ${x.angulo}`).join(" | ") || "nenhuma pendente"}` : "";
     const msg = `HOJE: ${DIAS[hoje.getDay()]}, ${hoje.toLocaleDateString("pt-BR")}. SEMANA QUE COMEÇA EM: ${segunda.toLocaleDateString("pt-BR")}.
 PUBLICAÇÕES POR SEMANA: ${n - 1}. Proponha ${n} pautas (uma é reserva), em ordem de prioridade.
 
@@ -183,7 +188,7 @@ ${(descartadas || []).map((p) => `- ${p.tema}`).join("\n") || "- nenhuma"}
 ${(regras || []).length ? `\nREGRAS DO ADVOGADO:\n${regras!.map((r) => `- ${r.regra}`).join("\n")}` : ""}
 
 RADAR DA SEMANA (Rondon):
-${(radar || []).map((x) => `- id ${x.id} [${x.categoria} · relevância ${x.relevancia}] ${x.titulo} (${x.fonte}, ${x.data_publicacao}). ${x.resumo} | Gancho: ${x.gancho_juridico || "-"}`).join("\n") || "- sem itens nesta semana"}`;
+${(radar || []).map((x) => `- id ${x.id} [${x.categoria} · relevância ${x.relevancia}] ${x.titulo} (${x.fonte}, ${x.data_publicacao}). ${x.resumo} | Gancho: ${x.gancho_juridico || "-"}`).join("\n") || "- sem itens nesta semana"}${blocoRef}`;
     const { r, falha } = await chamar("atena", SISTEMA_ATENA, msg, SCHEMA_ATENA);
     if (!r) return json({ erro: "Atena: " + falha }, 502);
     const radarPorId = Object.fromEntries((radar || []).map((x) => [x.id, x]));
@@ -327,6 +332,110 @@ ${corpo.pedido ? `\nPEDIDO DO ADVOGADO PARA ESTA PROPOSTA: ${corpo.pedido}` : ""
       status: "proposto", origem: "tarsila", mes, pedido: corpo.pedido || null });
     if (error) return json({ erro: "Falha ao gravar a proposta: " + error.message }, 500);
     return json({ ok: true, mes, nome: r.nome, mudancas, origem });
+  }
+
+  /* =============== REFERÊNCIAS QUE PERFORMARAM (RONDON) =============== */
+  const SISTEMA_REF = `Você é Rondon, analista de referências do Estúdio de Marketing da Palácio Gomes Advocacia (recuperação de crédito para empresas, foco em escolas particulares; público: diretor ou mantenedor de escola). Você estuda posts de outros perfis que tiveram desempenho acima da média do próprio perfil, para MODELAR O QUE DEU CERTO: tema, ângulo, formato, tipo de gancho, estrutura, tamanho e chamada de engajamento.
+
+REGRAS:
+- Nunca copie frases, títulos ou legendas; descreva o padrão com suas palavras. Paráfrase próxima também é cópia.
+- Diferencie o que é mérito do tema (o assunto em si interessa) do que é mérito da forma (gancho, formato, estrutura).
+- Ao sugerir pautas, adapte às regras da OAB (Provimento 205/2021): conteúdo informativo, sem promessa de resultado, sem captação ("contrate", "chame no direct", "consulta grátis"), sem casos de clientes, sem autopromoção. Se o padrão que funcionou depende de algo vedado (ex.: depoimento de cliente, "resultados"), aponte em "alertas_oab" e não o use.
+- As sugestões são para CARROSSEL ("lista", "pergunta" ou "mitofato") nos pilares: Gestão de Inadimplência, Diálogo com o Gestor Escolar, Gestão de Contratos, Relações Consumeristas, Casos Ilustrativos.
+- Use os números como sinal, não como verdade absoluta: poucos posts ou métricas incompletas pedem cautela.
+Responda somente com o JSON no formato solicitado.`;
+  const SCHEMA_REF = { type: "object", additionalProperties: false, required: ["resumo", "padroes", "sugestoes", "alertas_oab"], properties: {
+    resumo: { type: "string" },
+    padroes: { type: "array", items: { type: "object", additionalProperties: false, required: ["padrao", "evidencia", "como_adaptar"], properties: {
+      padrao: { type: "string" }, evidencia: { type: "string" }, como_adaptar: { type: "string" } } } },
+    sugestoes: { type: "array", items: { type: "object", additionalProperties: false, required: ["tema", "modelo", "pilar", "angulo", "inspirado_em"], properties: {
+      tema: { type: "string" }, modelo: { type: "string", enum: ["lista", "pergunta", "mitofato"] },
+      pilar: { type: "string", enum: ["Gestão de Inadimplência", "Diálogo com o Gestor Escolar", "Gestão de Contratos", "Relações Consumeristas", "Casos Ilustrativos"] },
+      angulo: { type: "string" }, inspirado_em: { type: "string" } } } },
+    alertas_oab: { type: "array", items: { type: "string" } } } };
+
+  if (corpo.tarefa === "referencia_manual") {
+    const m = corpo as unknown as { url?: string; texto?: string; metricas?: string; observacao?: string; perfil_id?: string };
+    if (!m.texto || m.texto.length < 30) return json({ erro: "Cole o texto, a legenda ou a transcrição do post (pelo menos algumas frases)." }, 400);
+    const SCHEMA_M = { type: "object", additionalProperties: false, required: ["analise"], properties: { analise: { type: "string" } } };
+    const { r, falha } = await chamar("rondon", SISTEMA_REF + "\nNESTA TAREFA: analise UM post que o advogado sabe que funcionou. Em \"analise\", em até 8 frases: por que provavelmente funcionou (tema × forma), qual padrão modelar e como adaptar às regras da OAB.",
+      `LINK: ${m.url || "-"}\nMÉTRICAS OBSERVADAS PELO ADVOGADO: ${m.metricas || "não informadas"}\nOBSERVAÇÃO: ${m.observacao || "-"}\n\nTEXTO / LEGENDA / TRANSCRIÇÃO:\n${String(m.texto).slice(0, 6000)}`, SCHEMA_M);
+    if (!r) return json({ erro: "Rondon: " + falha }, 502);
+    const { error } = await admin.from("referencias_posts").insert({ perfil_id: m.perfil_id || null, origem: "manual", permalink: m.url || null,
+      legenda: String(m.texto).slice(0, 4000), observacao: [m.metricas, m.observacao].filter(Boolean).join(" · ") || null, destaque: true, analise: r.analise });
+    if (error) return json({ erro: "Falha ao gravar: " + error.message }, 500);
+    return json({ ok: true, analise: r.analise, origem });
+  }
+
+  if (corpo.tarefa === "referencias") {
+    const TOKEN = Deno.env.get("META_TOKEN");
+    const V = "https://graph.facebook.com/v25.0";
+    const relatorio: string[] = [];
+    if (TOKEN) {
+      // conta do escritório (a consulta é feita "a partir" dela)
+      let igId = Deno.env.get("META_IG_USER_ID") || "";
+      if (!igId) {
+        const a = await (await fetch(`${V}/me?fields=instagram_business_account&access_token=${TOKEN}`)).json();
+        igId = a?.instagram_business_account?.id || "";
+        if (!igId) {
+          const b = await (await fetch(`${V}/me/accounts?fields=instagram_business_account&access_token=${TOKEN}`)).json();
+          igId = (b?.data || []).map((p: any) => p.instagram_business_account?.id).find(Boolean) || "";
+        }
+      }
+      if (!igId) return json({ erro: "Não encontrei a conta do Instagram do escritório ligada a uma Página do Facebook com esse acesso. Confira o passo a passo da Meta." }, 400);
+      const { data: perfis } = await admin.from("perfis_referencia").select("id,nome,endereco").eq("tipo", "instagram").eq("status", "ativo");
+      const usuarioDe = (e: string) => String(e || "").trim().replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").split(/[/?#]/)[0].toLowerCase();
+      for (const p of perfis || []) {
+        const u = usuarioDe(p.endereco || "");
+        if (!u) continue;
+        const campos = (comViews: boolean) => `business_discovery.username(${u}){followers_count,media_count,media.limit(50){id,caption,media_type,media_product_type,permalink,timestamp,like_count,comments_count${comViews ? ",view_count" : ""}}}`;
+        let d: any = await (await fetch(`${V}/${igId}?fields=${encodeURIComponent(campos(true))}&access_token=${TOKEN}`)).json();
+        if (d?.error && /view_count/i.test(d.error.message || "")) d = await (await fetch(`${V}/${igId}?fields=${encodeURIComponent(campos(false))}&access_token=${TOKEN}`)).json();
+        if (d?.error || !d?.business_discovery) {
+          const msg = d?.error?.message || "sem dados";
+          const amigavel = /not.*business|professional|cannot be found|does not exist/i.test(msg) ? "Conta pessoal, privada ou inexistente: a Meta só informa dados de contas profissionais." : "Erro da Meta: " + msg.slice(0, 160);
+          await admin.from("perfis_referencia").update({ erro_coleta: amigavel, ultima_coleta: new Date().toISOString() }).eq("id", p.id);
+          relatorio.push(`${p.nome}: ${amigavel}`); continue;
+        }
+        const bd = d.business_discovery, posts = bd.media?.data || [];
+        const pont = (x: any) => (x.like_count || 0) + 3 * (x.comments_count || 0) + (x.view_count || 0) / 20;
+        const ord = posts.map(pont).sort((a: number, b: number) => a - b);
+        const mediana = ord.length ? ord[Math.floor(ord.length / 2)] || 1 : 1;
+        const linhas = posts.map((x: any) => ({ perfil_id: p.id, origem: "instagram", ig_media_id: x.id, permalink: x.permalink, legenda: String(x.caption || "").slice(0, 2200),
+          tipo: x.media_product_type === "REELS" ? "reels" : x.media_type === "CAROUSEL_ALBUM" ? "carrossel" : x.media_type === "VIDEO" ? "video" : "imagem",
+          publicado_em: x.timestamp, curtidas: x.like_count ?? null, comentarios: x.comments_count ?? null, visualizacoes: x.view_count ?? null,
+          indice: Math.round((pont(x) / Math.max(1, mediana)) * 100) / 100, destaque: false, coletado_em: new Date().toISOString() }));
+        // destaques: 5 melhores dos últimos 180 dias, desde que acima da mediana do perfil
+        const lim = Date.now() - 180 * 864e5;
+        linhas.filter((l: any) => new Date(l.publicado_em).getTime() >= lim && l.indice > 1).sort((a: any, b: any) => b.indice - a.indice).slice(0, 5).forEach((l: any) => { l.destaque = true; });
+        if (linhas.length) await admin.from("referencias_posts").upsert(linhas, { onConflict: "ig_media_id" });
+        await admin.from("perfis_referencia").update({ seguidores: bd.followers_count ?? null, ultima_coleta: new Date().toISOString(), erro_coleta: null }).eq("id", p.id);
+        relatorio.push(`${p.nome}: ${posts.length} posts lidos, ${linhas.filter((l: any) => l.destaque).length} destaques`);
+      }
+    } else {
+      relatorio.push("Acesso da Meta ainda não cadastrado: só os posts colados manualmente entram na análise.");
+    }
+    // análise: destaques do Instagram + análises manuais recentes
+    const desde = new Date(Date.now() - 200 * 864e5).toISOString();
+    const [{ data: dest }, { data: perfisN }, { data: regrasRef }] = await Promise.all([
+      admin.from("referencias_posts").select("perfil_id,origem,tipo,legenda,curtidas,comentarios,visualizacoes,indice,publicado_em,analise,observacao,permalink")
+        .eq("destaque", true).gte("coletado_em", desde).order("indice", { ascending: false, nullsFirst: false }).limit(40),
+      admin.from("perfis_referencia").select("id,nome,seguidores"),
+      admin.from("aprendizados").select("regra").eq("ativo", true).in("agente", ["rondon", "todas"]),
+    ]);
+    if (!(dest || []).length) return json({ ok: true, aviso: "Ainda não há posts de destaque para analisar.", relatorio, origem });
+    const nomeP = Object.fromEntries((perfisN || []).map((p) => [p.id, p]));
+    const msg = `POSTS QUE PERFORMARAM ACIMA DA MÉDIA DO PRÓPRIO PERFIL (índice = desempenho ÷ mediana do perfil):
+${dest!.map((x, i) => `#${i + 1} [${nomeP[x.perfil_id || ""]?.nome || "post colado pelo advogado"}${nomeP[x.perfil_id || ""]?.seguidores ? ` · ${nomeP[x.perfil_id || ""].seguidores} seguidores` : ""}] ${x.tipo || "-"} · ${x.publicado_em ? String(x.publicado_em).slice(0, 10) : ""} · curtidas ${x.curtidas ?? "?"} · comentários ${x.comentarios ?? "?"} · views ${x.visualizacoes ?? "?"} · índice ${x.indice ?? "manual"}${x.observacao ? " · obs.: " + x.observacao : ""}
+LEGENDA (só para análise, não copiar): ${String(x.legenda || "").slice(0, 700)}${x.analise ? "\nANÁLISE ANTERIOR: " + x.analise : ""}`).join("\n\n")}
+${(regrasRef || []).length ? `\nREGRAS DO ADVOGADO:\n${regrasRef!.map((r) => `- ${r.regra}`).join("\n")}` : ""}
+
+Produza: resumo (3 frases), de 3 a 6 padrões e de 3 a 5 sugestões de pauta.`;
+    const { r, falha } = await chamar("rondon", SISTEMA_REF, msg, SCHEMA_REF);
+    if (!r) return json({ erro: "Rondon: " + falha, relatorio }, 502);
+    await admin.from("referencias_analises").insert({ mes: iso(hoje).slice(0, 7), resumo: r.resumo + ((r.alertas_oab || []).length ? "\n\nAlertas OAB: " + r.alertas_oab.join(" · ") : ""),
+      padroes: r.padroes || [], sugestoes: (r.sugestoes || []).map((s: any) => ({ ...s, usada: false })), posts_analisados: dest!.length });
+    return json({ ok: true, relatorio, sugestoes: (r.sugestoes || []).length, origem });
   }
 
   /* =============== BRIEFING (PÉRICLES) =============== */

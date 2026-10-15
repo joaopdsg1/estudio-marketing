@@ -312,6 +312,12 @@ Reformulada a pedido do João (12/10/2026): o Rondon passou a ser o pesquisador 
 - **Custo real:** ≈ US$ 0,20–0,33 por categoria pesquisada (≈ US$ 0,85 por semana, ≈ US$ 3,70 por mês).
 - **Limitação conhecida:** Estadão e UOL bloqueiam o robô de pesquisa e ficam desativados.
 
+### v012 — Referências que performaram ✅ publicada (aguardando o acesso da Meta)
+- Decisão do João (15/10/2026): prioridade é mapear o que deu certo (curtidas, comentários, views), sem descartar os links de sites; YouTube fica para depois.
+- Coleta mensal (dia 1º, 7h30) ou manual: para cada perfil de Instagram ativo, Business Discovery da Meta (só contas profissionais; compartilhamentos e salvamentos não são públicos). Desempenho = curtidas + 3×comentários + views/20, dividido pela mediana do próprio perfil; 5 destaques por perfil nos últimos 180 dias.
+- Rondon (Sonnet) analisa destaques + posts colados à mão: padrões (tema × forma), como adaptar à OAB, 3 a 5 sugestões de carrossel; nunca copia texto. Sugestão vira pauta com um clique; a Atena recebe padrões e sugestões na pauta semanal.
+- Requisitos: conta profissional do escritório ligada a uma Página do Facebook; app no Meta for Developers; token (Página, sem expiração) no Secret `META_TOKEN`.
+
 ### Etapa 4 (original) — Analista de Referências
 - Cadastro manual de referências e relatório. Integração com a Meta só se a verificação do §8 for positiva.
 - **Aceite:** relatório comparativo de pelo menos 3 perfis, sem nenhum trecho copiado.

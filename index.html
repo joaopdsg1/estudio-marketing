@@ -518,6 +518,24 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
     </div>
     <div class="progresso" id="prog-radar"></div>
     <div id="radar-lista"></div>
+    <div class="caixa" id="caixa-refs">
+      <h3><span>Referências que performaram</span><button class="btn mini" id="btn-refs" type="button">Atualizar agora</button></h3>
+      <p class="dica" style="font-size:13px;color:#7a8290">Todo dia 1º o Rondon lê os posts dos perfis de Instagram cadastrados, separa os que tiveram desempenho acima da média do próprio perfil e extrai os padrões para modelar (nunca copiar). Os links de sites e os posts que você colar abaixo também entram na análise.</p>
+      <div class="progresso" id="prog-refs"></div>
+      <div id="refs-analise"></div>
+      <h4 style="font-weight:400;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:16px 0 6px">Posts em destaque</h4>
+      <div style="overflow-x:auto"><table class="fila"><thead><tr><th>Perfil</th><th>Post</th><th>Curtidas</th><th>Coment.</th><th>Views</th><th>Desempenho</th></tr></thead><tbody id="refs-posts"></tbody></table></div>
+      <details style="margin-top:14px"><summary style="cursor:pointer;color:var(--petroleo);font-size:14px">Analisar um post que deu certo (site, LinkedIn, Instagram ou outro)</summary>
+        <div class="linha" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label for="rm-url">Link</label><input id="rm-url" placeholder="https://…"></div>
+          <div><label for="rm-metricas">Métricas que você viu (opcional)</label><input id="rm-metricas" placeholder="Ex.: 12 mil views, 300 compartilhamentos"></div>
+        </div>
+        <label for="rm-texto">Texto, legenda ou transcrição</label><textarea id="rm-texto" rows="4"></textarea>
+        <label for="rm-obs">Por que você acha que funcionou? (opcional)</label><input id="rm-obs">
+        <div class="decisao"><button class="btn sec" id="btn-ref-manual" type="button">Pedir análise ao Rondon</button></div>
+        <div class="progresso" id="prog-ref-manual"></div>
+      </details>
+    </div>
     <div class="caixa">
       <h3><span>Perfis de referência</span><button class="btn sec mini" id="btn-sugerir-perfis" type="button">Pedir sugestões ao Rondon</button></h3>
       <p class="dica" style="font-size:13px;color:#7a8290">Concorrentes e perfis que falam do tema. O Rondon sugere; você aceita ou recusa. A análise dos posts continua dependendo do link ou da transcrição que você colar.</p>
@@ -529,7 +547,7 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
         <div><button class="btn" id="btn-add-perfil" type="button">Adicionar</button></div>
       </div>
       <div class="progresso" id="prog-perfis"></div>
-      <div style="overflow-x:auto;margin-top:14px"><table class="fila"><thead><tr><th>Nome</th><th>Tipo</th><th>Endereço</th><th>Observação</th><th>Situação</th></tr></thead><tbody id="lista-perfis"></tbody></table></div>
+      <div style="overflow-x:auto;margin-top:14px"><table class="fila"><thead><tr><th>Nome</th><th>Tipo</th><th>Endereço</th><th>Observação</th><th>Coleta</th><th>Situação</th></tr></thead><tbody id="lista-perfis"></tbody></table></div>
     </div>
     <div class="caixa">
       <h3>Fontes confiáveis</h3>
@@ -622,8 +640,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v011';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Escritório (painel visual)',
+const VERSAO = 'v012';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Referências que performaram',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -1487,7 +1505,7 @@ async function carregarRadar(){
     $('prog-radar').textContent = 'Pauta criada. Ela aparece na Mesa, em "Pauta da semana", para você aprovar e produzir.';
     carregarRadar();
   }));
-  carregarPerfis(); carregarFontes();
+  carregarPerfis(); carregarFontes(); carregarReferencias();
 }
 $('btn-rodar-radar').addEventListener('click', async e => {
   e.target.disabled = true; const prog = $('prog-radar'); prog.innerHTML = '';
@@ -1515,10 +1533,11 @@ async function carregarPerfis(){
     return url ? `<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--petroleo)">${esc(e)}</a>` : esc(e); };
   $('lista-perfis').innerHTML = lst.length ? lst.map(p => `<tr data-id="${p.id}">
     <td>${esc(p.nome)}</td><td>${esc(p.tipo)}</td><td>${link(p)}</td><td>${esc(p.observacao||'')}</td>
+    <td style="font-size:13px">${p.tipo !== 'instagram' ? '<span style="color:#7a8290">sem métricas públicas</span>' : p.erro_coleta ? `<span style="color:var(--erro)">${esc(p.erro_coleta)}</span>` : p.ultima_coleta ? `${p.seguidores != null ? Number(p.seguidores).toLocaleString('pt-BR') + ' seguidores · ' : ''}${new Date(p.ultima_coleta).toLocaleDateString('pt-BR')}` : '<span style="color:#7a8290">aguardando 1ª coleta</span>'}</td>
     <td>${p.status==='sugerido' ? `<span class="selo em_revisao">Sugerido pelo Rondon</span>
       <div style="margin-top:6px;display:flex;gap:4px"><button class="btn mini" data-pf="ativo" type="button">Aceitar</button><button class="btn sec mini" data-pf="recusado" type="button">Recusar</button></div>`
       : `<span class="selo aprovada">Ativo</span> <button class="btn sec mini" data-pf="recusado" type="button" title="Remover">✕</button>`}</td></tr>`).join('')
-    : '<tr><td colspan="5">Nenhum perfil cadastrado ainda.</td></tr>';
+    : '<tr><td colspan="6">Nenhum perfil cadastrado ainda.</td></tr>';
   document.querySelectorAll('#lista-perfis [data-pf]').forEach(b => b.addEventListener('click', async () => {
     await sb.from('perfis_referencia').update({ status: b.dataset.pf }).eq('id', b.closest('tr').dataset.id); carregarPerfis();
   }));
@@ -2242,6 +2261,76 @@ async function carregarEscritorio(){
   const nomes = Object.fromEntries(POSTOS.map(a => [a.id, a.nome]));
   $('esc-log').innerHTML = ex.slice(0, 15).map(e => `<div><b style="font-weight:400;color:var(--petroleo)">${nomes[e.agente] || e.agente}</b> · ${esc(VERBO[e.agente] || 'Trabalhou')}${e.peca_id && tit[e.peca_id] ? ` “${esc(tit[e.peca_id].slice(0,60))}”` : ''}${e.status !== 'ok' ? ' <span style="color:var(--erro)">(falhou)</span>' : ''} <span>· ${new Date(e.criado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})} · ${usd(e.custo_usd)}</span></div>`).join('') || '<p class="dica" style="color:#7a8290;font-size:14px">Nenhuma atividade nos últimos 7 dias.</p>';
 }
+
+/* =========================================================
+   v012 · Referências que performaram (Rondon)
+   ========================================================= */
+async function carregarReferencias(){
+  const [{ data: an }, { data: posts }, { data: perfis }] = await Promise.all([
+    sb.from('referencias_analises').select('*').order('criado_em',{ascending:false}).limit(1),
+    sb.from('referencias_posts').select('*').eq('destaque', true).order('indice',{ascending:false, nullsFirst:false}).limit(40),
+    sb.from('perfis_referencia').select('id,nome')]);
+  const a = Array.isArray(an) ? an[0] : null;
+  const nomes = Object.fromEntries((Array.isArray(perfis) ? perfis : []).map(p => [p.id, p.nome]));
+  if (!a) $('refs-analise').innerHTML = '<p class="dica" style="font-size:14px;color:#7a8290">Ainda não há análise. Ela sai no dia 1º ou quando você clicar em "Atualizar agora".</p>';
+  else {
+    const sug = Array.isArray(a.sugestoes) ? a.sugestoes : [];
+    $('refs-analise').innerHTML = `<div class="dica" style="font-size:13px;color:#7a8290">Análise de ${new Date(a.criado_em).toLocaleDateString('pt-BR')} · ${a.posts_analisados || 0} posts</div>
+      <p style="white-space:pre-wrap;margin:6px 0 10px">${esc(a.resumo || '')}</p>
+      <h4 style="font-weight:400;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:10px 0 4px">Padrões que funcionaram</h4>
+      ${(a.padroes || []).map(x => `<div class="radar-item" style="margin-bottom:6px"><div class="t" style="font-size:15px">${esc(x.padrao)}</div>
+        <div class="linha-r"><b>Evidência:</b> ${esc(x.evidencia)}</div><div class="linha-r"><b>Como adaptar:</b> ${esc(x.como_adaptar)}</div></div>`).join('')}
+      <h4 style="font-weight:400;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--nevoa);margin:14px 0 4px">Sugestões de pauta</h4>
+      ${sug.map((x, i) => `<div class="radar-item${x.usada ? ' usado' : ''}" style="margin-bottom:6px"><div class="t" style="font-size:15px">${esc(x.tema)}</div>
+        <div class="meta">${NOMES_MODELO[x.modelo] || x.modelo} · ${esc(x.pilar)} · inspirado em: ${esc(x.inspirado_em)}</div>
+        <div class="linha-r">${esc(x.angulo)}</div>
+        <div class="acoes-r">${x.usada ? '<span style="color:#7a8290;font-size:13px">já virou pauta</span>' : `<button class="btn mini" data-sug="${i}" type="button">Virar pauta</button>`}</div></div>`).join('') || '<p class="dica">Sem sugestões.</p>'}`;
+    $('refs-analise').querySelectorAll('[data-sug]').forEach(b => b.addEventListener('click', async () => {
+      const x = sug[+b.dataset.sug], semana = segundaISO();
+      const { data: ps } = await sb.from('pautas').select('ordem').eq('semana', semana).eq('tipo','carrossel');
+      const ordem = Math.max(0, ...(Array.isArray(ps) ? ps.map(p => p.ordem) : [0])) + 1;
+      const { error } = await sb.from('pautas').insert({ semana, ordem, tema: x.tema, modelo: x.modelo, pilar: x.pilar, angulo: x.angulo,
+        justificativa: 'Referência que performou: ' + x.inspirado_em, status: 'proposta' });
+      if (error) return alert('Não foi possível criar a pauta: ' + error.message);
+      sug[+b.dataset.sug].usada = true;
+      await sb.from('referencias_analises').update({ sugestoes: sug }).eq('id', a.id);
+      $('prog-refs').textContent = 'Pauta criada. Ela aparece na Mesa, em "Pauta da semana".';
+      carregarReferencias();
+    }));
+  }
+  const lst = Array.isArray(posts) ? posts : [];
+  const n = v => v == null ? '—' : Number(v).toLocaleString('pt-BR');
+  $('refs-posts').innerHTML = lst.length ? lst.map(p => `<tr>
+    <td>${esc(nomes[p.perfil_id] || (p.origem === 'manual' ? 'Colado por você' : '—'))}</td>
+    <td style="max-width:340px"><div style="font-size:13px">${esc(p.tipo || '')}${p.publicado_em ? ' · ' + new Date(p.publicado_em).toLocaleDateString('pt-BR') : ''}</div>
+      <div style="font-size:13px;color:#5a6372">${esc(String(p.legenda || '').slice(0, 110))}${String(p.legenda||'').length > 110 ? '…' : ''}</div>
+      ${/^https?:\/\//.test(p.permalink || '') ? `<a href="${esc(p.permalink)}" target="_blank" rel="noopener" style="color:var(--petroleo);font-size:13px">ver post ↗</a>` : ''}
+      ${p.analise ? `<div style="font-size:13px;margin-top:4px"><b style="font-weight:400;color:var(--petroleo)">Rondon:</b> ${esc(p.analise)}</div>` : ''}</td>
+    <td>${n(p.curtidas)}</td><td>${n(p.comentarios)}</td><td>${n(p.visualizacoes)}</td>
+    <td>${p.indice != null ? `<b style="font-weight:400;color:var(--petroleo)">${String(p.indice).replace('.', ',')}×</b> a média do perfil` : (p.observacao ? esc(p.observacao) : '—')}</td></tr>`).join('')
+    : '<tr><td colspan="6">Nenhum post em destaque ainda.</td></tr>';
+}
+$('btn-refs').addEventListener('click', async e => {
+  e.target.disabled = true; $('prog-refs').textContent = 'Rondon lendo os perfis e analisando os destaques… (pode levar 1 a 2 minutos)';
+  try {
+    const r = await chamarRotina('referencias');
+    $('prog-refs').textContent = [...(r.relatorio || []), r.aviso || (r.sugestoes != null ? `${r.sugestoes} sugestão(ões) de pauta.` : '')].filter(Boolean).join(' · ');
+    carregarReferencias(); carregarPerfis(); carregarConsumo();
+  } catch (err) { $('prog-refs').textContent = 'Falhou: ' + err.message; }
+  e.target.disabled = false;
+});
+$('btn-ref-manual').addEventListener('click', async e => {
+  const texto = $('rm-texto').value.trim();
+  if (texto.length < 30) return $('prog-ref-manual').textContent = 'Cole o texto, a legenda ou a transcrição do post.';
+  e.target.disabled = true; $('prog-ref-manual').textContent = 'Rondon analisando…';
+  try {
+    const r = await chamarRotina('referencia_manual', { url: $('rm-url').value.trim(), texto, metricas: $('rm-metricas').value.trim(), observacao: $('rm-obs').value.trim() });
+    $('prog-ref-manual').textContent = r.analise || 'Análise salva.';
+    ['rm-url','rm-texto','rm-metricas','rm-obs'].forEach(i => $(i).value = '');
+    carregarReferencias(); carregarConsumo();
+  } catch (err) { $('prog-ref-manual').textContent = 'Falhou: ' + err.message; }
+  e.target.disabled = false;
+});
 
 /* ---------------- Início ---------------- */
 (async () => {
