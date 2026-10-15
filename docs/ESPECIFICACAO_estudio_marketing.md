@@ -332,6 +332,12 @@ Reformulada a pedido do João (12/10/2026): o Rondon passou a ser o pesquisador 
 - **Primeiro artigo:** "Bloqueio de Renda de Shows: O Caso Nego Di…", texto do João publicado exatamente como enviado, por decisão dele, sem revisão da Têmis (alerta registrado sobre a seção final de autopromoção e chamada à contratação).
 - **Limitação:** a função tem ~150 s por chamada; por isso a escrita e a revisão são chamadas separadas.
 
+### v014 — Capa dos artigos ✅ publicada
+- Pedido do João (15/10/2026): campo para anexar imagem ao artigo, servindo de capa e ajustada ao tamanho de cada bloco; /publicacoes inspirada (sem copiar) em vlma.com.br/publicacoes.
+- No estúdio: escolher imagem, ajustar enquadramento (vertical e horizontal), descrição para acessibilidade e crédito. O navegador recorta em 16:9 e gera 1600×900 e 800×450 em JPEG antes de enviar (bucket `capas-artigos`).
+- No site: capa no topo do artigo (og:image e dados estruturados), destaque largo com cartão sobreposto para o artigo mais recente e grade de cartões para os demais; sem capa, entra a capa padrão (azul com o caracol).
+- Direito de imagem: usar só imagens próprias, licenciadas ou de banco gratuito; foto de pessoa real exige autorização (STJ, Súmula 403).
+
 ### Etapa 4 (original) — Analista de Referências
 - Cadastro manual de referências e relatório. Integração com a Meta só se a verificação do §8 for positiva.
 - **Aceite:** relatório comparativo de pelo menos 3 perfis, sem nenhum trecho copiado.

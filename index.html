@@ -337,6 +337,12 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 .selo.bloqueado,.selo.descartado,.selo.retirado{background:#FBECEB;border-color:#EBC0BC;color:var(--erro)}
 .gbp-texto{white-space:pre-wrap;background:var(--gelo);border-radius:8px;padding:12px 14px;font-size:14.5px}
 @media (max-width:700px){.site-novo{grid-template-columns:1fr}}
+.capa-editor{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start}
+.capa-quadro{aspect-ratio:16/9;background:var(--gelo);border:1.5px dashed var(--linha);border-radius:8px;overflow:hidden;display:grid;place-items:center;color:#7a8290;font-size:13px;text-align:center}
+.capa-quadro span{padding:16px}
+.capa-quadro img{width:100%;height:100%;object-fit:cover;display:block}
+.capa-editor input[type=range]{width:100%}
+@media (max-width:700px){.capa-editor{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -698,8 +704,8 @@ table.fila tr.clicavel:hover td{background:#F7F9FB}
 /* =========================================================
    ESTÚDIO DE MARKETING · Palácio Gomes Advocacia
    ========================================================= */
-const VERSAO = 'v013';
-console.log('%cEstúdio de Marketing ' + VERSAO + ' · Machado: artigos do site',
+const VERSAO = 'v014';
+console.log('%cEstúdio de Marketing ' + VERSAO + ' · Capa dos artigos',
             'color:#0D507B;font-weight:bold');
 
 // Chave publicável: feita para ficar no navegador. Quem protege os dados são as regras (RLS) do banco.
@@ -2507,6 +2513,7 @@ function previaArtigo(a){
   const c = a.conteudo || {};
   const f = t => esc(t).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*+/g, '');
   return `<div class="artigo-previa">
+    ${a.capa_url ? `<img src="${esc(a.capa_url)}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;margin-top:18px">` : ''}
     <h2>${f(a.titulo)}</h2><p style="color:#5a6372">${f(a.resumo)}</p>
     ${(c.introducao||[]).map(p => `<p>${f(p)}</p>`).join('')}
     ${(c.secoes||[]).map(s => `<h3>${f(s.titulo)}</h3>${(s.paragrafos||[]).map(p => `<p>${f(p)}</p>`).join('')}${(s.itens||[]).length ? `<ul>${s.itens.map(i => `<li>${f(i)}</li>`).join('')}</ul>` : ''}`).join('')}
@@ -2514,6 +2521,64 @@ function previaArtigo(a){
     ${(c.fontes||[]).length ? `<h3>Fontes</h3><ul>${c.fontes.map(x => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener" style="color:var(--petroleo)">${esc(x.titulo || x.url)}</a></li>`).join('')}</ul>` : ''}
     <p style="font-size:13px;color:#7a8290;border-top:1px solid var(--linha);padding-top:10px;margin-top:18px">No site, o artigo termina com a ressalva informativa, a data, a sua revisão (OAB) e o link "Como o escritório conduz a recuperação de crédito".</p>
   </div>`;
+}
+
+// Recorta em 16:9 no ponto escolhido e gera a versão grande (1600×900) e a miniatura (800×450)
+function recortar(img, px, py, largura){
+  const w = img.naturalWidth, h = img.naturalHeight;
+  let cw = w, ch = Math.round(w * 9 / 16);
+  if (ch > h){ ch = h; cw = Math.round(h * 16 / 9); }
+  const sx = Math.round((w - cw) * px / 100), sy = Math.round((h - ch) * py / 100);
+  const c = document.createElement('canvas'); c.width = largura; c.height = Math.round(largura * 9 / 16);
+  const g = c.getContext('2d'); g.imageSmoothingQuality = 'high'; g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+  g.drawImage(img, sx, sy, cw, ch, 0, 0, c.width, c.height);
+  return new Promise(res => c.toBlob(res, 'image/jpeg', largura > 1000 ? 0.84 : 0.8));
+}
+function ligarCapa(a, publicado){
+  let imgNova = null;
+  const quadro = $('capa-quadro'), prog = $('prog-capa');
+  const posicionar = () => { const im = quadro.querySelector('img'); if (im && imgNova) im.style.objectPosition = `${$('capa-x').value}% ${$('capa-y').value}%`; };
+  $('capa-arquivo').addEventListener('change', ev => {
+    const f = ev.target.files[0]; prog.textContent = '';
+    if (!f) return;
+    if (f.size > 25 * 1024 * 1024){ prog.textContent = 'Imagem muito grande (máximo 25 MB).'; ev.target.value = ''; return; }
+    const url = URL.createObjectURL(f), im = new Image();
+    im.onload = () => {
+      imgNova = im;
+      quadro.innerHTML = ''; const vis = document.createElement('img'); vis.src = url; vis.alt = ''; quadro.appendChild(vis);
+      $('capa-ajuste').classList.remove('oculto'); $('capa-x').value = 50; $('capa-y').value = 50; posicionar();
+      if (im.naturalWidth < 1000) prog.textContent = `Atenção: a imagem tem ${im.naturalWidth} px de largura e pode ficar borrada no destaque (ideal: 1600 px ou mais).`;
+    };
+    im.onerror = () => { prog.textContent = 'Não foi possível abrir essa imagem.'; };
+    im.src = url;
+  });
+  ['capa-x','capa-y'].forEach(i => $(i).addEventListener('input', posicionar));
+  $('capa-salvar').addEventListener('click', async ev => {
+    ev.target.disabled = true; prog.textContent = imgNova ? 'Preparando e enviando a imagem…' : 'Salvando…';
+    try {
+      const dados = { capa_alt: $('capa-alt').value.trim() || null, capa_credito: $('capa-credito').value.trim() || null, atualizado_em: new Date().toISOString() };
+      if (imgNova){
+        const [grande, mini] = await Promise.all([recortar(imgNova, +$('capa-x').value, +$('capa-y').value, 1600), recortar(imgNova, +$('capa-x').value, +$('capa-y').value, 800)]);
+        const v = Date.now(), b = sb.storage.from('capas-artigos');
+        for (const [nome, blob] of [[`${a.id}/capa-${v}.jpg`, grande], [`${a.id}/mini-${v}.jpg`, mini]]){
+          const { error } = await b.upload(nome, blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false });
+          if (error) throw new Error(error.message);
+        }
+        dados.capa_url = b.getPublicUrl(`${a.id}/capa-${v}.jpg`).data.publicUrl;
+        dados.capa_mini_url = b.getPublicUrl(`${a.id}/mini-${v}.jpg`).data.publicUrl;
+      } else if (!a.capa_url) throw new Error('Escolha uma imagem primeiro.');
+      const { error } = await sb.from('artigos').update(dados).eq('id', a.id);
+      if (error) throw new Error(error.message);
+      await abrirArtigo(a.id);
+      $('prog-capa').textContent = publicado ? 'Capa salva. Clique em "Republicar com as alterações" para levar ao site.' : 'Capa salva. Ela vai junto quando você publicar.';
+    } catch (err) { prog.textContent = 'Não foi possível salvar a capa: ' + err.message; ev.target.disabled = false; }
+  });
+  if ($('capa-remover')) $('capa-remover').addEventListener('click', async () => {
+    if (!confirm('Remover a imagem de capa deste artigo?')) return;
+    await sb.from('artigos').update({ capa_url:null, capa_mini_url:null, capa_alt:null, capa_credito:null, atualizado_em: new Date().toISOString() }).eq('id', a.id);
+    await abrirArtigo(a.id);
+    $('prog-capa').textContent = publicado ? 'Capa removida. Republique para atualizar o site.' : 'Capa removida.';
+  });
 }
 
 async function abrirArtigo(id){
@@ -2545,7 +2610,27 @@ async function abrirArtigo(id){
       <div class="campo-seo"><label for="ed-titulo" style="margin:0">Título</label><input id="ed-titulo" value="${esc(a.titulo || '')}"><div class="cont" id="ct-titulo"></div></div>
       <div class="campo-seo"><label for="ed-desc" style="margin:0">Descrição</label><textarea id="ed-desc" rows="2">${esc(a.descricao || '')}</textarea><div class="cont" id="ct-desc"></div></div>
       <div class="campo-seo"><label for="ed-resumo" style="margin:0">Resumo na lista de publicações</label><textarea id="ed-resumo" rows="2">${esc(a.resumo || '')}</textarea></div>
-      <div class="decisao" style="margin-top:4px"><button class="btn sec mini" id="art-salvar" type="button">Salvar título, descrição e resumo</button></div>`;
+      <div class="decisao" style="margin-top:4px"><button class="btn sec mini" id="art-salvar" type="button">Salvar título, descrição e resumo</button></div>
+      <h4>Imagem de capa</h4>
+      <div class="capa-editor">
+        <div class="capa-quadro" id="capa-quadro">${a.capa_url ? `<img src="${esc(a.capa_url)}" alt="">` : '<span>Sem imagem. O site usa a capa padrão do escritório (azul com o caracol).</span>'}</div>
+        <div>
+          <label for="capa-arquivo" style="margin-top:0">${a.capa_url ? 'Trocar imagem' : 'Escolher imagem'} (JPG, PNG ou WEBP)</label>
+          <input type="file" id="capa-arquivo" accept="image/jpeg,image/png,image/webp">
+          <div id="capa-ajuste" class="oculto">
+            <label for="capa-y">Enquadramento vertical</label><input type="range" id="capa-y" min="0" max="100" value="50">
+            <label for="capa-x">Enquadramento horizontal</label><input type="range" id="capa-x" min="0" max="100" value="50">
+          </div>
+          <label for="capa-alt">Descrição da imagem (para leitores de tela e Google)</label>
+          <input id="capa-alt" value="${esc(a.capa_alt || '')}" placeholder="Ex.: Mãos assinando um contrato">
+          <label for="capa-credito">Crédito ou fonte da imagem</label>
+          <input id="capa-credito" value="${esc(a.capa_credito || '')}" placeholder="Ex.: Foto: arquivo do escritório">
+          <div class="decisao" style="margin-top:10px"><button class="btn sec mini" id="capa-salvar" type="button">Salvar capa</button>
+            ${a.capa_url ? '<button class="btn vermelho mini" id="capa-remover" type="button">Remover capa</button>' : ''}</div>
+          <p class="dica" style="font-size:12.5px;color:#7a8290;margin-top:8px">A imagem é recortada em 16:9 (1600 × 900) e reduzida aqui mesmo, antes de enviar. No site ela se ajusta ao bloco: faixa larga no destaque, cartão na lista e topo do artigo. Use só imagens próprias, licenciadas ou de banco gratuito.</p>
+          <div class="progresso" id="prog-capa"></div>
+        </div>
+      </div>`;
   }
   h += `<div class="decisao">
     ${!a.conteudo ? `<button class="btn" id="art-escrever" type="button">Pedir ao Machado para escrever</button>` : ''}
@@ -2573,6 +2658,7 @@ async function abrirArtigo(id){
       $('prog-artigo').textContent = error ? 'Não foi possível salvar: ' + error.message : (publicado ? 'Salvo. Clique em "Republicar com as alterações" para levar ao site.' : 'Salvo.');
     });
   }
+  if (a.conteudo) ligarCapa(a, publicado);
   const trava = on => $('site-detalhe').querySelectorAll('.decisao button').forEach(b => b.disabled = on);
   const rodar = async fn => { trava(true); $('prog-artigo').innerHTML = ''; try { await fn(); } catch (err) { passoEm('prog-artigo', 'Falhou: ' + err.message, 'falhou'); } trava(false); };
   if ($('art-escrever')) $('art-escrever').addEventListener('click', () => rodar(async () => { await cicloArtigo(a.id, 'prog-artigo', { pesquisar: a.origem === 'tema' && !a.pesquisa }); abrirArtigo(a.id); }));
@@ -2585,7 +2671,7 @@ async function abrirArtigo(id){
     const p = passoEm('prog-artigo', 'Têmis revisando…'); const r = await chamarSite('revisar', { artigo_id:a.id }); p.className='feito'; p.textContent = 'Têmis: ' + r.parecer; carregarConsumo(); abrirArtigo(a.id);
   }));
   if ($('art-publicar')) $('art-publicar').addEventListener('click', () => rodar(async () => {
-    if (!confirm(publicado ? 'Levar as alterações deste artigo para o site agora?' : 'Publicar este artigo em palaciogomes.com.br agora?')) return;
+    if (!confirm((publicado ? 'Levar as alterações deste artigo para o site agora?' : 'Publicar este artigo em palaciogomes.com.br agora?') + (a.capa_url ? '' : '\n\nEle ainda não tem imagem de capa: sairá com a capa padrão do escritório.'))) return;
     const p = passoEm('prog-artigo', 'Publicando no site…');
     let r;
     try { r = await chamarSite('publicar', { artigo_id:a.id }); }

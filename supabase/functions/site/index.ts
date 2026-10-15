@@ -180,6 +180,21 @@ const dataBR = (d: string | Date) => new Date(d).toLocaleDateString("pt-BR", { d
 const dataISO = (d: string | Date) => new Date(d).toISOString().slice(0, 10);
 
 /* ======================= GITHUB ======================= */
+type Arquivo = { path: string; content: string | null; base64?: string };
+async function baixarBase64(url: string): Promise<string> {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Não consegui baixar a imagem de capa (status ${r.status}).`);
+  const bytes = new Uint8Array(await r.arrayBuffer());
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+// Caminhos da capa no site (o carimbo do envio entra no nome para o navegador não mostrar imagem antiga)
+function capaSite(a: any): { grande: string; mini: string } | null {
+  if (!a.capa_url || !a.slug) return null;
+  const v = (String(a.capa_url).match(/capa-(\d+)\./) || [])[1] || "1";
+  return { grande: `assets/publicacoes/${a.slug}-${v}.jpg`, mini: `assets/publicacoes/${a.slug}-${v}-mini.jpg` };
+}
 function github(token: string) {
   const base = `https://api.github.com/repos/${REPO}`;
   const h = { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "estudio-palacio" };
@@ -198,16 +213,22 @@ function github(token: string) {
         return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
       } catch (e) { if (String(e).includes("404")) return null; throw e; }
     },
-    async commitar(arquivos: { path: string; content: string | null }[], mensagem: string): Promise<string> {
+    async existe(caminho: string): Promise<boolean> {
+      try { await req(`/contents/${caminho}?ref=${RAMO}`); return true; } catch (e) { if (String(e).includes("404")) return false; throw e; }
+    },
+    async commitar(arquivos: Arquivo[], mensagem: string): Promise<string> {
       const ref = await req(`/git/ref/heads/${RAMO}`);
       const pai = ref.object.sha;
       const commitPai = await req(`/git/commits/${pai}`);
-      const arvore = await req(`/git/trees`, { method: "POST", body: JSON.stringify({
-        base_tree: commitPai.tree.sha,
-        tree: arquivos.map((a) => a.content === null
-          ? { path: a.path, mode: "100644", type: "blob", sha: null }
-          : { path: a.path, mode: "100644", type: "blob", content: a.content }),
-      }) });
+      const itens = [];
+      for (const a of arquivos) {
+        if (a.base64) {
+          const blob = await req(`/git/blobs`, { method: "POST", body: JSON.stringify({ content: a.base64, encoding: "base64" }) });
+          itens.push({ path: a.path, mode: "100644", type: "blob", sha: blob.sha });
+        } else if (a.content === null) itens.push({ path: a.path, mode: "100644", type: "blob", sha: null });
+        else itens.push({ path: a.path, mode: "100644", type: "blob", content: a.content });
+      }
+      const arvore = await req(`/git/trees`, { method: "POST", body: JSON.stringify({ base_tree: commitPai.tree.sha, tree: itens }) });
       const novo = await req(`/git/commits`, { method: "POST", body: JSON.stringify({ message: mensagem, tree: arvore.sha, parents: [pai] }) });
       await req(`/git/refs/heads/${RAMO}`, { method: "PATCH", body: JSON.stringify({ sha: novo.sha }) });
       return novo.sha;
@@ -228,7 +249,7 @@ async function moldura(gh: ReturnType<typeof github>): Promise<Moldura> {
   return { cabecalho, rodape: rod[0], cauda: (cauda ? cauda[1] : "").trim() };
 }
 
-function cabecaHtml(o: { titulo: string; descricao: string; url: string; tipo: string; extra?: string }) {
+function cabecaHtml(o: { titulo: string; descricao: string; url: string; tipo: string; extra?: string; imagem?: string }) {
   return `<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -243,7 +264,7 @@ function cabecaHtml(o: { titulo: string; descricao: string; url: string; tipo: s
 <meta property="og:title" content="${esc(o.titulo)}">
 <meta property="og:description" content="${esc(o.descricao)}">
 <meta property="og:url" content="${o.url}">
-<meta property="og:image" content="${DOMINIO}/assets/midia/xadrez-poster.jpg">
+<meta property="og:image" content="${o.imagem || `${DOMINIO}/assets/midia/xadrez-poster.jpg`}">
 <link rel="icon" href="/assets/marca/coluna-indigo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/site.css">${o.extra || ""}
 </head>`;
@@ -253,10 +274,13 @@ function paginaArtigo(a: any, m: Moldura): string {
   const c = a.conteudo || {};
   const url = `${DOMINIO}/publicacoes/${a.slug}`;
   const publicado = a.publicado_em || new Date().toISOString();
+  const capa = capaSite(a);
+  const imagem = capa ? `${DOMINIO}/${capa.grande}` : `${DOMINIO}/assets/midia/xadrez-poster.jpg`;
+  const figura = capa ? `<figure class="capa-artigo"><div class="envolve"><img src="/${capa.grande}" alt="${esc(a.capa_alt || "")}" width="1600" height="900">${a.capa_credito ? `<figcaption>${esc(a.capa_credito)}</figcaption>` : ""}</div></figure>` : "";
   const grafo = { "@context": "https://schema.org", "@graph": [
     { "@type": "Article", headline: semMarcas(a.titulo), description: a.descricao, url, mainEntityOfPage: url,
       datePublished: publicado, dateModified: new Date().toISOString(), inLanguage: "pt-BR",
-      image: `${DOMINIO}/assets/midia/xadrez-poster.jpg`,
+      image: imagem,
       author: { "@type": "Person", name: "João Pedro Palácio Gomes", url: `${DOMINIO}/#equipe` },
       publisher: { "@type": "LegalService", "@id": `${DOMINIO}/#escritorio`, name: "Palácio Gomes Advogados", url: `${DOMINIO}/` } },
     { "@type": "FAQPage", mainEntity: (c.faq || []).map((f: any) => ({ "@type": "Question", name: semMarcas(f.pergunta),
@@ -280,7 +304,7 @@ ${c.faq.map((f: any) => `<details><summary>${fmt(f.pergunta)}</summary><div clas
 </div>` : "";
   const fontes = (c.fontes || []).length ? `<h2>Fontes</h2>
 <ul class="fontes">${c.fontes.map((f: any) => `<li><a href="${esc(f.url)}" rel="noopener nofollow">${esc(f.titulo || f.url)}</a></li>`).join("")}</ul>` : "";
-  return `${cabecaHtml({ titulo: `${semMarcas(a.titulo)} | Palácio Gomes Advogados`, descricao: a.descricao, url, tipo: "article",
+  return `${cabecaHtml({ titulo: `${semMarcas(a.titulo)} | Palácio Gomes Advogados`, descricao: a.descricao, url, tipo: "article", imagem,
     extra: `\n<meta property="article:published_time" content="${publicado}">\n<script type="application/ld+json">\n${ld(grafo)}\n</script>` })}
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -293,7 +317,8 @@ ${m.cabecalho}
     <p>${fmt(a.resumo)}</p>
   </div>
 </section>
-<article class="secao">
+${figura}
+<article class="secao${capa ? " com-capa" : ""}">
   <div class="envolve">
     <div class="texto corpo artigo">
 ${corpo}
@@ -317,15 +342,38 @@ function paginaLista(artigos: any[], m: Moldura): string {
   const grafo = { "@context": "https://schema.org", "@type": "CollectionPage", name: "Publicações", url,
     isPartOf: { "@id": `${DOMINIO}/#escritorio` },
     hasPart: artigos.map((a) => ({ "@type": "Article", headline: semMarcas(a.titulo), url: `${DOMINIO}/publicacoes/${a.slug}`, datePublished: a.publicado_em })) };
-  const lista = artigos.length
-    ? `<ul class="lista-artigos">
-${artigos.map((a) => `<li><p class="data">${dataBR(a.publicado_em)}</p><h2><a href="/publicacoes/${a.slug}">${fmt(a.titulo)}</a></h2><p>${fmt(a.resumo)}</p></li>`).join("\n")}
-</ul>`
-    : `<div class="vazio">
+  const imagem = (a: any, grande: boolean) => {
+    const c = capaSite(a);
+    return c ? `<img src="/${grande ? c.grande : c.mini}" alt="${esc(a.capa_alt || "")}" width="${grande ? 1600 : 800}" height="${grande ? 900 : 450}" loading="${grande ? "eager" : "lazy"}">`
+      : `<span class="sem-capa" aria-hidden="true"></span>`;
+  };
+  const meta = (a: any) => `<p class="meta-artigo"><span>Artigo</span> ${dataBR(a.publicado_em)} · João Pedro Palácio Gomes</p>`;
+  const [primeiro, ...resto] = artigos;
+  const conteudo = !artigos.length
+    ? `<div class="envolve"><div class="vazio">
       <h3>Os primeiros artigos estão em preparação</h3>
       <p>Enquanto isso, acompanhe os conteúdos do escritório no Instagram.</p>
       <p style="margin-top:20px"><a class="btn cheio" href="https://www.instagram.com/palaciogomes.adv/" rel="noopener">Ver @palaciogomes.adv</a></p>
-    </div>`;
+    </div></div>`
+    : `<section class="destaque-artigo">
+  <div class="destaque-imagem">${imagem(primeiro, true)}</div>
+  <div class="envolve">
+    <article class="destaque-cartao">
+      ${meta(primeiro)}
+      <h2><a href="/publicacoes/${primeiro.slug}">${fmt(primeiro.titulo)}</a></h2>
+      <p>${fmt(primeiro.resumo)}</p>
+      <a class="ler" href="/publicacoes/${primeiro.slug}">Ler artigo <span aria-hidden="true">→</span></a>
+    </article>
+  </div>
+</section>
+${resto.length ? `<section class="secao mais-artigos">
+  <div class="envolve">
+    <h2 class="rotulo">Mais publicações</h2>
+    <ul class="grade-artigos">
+${resto.map((a) => `<li class="cartao-artigo"><a class="foto" href="/publicacoes/${a.slug}" tabindex="-1">${imagem(a, false)}</a>${meta(a)}<h3><a href="/publicacoes/${a.slug}">${fmt(a.titulo)}</a></h3><p>${fmt(a.resumo)}</p><a class="ler" href="/publicacoes/${a.slug}">Ler artigo <span aria-hidden="true">→</span></a></li>`).join("\n")}
+    </ul>
+  </div>
+</section>` : ""}`;
   return `${cabecaHtml({ titulo: "Publicações | Palácio Gomes Advogados",
     descricao: "Artigos informativos do Palácio Gomes Advogados sobre recuperação de crédito, inadimplência escolar e contratos.",
     url, tipo: "website", extra: `\n<script type="application/ld+json">\n${ld(grafo)}\n</script>` })}
@@ -333,18 +381,14 @@ ${artigos.map((a) => `<li><p class="data">${dataBR(a.publicado_em)}</p><h2><a hr
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 ${m.cabecalho}
 <main id="conteudo">
-<section class="cabeca-pag">
+<section class="cabeca-pag cabeca-pub">
   <div class="envolve">
     <p class="rotulo">Publicações</p>
     <h1>Artigos sobre cobrança e inadimplência</h1>
     <p>Textos informativos sobre recuperação de crédito, inadimplência escolar e gestão de contratos.</p>
   </div>
 </section>
-<section class="secao">
-  <div class="envolve">
-    ${lista}
-  </div>
-</section>
+${conteudo}
 </main>
 ${m.rodape}
 ${m.cauda}
@@ -585,13 +629,23 @@ FONTES: ${(c.fontes || []).map((f: any) => f.url).join(" | ") || "(nenhuma)"}`;
     try {
       const m = await moldura(gh);
       const llmsAtual = (await gh.ler("llms.txt")) || "";
-      const arquivos: { path: string; content: string | null }[] = [
+      const arquivos: Arquivo[] = [
         { path: "publicacoes/index.html", content: paginaLista(lista, m) },
         { path: "sitemap.xml", content: sitemap(lista) },
         { path: "llms.txt", content: llmsAtualizado(llmsAtual, lista) },
       ];
-      if (acao === "publicar") arquivos.push({ path: `publicacoes/${alvo.slug}.html`, content: paginaArtigo(alvoFinal, m) });
-      else if (await gh.ler(`publicacoes/${alvo.slug}.html`)) arquivos.push({ path: `publicacoes/${alvo.slug}.html`, content: null });
+      const capa = capaSite(alvoFinal);
+      if (acao === "publicar") {
+        arquivos.push({ path: `publicacoes/${alvo.slug}.html`, content: paginaArtigo(alvoFinal, m) });
+        if (capa) {
+          arquivos.push({ path: capa.grande, content: "", base64: await baixarBase64(alvo.capa_url) });
+          arquivos.push({ path: capa.mini, content: "", base64: await baixarBase64(alvo.capa_mini_url || alvo.capa_url) });
+        }
+      } else {
+        if (await gh.existe(`publicacoes/${alvo.slug}.html`)) arquivos.push({ path: `publicacoes/${alvo.slug}.html`, content: null });
+        if (capa && await gh.existe(capa.grande)) arquivos.push({ path: capa.grande, content: null });
+        if (capa && await gh.existe(capa.mini)) arquivos.push({ path: capa.mini, content: null });
+      }
       const sha = await gh.commitar(arquivos, acao === "publicar"
         ? `conteúdo: publica "${semMarcas(alvo.titulo)}"\n\nPublicado pelo Estúdio de Marketing (Machado).`
         : `conteúdo: retira "${semMarcas(alvo.titulo)}" do site\n\nRetirado pelo Estúdio de Marketing.`);
