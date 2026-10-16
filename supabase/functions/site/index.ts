@@ -15,6 +15,19 @@ const json = (body: unknown, status = 200) =>
 const REPO = "joaopdsg1/site-palacio";
 const RAMO = "main";
 const DOMINIO = "https://palaciogomes.com.br";
+// IndexNow (Bing, Yandex e outros): a chave é pública por natureza; o arquivo /<chave>.txt no site comprova a posse do domínio
+const INDEXNOW_CHAVE = "be097aed46c5def7032e8b79a2981163";
+async function avisarIndexNow(urls: string[], esperarSeg = 0) {
+  if (esperarSeg) await new Promise((r) => setTimeout(r, esperarSeg * 1000)); // dá tempo de a Vercel publicar a nova versão
+  try {
+    const r = await fetch("https://api.indexnow.org/indexnow", {
+      method: "POST", headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ host: new URL(DOMINIO).host, key: INDEXNOW_CHAVE, keyLocation: `${DOMINIO}/${INDEXNOW_CHAVE}.txt`, urlList: urls }),
+    });
+    console.log("IndexNow", r.status, urls.length);
+    return r.status;
+  } catch (e) { console.log("IndexNow falhou", String(e)); return 0; }
+}
 const REVISOR = "João Pedro Palácio Gomes, OAB/PR nº 131.562";
 
 // Preços em US$ por milhão de tokens (out/2026)
@@ -267,6 +280,8 @@ function cabecaHtml(o: { titulo: string; descricao: string; url: string; tipo: s
 <meta property="og:image" content="${o.imagem || `${DOMINIO}/assets/midia/xadrez-poster.jpg`}">
 <link rel="icon" href="/assets/marca/coluna-indigo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/site.css">${o.extra || ""}
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>`;
 }
 
@@ -652,6 +667,9 @@ FONTES: ${(c.fontes || []).map((f: any) => f.url).join(" | ") || "(nenhuma)"}`;
       await admin.from("artigos").update(acao === "publicar"
         ? { status: "publicado", publicado_em: alvoFinal.publicado_em, commit_sha: sha, atualizado_em: agora }
         : { status: "retirado", commit_sha: sha, atualizado_em: agora }).eq("id", alvo.id);
+      // avisa os buscadores (Bing/ChatGPT) depois que a Vercel publicar; roda em segundo plano
+      const aviso = avisarIndexNow([`${DOMINIO}/publicacoes/${alvo.slug}`, `${DOMINIO}/publicacoes`], 90);
+      try { (globalThis as any).EdgeRuntime?.waitUntil(aviso); } catch { /* sem segundo plano: segue sem aviso */ }
       return { ok: true, url: `${DOMINIO}/publicacoes/${alvo.slug}`, commit: sha };
     } catch (e) {
       return { ok: false, falha: String(e instanceof Error ? e.message : e) };
@@ -693,7 +711,7 @@ FONTES: ${(c.fontes || []).map((f: any) => f.url).join(" | ") || "(nenhuma)"}`;
       const r = await pegar(DOMINIO + p);
       if (!r || ![200, 301, 308].includes(r.status)) problemas.push({ pagina: origemPag, tipo: "link_quebrado", detalhe: `Link para ${p} não abre (status ${r?.status ?? "sem resposta"}).` });
     }
-    for (const arq of ["/robots.txt", "/llms.txt"]) {
+    for (const arq of ["/robots.txt", "/llms.txt", `/${INDEXNOW_CHAVE}.txt`]) {
       const r = await pegar(DOMINIO + arq);
       if (!r || r.status !== 200) problemas.push({ pagina: arq, tipo: "arquivo", detalhe: `Não respondeu (status ${r?.status ?? "sem resposta"}).` });
     }
@@ -750,6 +768,13 @@ FONTES: ${(c.fontes || []).map((f: any) => f.url).join(" | ") || "(nenhuma)"}`;
       return json({ ok: true, revisados: res.length });
     }
     if (tarefa === "auditoria") return json(await auditar());
+    if (tarefa === "indexnow") {
+      const sm = await fetch(`${DOMINIO}/sitemap.xml`);
+      const urls = [...(await sm.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((x) => x[1].trim());
+      if (!urls.length) return json({ erro: "Sitemap vazio ou fora do ar." }, 502);
+      const status = await avisarIndexNow(urls);
+      return status >= 200 && status < 300 ? json({ ok: true, urls: urls.length, status }) : json({ erro: `IndexNow respondeu ${status}.` }, 502);
+    }
     if (tarefa === "gbp_mes") {
       const mes = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" }).slice(0, 7);
       const { data: ja } = await admin.from("gbp_posts").select("id").eq("mes", mes);

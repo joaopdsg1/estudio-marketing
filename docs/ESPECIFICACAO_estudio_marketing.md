@@ -342,6 +342,10 @@ Reformulada a pedido do João (12/10/2026): o Rondon passou a ser o pesquisador 
 - O resumo diário passa a receber do Machado: artigos aguardando sua decisão, artigos bloqueados pela Têmis, artigos em produção, a última auditoria do site e a sugestão de post do Google ainda não usada.
 - O Péricles só menciona o site quando há algo pendente para você. Na Mesa, os atalhos "artigos do site" e "post do Google" levam à aba Site.
 
+### Site: aviso ao Bing e medição de visitas (16/10/2026) ✅
+- IndexNow: a cada artigo publicado ou retirado, o Machado avisa o Bing (e outros buscadores) cerca de 90 segundos depois, já com a nova versão no ar. O ChatGPT pesquisa na internet pelo Bing. Chave pública no arquivo `/<chave>.txt` na raiz do site; a auditoria mensal confere se ele responde. Tarefa manual `indexnow` reenvia todas as páginas do sitemap.
+- Medição: Vercel Web Analytics em todas as páginas (sem cookies, dados anônimos; mostra páginas mais vistas e de onde vieram os visitantes, inclusive ChatGPT e Perplexity). Precisa ser ativada uma vez no painel da Vercel. Política de privacidade atualizada.
+
 ### Etapa 4 (original) — Analista de Referências
 - Cadastro manual de referências e relatório. Integração com a Meta só se a verificação do §8 for positiva.
 - **Aceite:** relatório comparativo de pelo menos 3 perfis, sem nenhum trecho copiado.
